@@ -1,0 +1,92 @@
+from datetime import datetime, timedelta
+from models import general_administrative_task, general_administrative_mappings
+from schemas import GeneralAdministrativeTaskSchema, GeneralAdministrativeMappingsSchema, GeneralAdministrativeMappingsPayload
+from sqlalchemy.orm import Session
+from fastapi import Depends, HTTPException, status, APIRouter, Response
+from database import get_db
+
+router = APIRouter()
+
+@router.get('/')
+def get_freight_task_info(db: Session = Depends(get_db)):
+    """Function to get all records from freight_task_info."""
+    query = db.query(general_administrative_task).all()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No freight_task_info found")
+    return {"status": "success", "data": query}
+
+@router.get('/getBygeneral_administrative_id/{general_administrative_id}')
+def getBygeneral_administrative_id(general_administrative_id: int, db: Session = Depends(get_db)):
+    general_administrative = db.query(general_administrative_task).filter(general_administrative_task.general_administrative_id == general_administrative_id).first()
+    if not general_administrative:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"No general_administrative_id: {general_administrative_id} found")
+    return {"status": "success", "general_administrative": general_administrative}
+
+@router.get('/general_administrative_mappings/')
+def get_general_administrative_mappings(db: Session = Depends(get_db)):
+    """Function to get all records from potato_rate_mapping."""
+    query = db.query(general_administrative_mappings).all()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No general_administrative_mappings  found")
+    return {"status": "success", "data": query}
+
+@router.get('/general_administrative_mappings_by_year/{year}')
+def general_administrative_mappings_by_year(year: str, db: Session = Depends(get_db)):
+    """Function to get all records from general_administrative_mappings."""
+    query = db.query(general_administrative_mappings).filter(general_administrative_mappings.year==year).all()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No potato_rate_mapping  found")
+    return {"status": "success", "data": query}
+
+@router.post("/update_freight_task_mappings/", status_code=status.HTTP_201_CREATED)
+async def update_freight_task_mappings(year: int, db: Session = Depends(get_db)):
+    """Function to update records in potato_rates table."""
+    # Fetch all records from the database
+    all_records = db.query(general_administrative_task).all()
+    # Ensure there are records in the database
+    if all_records.count==0:
+        raise HTTPException(status_code=404, detail="No records found in the database")
+
+    for record in all_records:
+        for period in range(1,14):
+            new_record = general_administrative_mappings(general_administrative_id = record.general_administrative_id, period=period, year=year, value=0.0)
+            db.add(new_record)
+            db.commit()
+
+    return {"status": "success"}
+
+@router.post('/create_freight_task_info', status_code=status.HTTP_201_CREATED)
+def create_freight_task_info(payload: GeneralAdministrativeTaskSchema, db: Session = Depends(get_db)):
+    new_record = general_administrative_task(**payload.dict())
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    return {"status": "success", "general_administrative_id": new_record.general_administrative_id}
+
+@router.post('/create_freight_task_mappings', status_code=status.HTTP_201_CREATED)
+def create_freight_task_mappings(payload: GeneralAdministrativeMappingsSchema, db: Session = Depends(get_db)):
+    new_record = general_administrative_mappings(**payload.dict())
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    return {"status": "success", "row_id": new_record.row_id}
+
+@router.post("/update_general_administrative_records/")
+def update_general_administrative_records(payload: GeneralAdministrativeMappingsPayload, db: Session = Depends(get_db)):
+    """Function to update already existing records in update_general_administrative_records table """
+    data = payload.data
+    update_count = 0
+    try:
+        for item in data:
+            db.query(general_administrative_mappings).filter(general_administrative_mappings.general_administrative_id == item.general_administrative_id).update(
+                {general_administrative_mappings.value: item.value, general_administrative_mappings.period.period: item.period}, synchronize_session='fetch')
+            update_count += 1
+        db.commit()
+
+        return {"status": "success", "records_updated": update_count}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
