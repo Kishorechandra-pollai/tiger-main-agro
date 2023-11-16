@@ -1,117 +1,33 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
   branches:
     include:
       - feature/agro-dev
-  paths:
-    include:
-      - pep-potato-sourcing-matrix-automation
+      - dev
+      - qa
 
-pool:
-  vmImage: ubuntu-latest
+  tags:
+    include:
+      - feature/s2u-dev
+      - dev
+      - qa
 
 resources:
- repositories:
-   - repository: templates
-     displayName: Templates from Dev 
-     type: git
-     name: agro/agro
-     ref: feature/agro-dev
+  repositories:
+    - repository: templates
+      type: git
+      name: EIAP_DevOps/pep-eiap-potato-sourcing-matrix-pipeline-templates
+      ref: master
 
-# template: /dev/variables-template.yaml@templates
+variables:
+  - template: variables.yaml@templates
+  - name: appname
+    value: pep-potato-sourcing-matrix-automation
 
 stages:
-
-- stage: Build_and_Push_Image_ACR
-  displayName: Build_and_Push_Image_ACR
-  variables: 
-    - template: dev/variables-template.yaml@templates
-  jobs:
-    - job: Build_and_Push_Image_ACR
-      steps:
-      - task: Docker@2
-        displayName: Build_and_Push_Image_ACR
-        inputs:
-          containerRegistry: 'psmacrsc'
-          repository: '$(imageName)'
-          command: 'buildAndPush'
-          Dockerfile: '$(Build.SourcesDirectory)/pep-potato-sourcing-matrix-automation/infra/Docker/Dockerfile'
-          buildContext: '$(Build.SourcesDirectory)'
-          tags: '$(imageTag)'
- 
-            
-      - task: PythonScript@0
-        displayName: 'Replace variables in Kubernetes manifest file'
-        inputs:
-          scriptSource: 'inline'
-          script: |          
-            from pathlib import Path
-            import codecs
-
-            # Define file path
-            file_path = Path('$(Build.SourcesDirectory)') / 'pep-potato-sourcing-matrix-automation/infra/Kubernetes/agro_deploy.yaml'
-
-            try:
-                # Try to read the file with the assumption of a BOM being present (UTF-8-SIG will handle UTF-8 files with BOM)
-                with codecs.open(file_path, 'r', encoding='utf-16') as file:
-                    contents = file.read()
-
-                # Perform your replacements
-                new_contents = contents.replace('imageTag', '$(imageTag)').replace('imageName', '$(imageName)').replace('loginServer', '$(loginServer)').replace('secName', '$(secName)')
-
-                # Write back to the file
-                with codecs.open(file_path, 'w', encoding='utf-16') as file:  # Writing back in UTF-8 encoding
-                    file.write(new_contents)
-
-            except UnicodeDecodeError:
-                # If there's still a decoding error, the file might be encoded in a different charset (e.g., UTF-16).
-                # You can add more logic here to try different encodings.
-                print("The file encoding is not UTF-8 or UTF-8-SIG. Please check the file's original encoding.")
-
-            except Exception as e:
-                # General error handling
-                print(f"An error occurred: {e}")
-
-          workingDirectory: '$(Build.SourcesDirectory)/pep-potato-sourcing-matrix-automation/infra/Kubernetes/'      
-           
-      - task: PublishPipelineArtifact@1
-        displayName: 'Download Manifest Artifact'
-        inputs:
-          targetPath: '$(Build.SourcesDirectory)/pep-potato-sourcing-matrix-automation/infra/Kubernetes/agro_deploy.yaml'
-          artifactName: '$(artifactName)'
-        
-- stage: Deploy_To_Kubernetes
-  displayName: Deploy_To_Kubernetes
-  variables:
-    - template: dev/variables-template.yaml@templates
-  jobs:
-    - job: Deploy_To_Kubernetes
-      steps:
-      - task: DownloadPipelineArtifact@2
-        displayName: 'Download Manifest Artifact'
-        inputs:
-          artifactName: $(artifactName)
-          downloadPath: '$(Pipeline.Workspace)/$(artifactName)'      
-
-      - task: Kubernetes@1
-        displayName:  Deploy_To_Kubernetes
-        inputs:
-          connectionType: 'Kubernetes Service Connection'
-          kubernetesServiceEndpoint: 'psmkubeclustersc'
-          namespace: 'psmdev'
-          command: 'apply'
-          useConfigurationFile: true
-          configuration: '$(Pipeline.Workspace)/$(artifactName)/agro_deploy.yaml'
-          secretType: 'dockerRegistry'
-          containerRegistryType: 'Azure Container Registry'
-          azureSubscriptionEndpointForSecrets: 's2urouteoptimizationsc'
-          azureContainerRegistry: 'psmacr.azurecr.io'
-          checkLatest: true
-
-
-
-
+  - template: Spring-CICD.yaml@templates
+    parameters:
+      isPython: true
+      isUI: false
+      isfortifyScanRequired: true
+      isSonarScanRequired: true
+      isSnykScanRequired: true
