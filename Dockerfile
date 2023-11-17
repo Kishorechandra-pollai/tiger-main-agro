@@ -6,7 +6,7 @@ ENV MSSQL_PORT=1433
 ENV MSSQL_USER=psmadmin
 ENV MSSQL_DB="psmsqldb"
 ENV MSSQL_HOST="postgres"
-ENV MSSQL_HOSTNAME="psmsqldb.database.windows.net"
+ENV MSSQL_HOSTNAME="cgfpsmadevsql.database.windows.net"
 ENV MSSQL_SCHEMA="dbo"
 ENV MSSQL_DRIVER="{ODBC Driver 18 for SQL Server}"
 
