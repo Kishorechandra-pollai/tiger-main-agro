@@ -3,9 +3,8 @@ FROM python:3.10
 
 # Set environment variables for MSSQL
 ENV MSSQL_PORT=1433
-ENV MSSQL_USER=psmadmin
-ENV MSSQL_DB="psmsqldb"
-ENV MSSQL_HOST="postgres"
+ENV MSSQL_USER=svcPSMaDBDev
+ENV MSSQL_DB="cgfpsmadevsqlDB"
 ENV MSSQL_HOSTNAME="cgfpsmadevsql.database.windows.net"
 ENV MSSQL_SCHEMA="dbo"
 ENV MSSQL_DRIVER="{ODBC Driver 18 for SQL Server}"
