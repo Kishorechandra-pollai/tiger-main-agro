@@ -21,7 +21,7 @@ resources:
 variables:
   - template: variables.yaml@templates
   - name: appname
-    value: pep-potato-sourcing-matrix-automation
+    value: potato-sourcing-matrix-api-repo
 
 stages:
   - template: Spring-CICD.yaml@templates
