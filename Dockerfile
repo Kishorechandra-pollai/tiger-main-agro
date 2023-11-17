@@ -51,6 +51,7 @@ USER psm
 
 # Set working directory
 WORKDIR /usr/src/app
+COPY requirementes.txt /requirements.txt
 
 # Copy the application to the container
 COPY --chown=psm:psm /pep-potato-sourcing-matrix-automation/src .
