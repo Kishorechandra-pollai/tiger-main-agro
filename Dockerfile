@@ -39,7 +39,7 @@ RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
 # Clean the build, removing cache and unnecessary files
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-COPY requirementes.txt /requirements.txt
+COPY requirements.txt /requirements.txt
 # Create a non-root user for the application
 RUN useradd -m -s /bin/bash psm
 
