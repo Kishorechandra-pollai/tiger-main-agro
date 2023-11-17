@@ -39,6 +39,10 @@ RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /requirements.txt
+
+# Upgrade pip and install Python dependencies
+RUN python -m pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 # Create a non-root user for the application
 RUN useradd -m -s /bin/bash psm
 
@@ -54,10 +58,6 @@ WORKDIR /usr/src/app
 
 # Copy the application to the container
 COPY --chown=psm:psm /pep-potato-sourcing-matrix-automation/src .
-
-# Upgrade pip and install Python dependencies
-RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
 
 # Expose the port the app runs on
 EXPOSE 8000
