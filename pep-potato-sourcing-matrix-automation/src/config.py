@@ -6,7 +6,6 @@ class Settings(BaseSettings):
     MSSQL_PASSWORD: str
     MSSQL_USER: str
     MSSQL_DB: str
-    MSSQL_HOST: str
     MSSQL_HOSTNAME: str
     MSSQL_SCHEMA: str
     MSSQl_DRIVER: str
