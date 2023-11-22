@@ -19,7 +19,7 @@ params = urllib.parse.quote_plus("DRIVER=" + driver + ";"
                                                       "SERVER=" + host + ";"
                                                                          "DATABASE=" + db1 + ";"
                                                                                              "UID=" + username + ";"
-                                                                                                                 "PWD=" + pwd + "")
+                                                                                                                 "PWD=" + pwd + "" + ";" + "Authentication=ActiveDirectoryPassword")
 
 engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
 
