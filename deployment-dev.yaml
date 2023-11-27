@@ -31,12 +31,12 @@ spec:
             cpu: "1"                       # maximum cpu requirement of app container
         ports:
         - containerPort: 8000            # port where application runs in the container
-        env:
-        - name: psm-dev-api-secret     # Name of the environment variable
-          valueFrom:
-            secretKeyRef:
-              name: pep-eiap-cgf-psm-dev-api-secret   # Name of the secret
-              key: MSSQL_PASSWORD # Key within the secret to use as the value                             
+        # env:
+        # - name: psm-dev-api-secret     # Name of the environment variable
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: pep-eiap-cgf-psm-dev-api-secret   # Name of the secret
+        #       key: MSSQL_PASSWORD # Key within the secret to use as the value                             
         livenessProbe:
           httpGet:
             path: /docs
