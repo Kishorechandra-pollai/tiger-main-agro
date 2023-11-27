@@ -14,14 +14,14 @@ username = settings.MSSQL_USER
 pwd = settings.MSSQL_PASSWORD
 db1 = settings.MSSQL_DB
 print("driver-name=" + driver)
-# params = urllib.parse.quote_plus("DRIVER=" + driver + ";"
-#                                                       "SERVER=" + host + ";"+""
-#                                                                          "DATABASE=" + db1 + ";"
-#                                                                                              "UID=" + username + ";"
-#                                                                                                                  "PWD=" + pwd + "" + ";" + "Authentication=ActiveDirectoryPassword")
+params = urllib.parse.quote_plus("DRIVER=" + driver + ";"
+                                                      "SERVER=" + host + ";"+""
+                                                                         "DATABASE=" + db1 + ";"
+                                                                                             "UID=" + username + ";"
+                                                                                                                 "PWD=" + pwd + "" + ";" + "Authentication=ActiveDirectoryPassword")
 
 
-params = "DRIVER=" + driver + ";Server=tcp:" + host + ";Database=" + db + ";Uid=" + username + ";Pwd=" + pwd + ";Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30" + ";Authentication=ActiveDirectoryPassword"
+# params = "DRIVER=" + driver + ";Server=tcp:" + host + ";Database=" + db + ";Uid=" + username + ";Pwd=" + pwd + ";Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30" + ";Authentication=ActiveDirectoryPassword"
 
 print(" ------------- params -------------")
 print(params)
