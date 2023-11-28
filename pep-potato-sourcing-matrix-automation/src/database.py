@@ -12,13 +12,14 @@ driver = settings.MSSQl_DRIVER
 host = settings.MSSQL_HOSTNAME
 username = settings.MSSQL_USER
 pwd = settings.MSSQL_PASSWORD
-db1 = settings.MSSQL_DB
+db = settings.MSSQL_DB
 print("driver-name=" + driver)
-params = urllib.parse.quote_plus("DRIVER=" + driver + ";"
-                                                      "SERVER=" + host + ";"+""
-                                                                         "DATABASE=" + db1 + ";"
-                                                                                             "UID=" + username + ";"
-                                                                                                                 "PWD=" + pwd + "" + ";" + "Authentication=ActiveDirectoryPassword")
+params = urllib.parse.quote_plus("DRIVER=" + driver +
+                                 ";SERVER=" + host +
+                                 ";DATABASE=" + db +
+                                 ";UID=" + username +
+                                 ";PWD=" + pwd)
+
 
 
 # params = "DRIVER=" + driver + ";Server=tcp:" + host + ";Database=" + db + ";Uid=" + username + ";Pwd=" + pwd + ";Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30" + ";Authentication=ActiveDirectoryPassword"
@@ -28,14 +29,13 @@ print(params)
 
 engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
 
+print(engine)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-
-def get_connection():
-    connection = engine.raw_connection()
-    return connection
+print(SessionLocal)
 
 def get_db():
     db = SessionLocal()
