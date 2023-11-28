@@ -3,13 +3,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import models
 import uvicorn
+import plants
 """import allocation
 import plant_mtrx
 import category
 import dummy
 import growers
 import growingarea
-import plants
 import freightcost
 import region
 import ownership
