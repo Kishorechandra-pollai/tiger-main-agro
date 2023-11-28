@@ -3,7 +3,7 @@ FROM python:3.10
 
 # Set environment variables for MSSQL
 ENV MSSQL_PORT=1433
-ENV MSSQL_USER=svcPSMaDBDev
+ENV MSSQL_USER=cgfpsmadevadmin
 ENV MSSQL_DB="cgfpsmadevsqlDB"
 ENV MSSQL_HOSTNAME="cgfpsmadevsql.database.windows.net"
 ENV MSSQL_SCHEMA="dbo"
