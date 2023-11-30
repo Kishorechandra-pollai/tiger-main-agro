@@ -13,7 +13,6 @@ import os
 def get_secret(secret_name):
     try:
         with open(f"/mnt/psmdev-secret/{secret_name}", "r") as secret_file:
-            print(secret_file.read().strip())
             return secret_file.read().strip()
     except IOError:
         return "Some error occured"
