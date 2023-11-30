@@ -7,11 +7,27 @@ from sqlalchemy.orm import sessionmaker
 from config import settings, Settings
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.engine import URL
+import os
+
+
+def get_secret(secret_name):
+    try:
+        with open(f"/mnt/psmdev-secret/{secret_name}", "r") as secret_file:
+            print(secret_file.read().strip())
+            return secret_file.read().strip()
+    except IOError:
+        return "Some error occured"
+
+username = get_secret("Username") # Replace with the actual secret name in key vault
+pwd = get_secret("Password") 
+print("username -> ",username)
+print("pass -> ",pwd)
+
 
 driver = settings.MSSQl_DRIVER
 host = settings.MSSQL_HOSTNAME
-username = settings.MSSQL_USER
-pwd = settings.MSSQL_PASSWORD
+# username = settings.MSSQL_USER
+# pwd = settings.MSSQL_PASSWORD
 db = settings.MSSQL_DB
 print("driver-name=" + driver)
 params = urllib.parse.quote_plus("DRIVER=" + driver +
