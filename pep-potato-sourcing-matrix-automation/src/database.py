@@ -19,9 +19,6 @@ def get_secret(secret_name):
 
 username = get_secret("Username") # Replace with the actual secret name in key vault
 pwd = get_secret("Password") 
-print("username -> ",username)
-print("pass -> ",pwd)
-
 
 driver = settings.MSSQl_DRIVER
 host = settings.MSSQL_HOSTNAME
