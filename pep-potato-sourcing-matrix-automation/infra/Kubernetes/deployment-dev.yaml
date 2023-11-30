@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: pep-eiap-cgf-psm-dev-api
-  replicas: 3                               # number of instances required
+  replicas: 5                               # number of instances required
   template:
     metadata:
       labels:
