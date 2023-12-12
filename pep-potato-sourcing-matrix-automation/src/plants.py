@@ -1,8 +1,10 @@
+from datetime import date
 import schemas
 import models
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter, Response
 from database import get_db
+import period_week_calc
 
 router = APIRouter()
 
@@ -10,10 +12,17 @@ router = APIRouter()
 @router.get('/')
 def get_plant(db: Session = Depends(get_db)):
     plant = db.query(models.Plant).filter(models.Plant.status == "ACTIVE").all()
+    today_date = date.today()
+    res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
+    current_period = res['Period']
+    current_week = res['week']
+    year_data = res['year']
+    print(current_period, current_week)
     if not plant:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No plant  found")
-    return {"status": "success", "plant": plant}
+    return {"status": "success", "plant": plant,
+            "current_period": current_period, "current_week": current_week, "year": year_data}
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED)

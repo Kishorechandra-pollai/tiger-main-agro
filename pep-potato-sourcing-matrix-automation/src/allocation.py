@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 import schemas
 from database import get_db
 import models
+import period_week_calc
 
 router = APIRouter()
 
@@ -63,21 +64,43 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
             current_year = int(data_list[2])
             print(category_value, period_value, current_year)
             plant_id_list = getAllPlants(category_value, db)
+            print("--- plant_id list -----")
+            print(plant_id_list)
             for plant_id in plant_id_list:
-                lastYear_actuals = db.query(models.pcusage.actual_value).filter(models.pcusage.plant_id == plant_id,
-                                                                                models.pcusage.year == current_year - 1,
-                                                                                models.pcusage.period == period_value).all()
-                lastYear_actual_list = [t[0] for t in lastYear_actuals]
+                lastYear_actual_list = {}
+                lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
+                                            models.View_forecast_pcusage.columns.total_actual_value)\
+                    .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
+                            models.View_forecast_pcusage.columns.year == current_year - 1,
+                            models.View_forecast_pcusage.columns.period == period_value).all()
+                print(lastYear_actuals)
+                lastYear_actual_list = {key: value for key, value in lastYear_actuals}
+                print(lastYear_actual_list)
                 week_value = 1
-                while week_value < 5:
-                    new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
+
+                if period_week_calc.calculate_week_num(current_year, int(period_value)):
+                    no_of_week = 6
+                else:
+                    no_of_week = 5
+
+                while week_value < no_of_week:
+                    lastYear_actual_list.setdefault(week_value, 0)
+                    if week_value == 5:
+                        new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
+                    else:
+                        print("last year actual_value ------")
+                        print(lastYear_actual_list[week_value])
+                        new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
+                        print("--------new_forecast_value ------")
+                        print(new_forecast_value)
                     db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
                                                     models.pcusage.year == current_year,
                                                     models.pcusage.period == period_value,
                                                     models.pcusage.week_no == week_value).update(
                         {models.pcusage.forecasted_value: new_forecast_value}, synchronize_session=False)
                     week_value += 1
-            db.commit()
+                print("........ plant id :", plant_id, " is completed ........")
+                db.commit()
 
             # requirement: index, lastyear_actual of that period, category
 
@@ -91,10 +114,10 @@ def createAllocation(year: int, db: Session = Depends(get_db)):
     category_table = db.query(models.category.category_name, models.category.country).all()
     for category_item in category_table:
         i = 1
-        while i < 14:  # No. of period
+        while i <= 13:  # No. of period
             allocation_id = category_item[0] + "#" + str(i) + "#" + str(year)
             payload = {"allocation_id": allocation_id, "category_name": category_item[0], "year": year,
-                       "country": trim(category_item[1]), "period": i}
+                       "country": trim(category_item[1]), "period": i, "value": 0}
             new_allocation = models.allocation(**payload)
             db.add(new_allocation)
             i += 1

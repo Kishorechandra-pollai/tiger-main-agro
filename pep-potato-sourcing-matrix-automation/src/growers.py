@@ -9,7 +9,9 @@ router = APIRouter()
 
 @router.get('/')
 def get_growers(db: Session = Depends(get_db)):
-    growers = db.query(models.growers).filter(models.growers.status == "ACTIVE").all()
+    growers = db.query(models.growers).filter(models.growers.status == "ACTIVE")\
+        .order_by(models.growers.grower_name.asc())\
+        .all()
     if not growers:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No Growers  found")

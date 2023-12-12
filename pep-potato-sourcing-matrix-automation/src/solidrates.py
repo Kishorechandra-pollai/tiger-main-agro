@@ -1,6 +1,6 @@
 from datetime import datetime
-from models import growing_area, solids_rates, solid_rate_mapping
-from schemas import solidRateMappingSchema, solidRateMappingPayload
+from models import growing_area, solids_rates, solid_rate_mapping,solids_rate_table_period
+from schemas import  solidRateMappingPayload
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter, Response
 from database import get_db
@@ -63,7 +63,7 @@ async def update_solids_rates_with_default_value( db: Session = Depends(get_db))
 
     for record in all_records:
         for period in range(1,14):
-            new_record = solid_rate_mapping(solids_rate_id = record.solids_rate_id, period=period, rate=0)
+            new_record = solid_rate_mapping(solids_rate_id = record.solids_rate_id, period=period, rate=5)
             db.add(new_record)
             db.commit()
 
@@ -93,8 +93,8 @@ def update_solid_rates_records(payload: solidRateMappingPayload, db: Session = D
     update_count = 0
     try:
         for item in data:
-            db.query(solid_rate_mapping).filter(solid_rate_mapping.solids_rate_id == item.solids_rate_id).update(
-                {solid_rate_mapping.rate: item.rate, solid_rate_mapping.period: item.period}, synchronize_session='fetch')
+            db.query(solid_rate_mapping).filter(solid_rate_mapping.solids_rate_id == item.solids_rate_id, solid_rate_mapping.period==item.period).update(
+                {solid_rate_mapping.rate: item.rate}, synchronize_session='fetch')
             update_count += 1
         db.commit()
 
@@ -112,3 +112,46 @@ def get_solid_rate_mapping(year: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="No potato_rate_mapping  found")
     return {"status": "success", "data": query}
+
+
+@router.get('/solids_rate_period')
+def solids_rate_period(db: Session = Depends(get_db)):
+    """Function to fetch all records from solids_rate_table for period view"""
+    try:
+        records = db.query(solids_rate_table_period).all()
+        result = [
+            {
+                "growing_area_id": row.growing_area_id,
+                "period": row.period,
+                "fcst": row.plan_rate,
+                "actual":row.actual_rate,
+                "year": row.year,
+                "week":0,
+                "period_with_P": f'P{row.period}'
+            }
+            for row in records
+        ]
+        return {"solids_rate_period": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))   
+
+@router.get('/solid_rate_period_year/{year}')
+def solid_rate_period_year(year:int, db: Session = Depends(get_db)):
+    """Function to fetch all records from solids_rate table for a particular year """
+    try:
+        records = db.query(solids_rate_table_period).filter(solids_rate_table_period.columns.year == year).all()
+        result = [
+            {
+                "growing_area_id": row.growing_area_id,
+                "period": row.period,
+                "fcst": row.plan_rate,
+                "actual":row.actual_rate,
+                "year": row.year,
+                "week":0,
+                "period_with_P": f'P{row.period}'
+            }
+            for row in records
+        ]
+        return {"solids_rate_period_year": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

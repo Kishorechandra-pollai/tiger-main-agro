@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from models import off_contract_info, off_contract_task_mapping
+from models import off_contract_info, off_contract_task_mapping, country_division_name
 from schemas import OffContractInfoSchema, OffContractTaskMappingSchema, OffContractTaskMappingPayload
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter, Response
@@ -33,10 +33,10 @@ def get_off_contract_task_mapping(db: Session = Depends(get_db)):
                             detail="No off_contract_task_mapping  found")
     return {"status": "success", "data": query}
 
-@router.get('/off_contract_task_mapping_by_year/{year}')
-def off_contract_task_mapping_by_year(year: str, db: Session = Depends(get_db)):
+@router.get('/off_contract_task_mapping_by_year/{year}/{country}')
+def off_contract_task_mapping_by_year(year: str, country:str, db: Session = Depends(get_db)):
     """Function to get all records from off_contract_task_mapping."""
-    query = db.query(off_contract_task_mapping).filter(off_contract_task_mapping.year==year).all()
+    query = db.query(off_contract_task_mapping).filter(off_contract_task_mapping.year==year, off_contract_task_mapping.company_name==country).all()
     if not query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="No potato_rate_mapping  found")
@@ -47,17 +47,24 @@ async def update_off_contract_task_mapping(year: int, db: Session = Depends(get_
     """Function to update records in potato_rates table."""
     # Fetch all records from the database
     all_records = db.query(off_contract_info).all()
+    countries = db.query(country_division_name).all()
     # Ensure there are records in the database
     if all_records.count==0:
         raise HTTPException(status_code=404, detail="No records found in the database")
 
+    existingTaskNames = []
     for record in all_records:
+        existingRecord = db.query(off_contract_task_mapping).filter(off_contract_task_mapping.year==year,off_contract_task_mapping.off_contract_task_id==record.off_contract_task_id ).first();
+        if existingRecord:
+            existingTaskNames.append(record.task_name)
+            continue
         for period in range(1,14):
-            new_record = off_contract_task_mapping(off_contract_task_id = record.off_contract_task_id, period=period, year=year,value=0.0)
-            db.add(new_record)
-            db.commit()
+            for con in countries:
+                new_record = off_contract_task_mapping(off_contract_task_id = record.off_contract_task_id, period=period, year=year,value=0.0, company_name=con.division_name)
+                db.add(new_record)
+                db.commit()
 
-    return {"status": "success"}
+    return {"status": "success", "Records already exists for ":existingTaskNames, "forYear": year}
 
 @router.post('/create_freight_task_info', status_code=status.HTTP_201_CREATED)
 def create_freight_task_info(payload: OffContractInfoSchema, db: Session = Depends(get_db)):
@@ -99,11 +106,14 @@ def update_off_contract(off_contract_task_id: int, payload: OffContractTaskMappi
 def update_off_contract_records(payload: OffContractTaskMappingPayload, db: Session = Depends(get_db)):
     """Function to update already existing records in off_contract_task_mapping table """
     data = payload.data
+    print(data)
     update_count = 0
     try:
         for item in data:
-            db.query(off_contract_task_mapping).filter(off_contract_task_mapping.off_contract_task_id == item.off_contract_task_id).update(
-                {off_contract_task_mapping.value: item.value, off_contract_task_mapping.period.period: item.period}, synchronize_session='fetch')
+            if item.off_contract_task_id<=0 or item.period<=0 or item.year<=0:
+                return {"status": "error", "message":"Please check details"}
+            db.query(off_contract_task_mapping).filter(off_contract_task_mapping.off_contract_task_id == item.off_contract_task_id, off_contract_task_mapping.period == item.period, off_contract_task_mapping.year == item.year).update(
+                {off_contract_task_mapping.value: item.value}, synchronize_session='fetch')
             update_count += 1
         db.commit()
 

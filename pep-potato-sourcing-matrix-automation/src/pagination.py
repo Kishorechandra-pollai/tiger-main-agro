@@ -20,3 +20,7 @@ async def pagination_range(page:int, items_per_page:int, vendor_name:str, BPA_no
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# @router.get("/read_file")
+# async def read_file(db: Session = Depends(get_db)):
+
+#     return ""

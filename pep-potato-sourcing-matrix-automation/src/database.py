@@ -15,7 +15,7 @@ def get_secret(secret_name):
         with open(f"/mnt/psmdev-secret/{secret_name}", "r") as secret_file:
             return secret_file.read().strip()
     except IOError:
-        return "Some error occured"
+        return os.environ[secret_name]
 
 username = get_secret("Username") # Replace with the actual secret name in key vault
 pwd = get_secret("Password") 
