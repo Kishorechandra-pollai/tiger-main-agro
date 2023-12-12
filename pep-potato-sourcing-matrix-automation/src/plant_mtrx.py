@@ -139,7 +139,7 @@ def getPlantMtrx_growingArea(name: str, year: int, db: Session = Depends(get_db)
                     models.View_PlantMtrx_table.columns.status == 'active',
                     models.region.country == name) \
             .group_by(models.View_PlantMtrx_table.columns.year,
-                      models.View_PlantMtrx_table.columns.growing_area_id,
+                      models.View_PlantMtrx_table.columns.growing_area_desc,
                       models.View_PlantMtrx_table.columns.growing_area_name,
                       models.View_PlantMtrx_table.columns.period_with_P,
                       models.View_PlantMtrx_table.columns.period,
