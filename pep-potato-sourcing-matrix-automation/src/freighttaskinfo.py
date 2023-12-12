@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from models import freight_task_info, freight_task_mappings
+from models import freight_task_info, freight_task_mappings, country_division_name
 from schemas import FreightTaskInfoSchema, FreightTaskMappingsSchema, FreightTaskMappingsPayload
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter, Response
@@ -24,10 +24,10 @@ def getByoff_contract_task_id(freight_task_id: int, db: Session = Depends(get_db
                             detail=f"No freight_task_info_id: {freight_task_id} found")
     return {"status": "success", "freight_task": freight_task}
 
-@router.get('/freight_task_mappings/')
-def get_freight_task_mappings(db: Session = Depends(get_db)):
+@router.get('/freight_task_mappings/{year}/{country}')
+def get_freight_task_mappings(year: str, country:str,db: Session = Depends(get_db)):
     """Function to get all records from potato_rate_mapping."""
-    query = db.query(freight_task_mappings).all()
+    query = db.query(freight_task_mappings).filter(freight_task_mappings.year==year, freight_task_mappings.company_name==country).all()
     if not query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="No freight_task_mappings  found")
@@ -39,17 +39,24 @@ async def update_freight_task_mappings(year: int, db: Session = Depends(get_db))
     """Function to update records in potato_rates table."""
     # Fetch all records from the database
     all_records = db.query(freight_task_info).all()
+    countries = db.query(country_division_name).all()
     # Ensure there are records in the database
     if all_records.count==0:
         raise HTTPException(status_code=404, detail="No records found in the database")
 
+    existingTaskNames = []
     for record in all_records:
+        existingRecord = db.query(freight_task_mappings).filter(freight_task_mappings.year==year,freight_task_mappings.freight_task_id==record.freight_task_id).first();
+        if existingRecord:
+            existingTaskNames.append(record.task_name)
+            continue
         for period in range(1,14):
-            new_record = freight_task_mappings(freight_task_id = record.freight_task_id, period=period, year=year, value=0.0)
-            db.add(new_record)
-            db.commit()
+            for con in countries:
+                new_record = freight_task_mappings(freight_task_id = record.freight_task_id, period=period, year=year, value=0.0, company_name=con.division_name)
+                db.add(new_record)
+                db.commit()
 
-    return {"status": "success"}
+    return {"status": "success", "Records already exists for ":existingTaskNames, "forYear": year}
 
 @router.post('/create_freight_task_info', status_code=status.HTTP_201_CREATED)
 def create_freight_task_info(payload: FreightTaskInfoSchema, db: Session = Depends(get_db)):
@@ -74,7 +81,9 @@ def update_freight_task_records(payload: FreightTaskMappingsPayload, db: Session
     update_count = 0
     try:
         for item in data:
-            db.query(freight_task_mappings).filter(freight_task_mappings.freight_task_id == item.freight_task_id).update(
+            if item.freight_task_id<=0 or item.period<=0 or item.year<=0:
+                return {"status": "error", "message":"Please check details"}
+            db.query(freight_task_mappings).filter(freight_task_mappings.freight_task_id == item.freight_task_id, freight_task_mappings.period==item.period, freight_task_mappings.year==item.year).update(
                 {freight_task_mappings.value: item.value, freight_task_mappings.period: item.period}, synchronize_session='fetch')
             update_count += 1
         db.commit()

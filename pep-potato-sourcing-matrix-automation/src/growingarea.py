@@ -24,6 +24,15 @@ def create_growing_area(payload: schemas.GrowingAreaSchema, db: Session = Depend
     db.refresh(new_area)
     return {"status": "success", "growing_area_id": new_area.growing_area_id}
 
+@router.get('/preferred_grower')
+def get_preferred_grower(db: Session = Depends(get_db)):
+    """Function to get preferred grower list for all growing_area."""
+    data = db.query(models.preferred_grower).all()
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No grower  found")
+    return {"status": "success", "preferred_grower": data}
+
 
 @router.get('/{growing_areaId}')
 def get_post(growing_areaId: str, db: Session = Depends(get_db)):

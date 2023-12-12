@@ -3,12 +3,12 @@ import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from models import (FreightCostMapping, FreightCostRate,
-                    PlantSiteGrowingAreaMapping)
+                    PlantSiteGrowingAreaMapping, freight_cost_period_table,
+                    freight_cost_period_week_table, rate_growing_area_table)
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 router = APIRouter()
-
 
 
 @router.get('/get_freight_cost_rate')
@@ -19,7 +19,6 @@ def view_freight_cost(db: Session = Depends(get_db)):
         return {"data": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 
 @router.post("/create_freight_cost_records")
@@ -89,7 +88,6 @@ def view_freight_mapping(db: Session = Depends(get_db)):
                 "period": row.FreightCostMapping.period,
                 "year": row.FreightCostMapping.year,
                 "rate": row.FreightCostMapping.rate,
-                "actual_rate": row.FreightCostMapping.actual_rate,
                 "period_with_P": row.period_with_P
             }
             for row in records
@@ -97,7 +95,27 @@ def view_freight_mapping(db: Session = Depends(get_db)):
         return {"status": "success", "freight_cost_mapping": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
+    
+@router.get('/get_freight_cost_mapping/{year}')
+def view_freight_mapping_by_year(year:int, db: Session = Depends(get_db)):
+    """Function to fetch all records from freight_cost_mapping table """
+    try:
+        records = db.query(FreightCostMapping, func.concat("P", FreightCostMapping.period)\
+            .label("period_with_P")).filter(FreightCostMapping.year == year).all()
+        # Extract the results as dictionaries and build the response
+        result = [
+            {
+                "freight_cost_id": row.FreightCostMapping.freight_cost_id,
+                "period": row.FreightCostMapping.period,
+                "year": row.FreightCostMapping.year,
+                "rate": row.FreightCostMapping.rate,
+                "period_with_P": row.period_with_P
+            }
+            for row in records
+        ]
+        return {"status": "success", "freight_cost_mapping": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/create_freight_cost_mapping_records")
 def create_freight_mapping(
@@ -146,3 +164,175 @@ def update_freight_mapping(
         record.rate = new_rate
         db.commit()
     return records_to_update
+
+@router.delete('delete/{year}')
+def delete_post(year:int, db: Session = Depends(get_db)):
+    records_to_delete = db.query(FreightCostMapping).filter(FreightCostMapping.year == year).all()
+    if not records_to_delete:
+        raise HTTPException(status_code=404,
+                            detail=f'No region  with this year: {year} found')
+    for record in records_to_delete:
+            db.delete(record)
+    db.commit()
+    return {"message": f"Records for the year {year} deleted successfully."}
+
+@router.get('/freight_cost_period_view')
+def freight_cost_period_view(db: Session = Depends(get_db)):
+    """Function to fetch all records from freight period view table """
+    try:
+        records = db.query(freight_cost_period_table).all()
+        result = [
+            {
+                "plant_id": row.Plant_Id,
+                "period": row.UNL_DATE_PD,
+                "plant_name": row.plant_name,
+                "dollarbymcwt": row.dollorcwt,
+                "year": row.UNLOAD_YEAR,
+                "totalspend":row.totalspend,
+                "week":0,
+                "period_with_P": f'P{row.UNL_DATE_PD}'
+            }
+            for row in records
+        ]
+        return {"freight_cost_period_view": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))   
+
+@router.get('/freight_cost_period_view/{year}')
+def freight_cost_period_view_year(year:int, db: Session = Depends(get_db)):
+    """Function to fetch all records from freight period view table """
+    try:
+        records = db.query(freight_cost_period_table).filter(freight_cost_period_table.columns.UNLOAD_YEAR == year).all()
+        result = [
+            {
+                "plant_id": row.Plant_Id,
+                "period": row.UNL_DATE_PD,
+                "plant_name": row.plant_name,
+                "dollarbymcwt": row.dollorcwt,
+                "totalspend":row.totalspend,
+                "year": row.UNLOAD_YEAR,
+                "week":0,
+                "period_with_P": f'P{row.UNL_DATE_PD}'
+            }
+            for row in records
+        ]
+        return {"freight_cost_period_view": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# @router.get('/create_freight_cost_period_view')
+# def create_freight_cost_period_view_year(year:int,db: Session = Depends(get_db)):
+#     """Function to fetch all records from freight period view table """
+#     try:
+#         records = db.query(freight_cost_period_table).all()
+#         result = [
+#             {
+#                 "plant_id": row.Plant_Id,
+#                 "period": row.period_num,
+#                 "plant_name": row.plant_name,
+#                 "dollarbycwt": 0,
+#                 "year": year,
+#                 "totalspend":0,
+#                 "week":0,
+#                 "period_with_P": f'P{row.period_num}'
+#             }
+#             for row in records
+#         ]
+#         return {"freight_cost_period_view": result}
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e)) 
+
+@router.get('/freight_cost_period_week_view')
+def freight_cost_period_week_view(db: Session = Depends(get_db)):
+    """Function to fetch all records from freight period week view table """
+    try:
+        records = db.query(freight_cost_period_week_table).all()
+        result = [
+            {
+                "plant_id": row.Plant_Id,
+                "plant_name": row.plant_name,
+                "period": row.UNL_DATE_PD,
+                "week" : row.Unl_Date_Wk_Num,
+                "dollarbymcwt": row.dollorcwt,
+                "year": row.UNLOAD_YEAR,
+                "totalspend": row.totalspend,
+                "P*W": f'P{row.UNL_DATE_PD}W{row.Unl_Date_Wk_Num}'
+            }
+            for row in records
+        ]
+        return {"freight_cost_period_week_view": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get('/freight_cost_period_week_view/{year}')
+def freight_cost_period_week_view_year(year: int,db: Session = Depends(get_db)):
+    """Function to fetch all records from freight period week view table """
+    try:
+        records = db.query(freight_cost_period_week_table).filter(freight_cost_period_week_table.columns.UNLOAD_YEAR == year).all()
+        result = [
+            {
+                "plant_id": row.Plant_Id,
+                "plant_name": row.plant_name,
+                "period": row.UNL_DATE_PD,
+                "week" : row.Unl_Date_Wk_Num,
+                "dollarbymcwt": row.dollorcwt,
+                "year": row.UNLOAD_YEAR,
+                "totalspend": row.totalspend,
+                "P*W": f'P{row.UNL_DATE_PD}W{row.Unl_Date_Wk_Num}'
+            }
+            for row in records
+        ]
+        return {"freight_cost_period_week_view": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('/rate_growing_area')
+def rate_growing_area(db: Session = Depends(get_db)):
+    """Function to fetch all records from rate growing area table """
+    try:
+        records = db.query(rate_growing_area_table).all()
+        result = [
+            {
+                "plant_id": row.plant_id,
+                "plant_name": row.plant_name,
+                "growing_area":row.growing_area_name,
+                "growing_area_id": row.growing_area_id,
+                "period": row.period,
+                "fcst": row.rate_plan,
+                "actual": row.rate_actual,
+                "totaldollarbymcwt": row.totaldollarcwt,
+                "year": row.p_year,
+                "period_with_P": f'P{row.period}',
+                "week": 0
+            }
+            for row in records
+        ]
+        return {"freight_cost_rate_growing_area": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/get_rate_gowing_area/{year}")
+def get_rate_growing_area_year(year: int, db: Session = Depends(get_db)):
+    """Function to get records rate growing area table by year"""
+    try:
+        records = db.query(rate_growing_area_table).filter(rate_growing_area_table.columns.p_year == year).all()
+        result = [
+            {
+                "plant_id": row.plant_id,
+                "plant_name": row.plant_name,
+                "growing_area":row.growing_area_name,
+                "growing_area_id": row.growing_area_id,
+                "period": row.period,
+                "fcst": row.rate_plan,
+                "actual": row.rate_actual,
+                "totaldollarbymcwt": row.totaldollarcwt,
+                "year": row.p_year,
+                "period_with_P": f'P{row.period}',
+                "week": 0
+            }
+            for row in records
+        ]
+        return {"freight_cost_rate_growing_area": result}
+    except Exception as e:
+        print(f"Exception: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
