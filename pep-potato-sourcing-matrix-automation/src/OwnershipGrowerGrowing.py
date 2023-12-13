@@ -13,6 +13,7 @@ def get_ownershipMapping(year: int, db: Session = Depends(get_db)):
     grower_growing = db.query(models.OwnershipGrowerGrowing.row_id,
                               models.OwnershipGrowerGrowing.ownership_id,
                               models.growers.grower_name,
+                              models.OwnershipGrowerGrowing.shrinkage,
                               models.OwnershipGrowerGrowing.contract_erp,
                               models.OwnershipGrowerGrowing.contract,
                               models.OwnershipGrowerGrowing.year,
