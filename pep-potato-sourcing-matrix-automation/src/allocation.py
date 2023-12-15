@@ -1,7 +1,8 @@
+from datetime import date
 from fastapi import Depends, HTTPException, status, APIRouter, Response
 from sqlalchemy.orm import Session
-import schemas
 from database import get_db
+import schemas
 import models
 import period_week_calc
 
@@ -45,6 +46,11 @@ def getAllPlants(category_name: str, db: Session = Depends(get_db)):
 
 @router.post('/updateAllocation')
 def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)):
+    today_date = date.today()
+    res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
+    current_period = res['Period']
+    current_week = res['week']
+    year_data = res['year']
     data = payload.data
     update_count = 0
     allocation_id_list = {}
@@ -85,24 +91,31 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
 
                 while week_value < no_of_week:
                     lastYear_actual_list.setdefault(week_value, 0)
+
                     if week_value == 5:
                         new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
                     else:
-                        print("last year actual_value ------")
-                        print(lastYear_actual_list[week_value])
                         new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
-                        print("--------new_forecast_value ------")
-                        print(new_forecast_value)
+
                     db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
                                                     models.pcusage.year == current_year,
                                                     models.pcusage.period == period_value,
-                                                    models.pcusage.week_no == week_value).update(
-                        {models.pcusage.forecasted_value: new_forecast_value}, synchronize_session=False)
+                                                    models.pcusage.week_no == week_value)\
+                        .update({models.pcusage.forecasted_value: new_forecast_value},
+                                synchronize_session=False)
+                    if year_data == current_year and \
+                            (current_period*5+current_week) < (period_value*5+week_value):
+                        """Update the plantMtrx actual value if current week is less than update week"""
+                        db.query(models.plantMtrx)\
+                            .filter(models.plantMtrx.plant_id == plant_id,
+                                    models.plantMtrx.year == current_year,
+                                    models.plantMtrx.period == period_value,
+                                    models.plantMtrx.week == week_value)\
+                            .update({models.plantMtrx.value: new_forecast_value},
+                                    synchronize_session=False)
                     week_value += 1
                 print("........ plant id :", plant_id, " is completed ........")
                 db.commit()
-
-            # requirement: index, lastyear_actual of that period, category
 
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
