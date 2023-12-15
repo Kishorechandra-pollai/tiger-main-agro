@@ -68,15 +68,6 @@ def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
     ownership_record.total_ship = ownership_record.to_ship + ownership_record.market_and_flex
     db.commit()
 
-
-# def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
-#     ownership_record = db.query(models.Ownership) \
-#         .filter(models.Ownership.ownership_id == ownership_id).first()
-#
-#     ownership_record.total_ship = ownership_record.to_ship + ownership_record.market_and_flex
-#     db.commit()
-
-
 @router.post('/UpdateOwnershipGrowing_mapping/{cropyear_input}')
 def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrowerGrowing,
                      db: Session = Depends(get_db)):
@@ -248,3 +239,26 @@ def Create_new_Ownership(year: int, db: Session = Depends(get_db)):
         return {"Status": "success", "records_inserted": "Next year data are added"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/update_contract_erp/{crop_year}")
+def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db)):
+    try:
+        view_data = db.query(models.View_total_sum_growing_area)\
+            .filter(models.View_total_sum_growing_area.columns.STORAGE_period == crop_year)\
+            .all()
+        if len(view_data) > 0:
+            for data in view_data:
+                existing_record = db.query(models.Ownership)\
+                    .filter(models.Ownership.growing_area_id == data.growing_area_id,
+                            models.Ownership.crop_year == crop_year)\
+                    .first()
+                if existing_record is not None:
+                    db.query(models.Ownership).filter(
+                        models.Ownership.growing_area_id == data.growing_area_id,
+                        models.Ownership.crop_year == crop_year
+                    ).update({models.Ownership.contract_erp_value: data.totalsum})
+
+                db.commit()
+        return {"message": f"Total Contract ERP updated for {crop_year} in Ownership table"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")

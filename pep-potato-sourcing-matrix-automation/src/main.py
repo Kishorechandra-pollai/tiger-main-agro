@@ -17,7 +17,7 @@ import plantGrowingMapping
 # import erp_raw_data_us
 import OwnershipGrowerGrowing
 import pcusage
-import erprawdata
+# import erprawdata
 import plant_site_growing_area_mapping
 import vendor_site_code
 # import pagination
@@ -58,7 +58,7 @@ app.include_router(extensionMapping.router, tags=['extensionMapping'], prefix='/
 app.include_router(MarketFlexMapping.router, tags=['MarketFlexMapping'], prefix='/api/MarketFlexMapping')
 app.include_router(OwnershipGrowerGrowing.router, tags=['OwnershipGrowerGrowingMapping'],
                    prefix='/api/ownershipMapping')
-app.include_router(erprawdata.router, tags=['erp-raw-data'], prefix='/api/erp-raw-data')
+# app.include_router(erprawdata.router, tags=['erp-raw-data'], prefix='/api/erp-raw-data')
 app.include_router(plant_mtrx.router, tags=['plant_mtrx'], prefix='/api/plant_mtrx')
 app.include_router(plant_site_growing_area_mapping.router, tags=['plant_site_growing_area_mapping'],
                    prefix='/api/plant_site_growing_area_mapping')
