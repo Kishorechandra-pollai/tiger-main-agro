@@ -1,6 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, or_, and_
-from fastapi import Depends, HTTPException, status, APIRouter, Response
 from sqlalchemy import func
 from fastapi import Depends, HTTPException, status, APIRouter
 import schemas

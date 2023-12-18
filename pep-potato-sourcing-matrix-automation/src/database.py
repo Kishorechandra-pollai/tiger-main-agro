@@ -35,19 +35,13 @@ params = urllib.parse.quote_plus("DRIVER=" + driver +
 
 
 # params = "DRIVER=" + driver + ";Server=tcp:" + host + ";Database=" + db + ";Uid=" + username + ";Pwd=" + pwd + ";Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30" + ";Authentication=ActiveDirectoryPassword"
-
-print(" ------------- params -------------")
-print(params)
+print("---- loading ----")
 
 engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
-
-print(engine)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
-
-print(SessionLocal)
 
 def get_db():
     db = SessionLocal()
