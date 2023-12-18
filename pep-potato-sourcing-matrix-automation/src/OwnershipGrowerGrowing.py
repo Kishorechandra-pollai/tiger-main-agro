@@ -12,6 +12,7 @@ router = APIRouter()
 def get_ownershipMapping(year: int, db: Session = Depends(get_db)):
     grower_growing = db.query(models.OwnershipGrowerGrowing.row_id,
                               models.OwnershipGrowerGrowing.ownership_id,
+                              models.OwnershipGrowerGrowing.growing_area_id,
                               models.growers.grower_name,
                               models.OwnershipGrowerGrowing.shrinkage,
                               models.OwnershipGrowerGrowing.contract_erp,
@@ -52,20 +53,20 @@ def create_grower_growing_area_mapping(payload: schemas.OwnershipGrowerGrowingSc
             existing_record if existing_record else new_GrowerMapping).growing_area_id_mapper_id
     }
 
-
-@router.get('/{GrowingAreaId}/{GrowerId}/{year}')
-def get_post(GrowingAreaId: str, GrowerId, year, db: Session = Depends(get_db)):
-    Growers_GrowingArea_yearWise = (db.query(models.growers, models.OwnershipGrowerGrowing)
-                                    .join(models.growers,
-                                          models.growers.grower_id == models.OwnershipGrowerGrowing.grower_id)
-                                    .filter(models.OwnershipGrowerGrowing.growing_area_id == GrowingAreaId,
-                                            models.OwnershipGrowerGrowing.grower_id == GrowerId,
-                                            models.OwnershipGrowerGrowing.year == year).all())
-    if not Growers_GrowingArea_yearWise:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"No records found")
-
-    return {"status": "success", "Growers_GrowingAreaWise": Growers_GrowingArea_yearWise}
+#
+# @router.get('/{GrowingAreaId}/{GrowerId}/{year}')
+# def get_post(GrowingAreaId: str, GrowerId, year, db: Session = Depends(get_db)):
+#     Growers_GrowingArea_yearWise = (db.query(models.growers, models.OwnershipGrowerGrowing)
+#                                     .join(models.growers,
+#                                           models.growers.grower_id == models.OwnershipGrowerGrowing.grower_id)
+#                                     .filter(models.OwnershipGrowerGrowing.growing_area_id == GrowingAreaId,
+#                                             models.OwnershipGrowerGrowing.grower_id == GrowerId,
+#                                             models.OwnershipGrowerGrowing.year == year).all())
+#     if not Growers_GrowingArea_yearWise:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail=f"No records found")
+#
+#     return {"status": "success", "Growers_GrowingAreaWise": Growers_GrowingArea_yearWise}
 
 
 @router.delete('/{Growing_area_id}/{Grower_id}/{year}')

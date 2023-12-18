@@ -98,6 +98,7 @@ def getPlantMtrx_growingArea(region_id: int, year: int, db: Session = Depends(ge
         data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
                                     models.View_PlantMtrx_table.columns.growing_area_desc)
                         .label("growing_area_name"),
+                        models.View_PlantMtrx_table.columns.growing_area_id,
                         models.View_PlantMtrx_table.columns.period,
                         models.View_PlantMtrx_table.columns.period_with_P,
                         models.View_PlantMtrx_table.columns.week,
@@ -109,6 +110,7 @@ def getPlantMtrx_growingArea(region_id: int, year: int, db: Session = Depends(ge
                     models.View_PlantMtrx_table.columns.ga_region_id == region_id)\
             .group_by(models.View_PlantMtrx_table.columns.year,
                       models.View_PlantMtrx_table.columns.growing_area_desc,
+                      models.View_PlantMtrx_table.columns.growing_area_id,
                       models.View_PlantMtrx_table.columns.growing_area_name,
                       models.View_PlantMtrx_table.columns.period_with_P,
                       models.View_PlantMtrx_table.columns.period,
@@ -127,6 +129,7 @@ def getPlantMtrx_growingArea(name: str, year: int, db: Session = Depends(get_db)
         data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
                                     models.View_PlantMtrx_table.columns.growing_area_desc)
                         .label("growing_area_name"),
+                        models.View_PlantMtrx_table.columns.growing_area_id,
                         models.View_PlantMtrx_table.columns.period,
                         models.View_PlantMtrx_table.columns.period_with_P,
                         models.View_PlantMtrx_table.columns.week,
@@ -140,6 +143,7 @@ def getPlantMtrx_growingArea(name: str, year: int, db: Session = Depends(get_db)
                     models.region.country == name) \
             .group_by(models.View_PlantMtrx_table.columns.year,
                       models.View_PlantMtrx_table.columns.growing_area_desc,
+                      models.View_PlantMtrx_table.columns.growing_area_id,
                       models.View_PlantMtrx_table.columns.growing_area_name,
                       models.View_PlantMtrx_table.columns.period_with_P,
                       models.View_PlantMtrx_table.columns.period,
@@ -279,10 +283,11 @@ def update_plantMtrx(payload: schemas.PlantMtrxPayload, db: Session = Depends(ge
 
 
 @router.post('/createNewMatrix/{year}')
-async def createNew_plantMatrix(year: int, db: Session = Depends(get_db)):
+def createNew_plantMatrix(year: int, db: Session = Depends(get_db)):
+    """for all plants generate the plant_mtrx from pc_usage data using preferred growing_area"""
     try:
         check_data = db.query(models.plantMtrx.plant_matrix_id).filter(models.plantMtrx.year == year).first()
-        newrecord_count = 0
+        record_count = 0
         if check_data is None:
             plant_list = db.query(models.Plant.plant_id, models.Plant.region_id) \
                 .filter(models.Plant.status == "ACTIVE",
@@ -318,18 +323,20 @@ async def createNew_plantMatrix(year: int, db: Session = Depends(get_db)):
                                                                      prefered_growingarea[0], db)
                             PlantMtrx_payload = {"plant_matrix_id": plantMtrx_id,
                                                  "region_id": region, "plant_id": plant_id,
-                                                 "growing_area_id": prefered_growingarea[0], "period": period_value,
-                                                 "week": week_value, "year": year, "crop_type": crop_type,
-                                                 "crop_year": crop_year, "value": total_value[0], "status": 'active'}
+                                                 "growing_area_id": prefered_growingarea[0],
+                                                 "period": period_value, "week": week_value,
+                                                 "year": year, "crop_type": crop_type,
+                                                 "crop_year": crop_year, "value": total_value[0],
+                                                 "status": 'active'}
 
                             newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
                             db.add(newplantMtrx_record)
-                            newrecord_count += 1
+                            record_count += 1
+                            print(record_count)
                             week_value += 1
                         db.commit()
                     period_value += 1
-        # for all plants generate the plant_mtrx from pc_usage data using preferred growing_area->
-        return {"status": "Success", "records create": newrecord_count}
+        return {"status": "Success", "records create": record_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

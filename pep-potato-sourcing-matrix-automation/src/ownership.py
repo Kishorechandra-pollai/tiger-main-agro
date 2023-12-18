@@ -68,6 +68,7 @@ def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
     ownership_record.total_ship = ownership_record.to_ship + ownership_record.market_and_flex
     db.commit()
 
+
 @router.post('/UpdateOwnershipGrowing_mapping/{cropyear_input}')
 def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrowerGrowing,
                      db: Session = Depends(get_db)):
@@ -124,14 +125,15 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                 db.add(new_record)
             db.commit()
             update_count += 1
-
+            print(cropyear_input,item.growing_area_id)
             mapping_data = db.query(models.OwnershipGrowerGrowing.growing_area_id,
-                                    func.sum(models.OwnershipGrowerGrowing.contract)).filter(
-                models.OwnershipGrowerGrowing.crop_year == cropyear_input,
-                models.OwnershipGrowerGrowing.status == 'ACTIVE',
-                models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id).group_by(
-                models.OwnershipGrowerGrowing.growing_area_id).order_by(
-                models.OwnershipGrowerGrowing.growing_area_id).all()
+                                    func.sum(models.OwnershipGrowerGrowing.contract))\
+                .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
+                        models.OwnershipGrowerGrowing.status == 'ACTIVE',
+                        models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id)\
+                .group_by(models.OwnershipGrowerGrowing.growing_area_id)\
+                .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
+            print("----- mapping data -------")
             print(mapping_data)
             if len(mapping_data) == 0:
                 db.query(models.Ownership).filter(models.Ownership.ownership_id == item.ownership_id) \
@@ -140,6 +142,7 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                              models.Ownership.to_ship: 0}, synchronize_session='fetch')
                 total_ship_calculation(item.ownership_id, db)
             else:
+                print("-- else --")
                 per_grower_shrinkage = db.query(
                     models.OwnershipGrowerGrowing.growing_area_id,
                     models.OwnershipGrowerGrowing.contract,
