@@ -19,11 +19,10 @@ def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
             .filter(models.region.country == region, or_(models.View_Ownership.columns.year == year - 1,
                                                          models.View_Ownership.columns.year == year)).all()
 
-        ownership_metric = db.query(models.View_OwnershipMetrics_region) \
-            .join(models.region,
-                  models.View_OwnershipMetrics_region.columns.region == models.region.region_id) \
-            .filter(models.region.country == region, or_(models.View_OwnershipMetrics_region.columns.year == year - 1,
-                                                         models.View_OwnershipMetrics_region.columns.year == year))\
+        ownership_metric = db.query(models.View_OwnershipMetrics_country) \
+            .filter(models.View_OwnershipMetrics_country.columns.country == region,
+                    or_(models.View_OwnershipMetrics_region.columns.year == year - 1,
+                        models.View_OwnershipMetrics_region.columns.year == year))\
             .all()
         if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -51,10 +50,11 @@ def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
 def get_ownership(year: int, db: Session = Depends(get_db)):
     ownership = db.query(models.View_Ownership).filter(or_(models.View_Ownership.columns.year == year - 1,
                                                            models.View_Ownership.columns.year == year)).all()
+
     ownership_metric_all = db.query(models.View_OwnershipMetrics_all)\
         .filter(or_(models.View_Ownership.columns.year == year - 1,
                     models.View_Ownership.columns.year == year)).all()
-    #contract_erp = db.query(models.View_infodata_contract_erp).all()
+
     if not ownership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No ownership_id found")
