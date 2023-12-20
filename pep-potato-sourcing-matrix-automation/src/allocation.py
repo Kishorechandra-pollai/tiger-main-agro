@@ -61,7 +61,6 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
     allocation_id_list = {}
     try:
         for item in data:
-            print("inside item")
             if int(item.year) > year_data:
                 allocation_id_list[item.allocation_id] = item.value
                 db.query(models.allocation) \
@@ -70,60 +69,49 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
                             synchronize_session='fetch')
                 update_count += 1
                 db.commit()
-                # PcUsage data is updated here
-                for allocation_item in allocation_id_list:
-                    new_index = allocation_id_list[allocation_item]
-                    data_list = allocation_item.split("#")
-                    category_value = data_list[0]
-                    period_value = int(data_list[1])
-                    current_year = int(data_list[2])
-                    print(category_value, period_value, current_year)
-                    plant_id_list = getAllPlants(category_value, db)
-                    print("--- plant_id list -----")
-                    print(plant_id_list)
-                    for plant_id in plant_id_list:
-                        lastYear_actual_list = {}
-                        print(type(current_year))
-                        lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
-                                                    models.View_forecast_pcusage.columns.total_actual_value) \
-                            .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
-                                    models.View_forecast_pcusage.columns.year == current_year - 1,
-                                    models.View_forecast_pcusage.columns.period == period_value).all()
-                        print(lastYear_actuals)
-                        if not lastYear_actuals:
-                            continue
-                        lastYear_actual_list = {key: value for key, value in lastYear_actuals}
-                        week_value = 1
 
-                        if period_week_calc.calculate_week_num(current_year, int(period_value)):
-                            no_of_week = 6
+                new_index = int(item.value)
+                category_value = item.category_name
+                period_value = int(item.period)
+                current_year = int(item.year)
+                plant_id_list = getAllPlants(category_value, db)
+                print(plant_id_list)
+                for plant_id in plant_id_list:
+                    lastYear_actual_list = {}
+                    lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
+                                                models.View_forecast_pcusage.columns.total_actual_value)\
+                        .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
+                                models.View_forecast_pcusage.columns.year == current_year - 1,
+                                models.View_forecast_pcusage.columns.period == period_value).all()
+                    if not lastYear_actuals:
+                        continue
+                    lastYear_actual_list = {key: value for key, value in lastYear_actuals}
+                    week_value = 1
+                    if period_week_calc.calculate_week_num(current_year, int(period_value)):
+                        no_of_week = 6
+                    else:
+                        no_of_week = 5
+                    while week_value < no_of_week:
+                        lastYear_actual_list.setdefault(week_value, 0)
+                        if week_value == 5:
+                            new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
                         else:
-                            no_of_week = 5
+                            new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
 
-                        while week_value < no_of_week:
-                            lastYear_actual_list.setdefault(week_value, 0)
-
-                            if week_value == 5:
-                                new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
-                            else:
-                                new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
-
-                            db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
-                                                            models.pcusage.year == current_year,
-                                                            models.pcusage.period == period_value,
-                                                            models.pcusage.week_no == week_value) \
-                                .update({models.pcusage.forecasted_value: new_forecast_value},
-                                        synchronize_session=False)
-                            db.query(models.plantMtrx) \
-                                .filter(models.plantMtrx.plant_id == plant_id,
-                                        models.plantMtrx.year == current_year,
-                                        models.plantMtrx.period == period_value,
-                                        models.plantMtrx.week == week_value) \
-                                .update({models.plantMtrx.value: new_forecast_value},
-                                        synchronize_session=False)
-                            print("true.....")
-                            week_value += 1
-                        print("........ plant id :", plant_id, " is completed ........")
+                        db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
+                                                        models.pcusage.year == current_year,
+                                                        models.pcusage.period == period_value,
+                                                        models.pcusage.week_no == week_value)\
+                            .update({models.pcusage.forecasted_value: new_forecast_value},
+                                    synchronize_session=False)
+                        db.query(models.plantMtrx)\
+                            .filter(models.plantMtrx.plant_id == plant_id,
+                                    models.plantMtrx.year == current_year,
+                                    models.plantMtrx.period == period_value,
+                                    models.plantMtrx.week == week_value)\
+                            .update({models.plantMtrx.value: new_forecast_value},
+                                    synchronize_session=False)
+                        week_value += 1
                         db.commit()
             elif year_data == int(item.year) and current_period < item.period:
                 allocation_id_list[item.allocation_id] = item.value
@@ -133,60 +121,49 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
                             synchronize_session='fetch')
                 update_count += 1
                 db.commit()
-                # PcUsage data is updated here
-                for allocation_item in allocation_id_list:
-                    new_index = allocation_id_list[allocation_item]
-                    data_list = allocation_item.split("#")
-                    category_value = data_list[0]
-                    period_value = int(data_list[1])
-                    current_year = int(data_list[2])
-                    print(category_value, period_value, current_year)
-                    plant_id_list = getAllPlants(category_value, db)
-                    print("--- plant_id list -----")
-                    print(plant_id_list)
-                    for plant_id in plant_id_list:
-                        lastYear_actual_list = {}
-                        print(type(current_year))
-                        lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
-                                                    models.View_forecast_pcusage.columns.total_actual_value) \
-                            .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
-                                    models.View_forecast_pcusage.columns.year == current_year - 1,
-                                    models.View_forecast_pcusage.columns.period == period_value).all()
-                        print(lastYear_actuals)
-                        if not lastYear_actuals:
-                            continue
-                        lastYear_actual_list = {key: value for key, value in lastYear_actuals}
-                        week_value = 1
 
-                        if period_week_calc.calculate_week_num(current_year, int(period_value)):
-                            no_of_week = 6
+                new_index = int(item.value)
+                category_value = item.category_name
+                period_value = int(item.period)
+                current_year = int(item.year)
+                plant_id_list = getAllPlants(category_value, db)
+                print(plant_id_list)
+                for plant_id in plant_id_list:
+                    lastYear_actual_list = {}
+                    lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
+                                                models.View_forecast_pcusage.columns.total_actual_value) \
+                        .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
+                                models.View_forecast_pcusage.columns.year == current_year - 1,
+                                models.View_forecast_pcusage.columns.period == period_value).all()
+                    if not lastYear_actuals:
+                        continue
+                    lastYear_actual_list = {key: value for key, value in lastYear_actuals}
+                    week_value = 1
+                    if period_week_calc.calculate_week_num(current_year, int(period_value)):
+                        no_of_week = 6
+                    else:
+                        no_of_week = 5
+                    while week_value < no_of_week:
+                        lastYear_actual_list.setdefault(week_value, 0)
+                        if week_value == 5:
+                            new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
                         else:
-                            no_of_week = 5
+                            new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
 
-                        while week_value < no_of_week:
-                            lastYear_actual_list.setdefault(week_value, 0)
-
-                            if week_value == 5:
-                                new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
-                            else:
-                                new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
-
-                            db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
-                                                            models.pcusage.year == current_year,
-                                                            models.pcusage.period == period_value,
-                                                            models.pcusage.week_no == week_value) \
-                                .update({models.pcusage.forecasted_value: new_forecast_value},
-                                        synchronize_session=False)
-                            db.query(models.plantMtrx) \
-                                .filter(models.plantMtrx.plant_id == plant_id,
-                                        models.plantMtrx.year == current_year,
-                                        models.plantMtrx.period == period_value,
-                                        models.plantMtrx.week == week_value) \
-                                .update({models.plantMtrx.value: new_forecast_value},
-                                        synchronize_session=False)
-                            print("true.....")
-                            week_value += 1
-                        print("........ plant id :", plant_id, " is completed ........")
+                        db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
+                                                        models.pcusage.year == current_year,
+                                                        models.pcusage.period == period_value,
+                                                        models.pcusage.week_no == week_value) \
+                            .update({models.pcusage.forecasted_value: new_forecast_value},
+                                    synchronize_session=False)
+                        db.query(models.plantMtrx) \
+                            .filter(models.plantMtrx.plant_id == plant_id,
+                                    models.plantMtrx.year == current_year,
+                                    models.plantMtrx.period == period_value,
+                                    models.plantMtrx.week == week_value) \
+                            .update({models.plantMtrx.value: new_forecast_value},
+                                    synchronize_session=False)
+                        week_value += 1
                         db.commit()
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
