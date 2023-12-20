@@ -334,6 +334,8 @@ def createNew_plantMatrix(year: int, db: Session = Depends(get_db)):
                             record_count += 1
                             print(record_count)
                             week_value += 1
+                        else:
+                            week_value += 1
                         db.commit()
                     period_value += 1
         return {"status": "Success", "records create": record_count}
