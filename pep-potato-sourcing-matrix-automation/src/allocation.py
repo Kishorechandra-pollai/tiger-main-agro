@@ -38,8 +38,13 @@ def get_FilteredAllocation(year: int, db: Session = Depends(get_db)):
 
 
 def getAllPlants(category_name: str, db: Session = Depends(get_db)):
-    crop_category_id = db.query(models.category.crop_category).filter(models.category.category_name == category_name).first()
-    data = db.query(models.Plant.plant_id).filter(models.Plant.crop_category_id == crop_category_id[0]).all()
+    """Get the Plants List of that category."""
+    crop_category_id = db.query(models.category.crop_category)\
+        .filter(models.category.category_name == category_name)\
+        .first()
+    data = db.query(models.Plant.plant_id)\
+        .filter(models.Plant.crop_category_id == crop_category_id[0])\
+        .all()
     result_list = [t[0] for t in data]
     return result_list
 
@@ -48,17 +53,19 @@ def getAllPlants(category_name: str, db: Session = Depends(get_db)):
 def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)):
     today_date = date.today()
     res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
-    current_period = res['Period']
-    current_week = res['week']
-    year_data = res['year']
+    current_period = int(res['Period'])
+    current_week = int(res['week'])
+    year_data = int(res['year'])
     data = payload.data
     update_count = 0
     allocation_id_list = {}
     try:
         for item in data:
             allocation_id_list[item.allocation_id] = item.value
-            db.query(models.allocation).filter(models.allocation.allocation_id == item.allocation_id).update(
-                {models.allocation.value: item.value}, synchronize_session='fetch')
+            db.query(models.allocation)\
+                .filter(models.allocation.allocation_id == item.allocation_id)\
+                .update({models.allocation.value: item.value},
+                        synchronize_session='fetch')
             update_count += 1
         db.commit()
         # PcUsage data is updated here
@@ -66,7 +73,7 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
             new_index = allocation_id_list[allocation_item]
             data_list = allocation_item.split("#")
             category_value = data_list[0]
-            period_value = data_list[1]
+            period_value = int(data_list[1])
             current_year = int(data_list[2])
             print(category_value, period_value, current_year)
             plant_id_list = getAllPlants(category_value, db)
@@ -74,12 +81,15 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
             print(plant_id_list)
             for plant_id in plant_id_list:
                 lastYear_actual_list = {}
+                print(type(current_year))
                 lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
                                             models.View_forecast_pcusage.columns.total_actual_value)\
                     .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
                             models.View_forecast_pcusage.columns.year == current_year - 1,
                             models.View_forecast_pcusage.columns.period == period_value).all()
                 print(lastYear_actuals)
+                if not lastYear_actuals:
+                    continue
                 lastYear_actual_list = {key: value for key, value in lastYear_actuals}
                 print(lastYear_actual_list)
                 week_value = 1
@@ -113,6 +123,7 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
                                     models.plantMtrx.week == week_value)\
                             .update({models.plantMtrx.value: new_forecast_value},
                                     synchronize_session=False)
+                        print("true.....")
                     week_value += 1
                 print("........ plant id :", plant_id, " is completed ........")
                 db.commit()

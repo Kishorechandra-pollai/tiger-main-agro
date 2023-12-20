@@ -346,6 +346,7 @@ View_forecast_pcusage = db.Table('View_forecast_pcusage', metadata, autoload=Tru
 View_Ownership = db.Table('View_Ownership', metadata, autoload=True, autoload_with=engine)
 View_OwnershipMetrics_region = db.Table('View_OwnershipMetrics_region', metadata, autoload=True, autoload_with=engine)
 View_OwnershipMetrics_all = db.Table('View_OwnershipMetrics_all', metadata, autoload=True, autoload_with=engine)
+View_OwnershipMetrics_country = db.Table('View_OwnershipMetrics_country', metadata, autoload=True, autoload_with=engine)
 View_growing_area_contract_erp = db.Table('View_growing_area_contract_erp', metadata, autoload=True, autoload_with=engine)
 View_total_sum_growing_area = db.Table('View_total_sum_growing_area', metadata, autoload=True, autoload_with=engine)
 
