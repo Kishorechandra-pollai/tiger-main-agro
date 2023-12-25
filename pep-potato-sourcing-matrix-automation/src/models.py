@@ -330,6 +330,7 @@ class plantMtrx(Base):
 View_PlantMtrx_table = db.Table('View_PlantMtrx_table', metadata, autoload=True, autoload_with=engine)
 View_PlantMtrx_position = db.Table('View_PlantMtrx_position', metadata, autoload=True, autoload_with=engine)
 View_plant_matrix_actual = db.Table('View_plant_matrix_actual', metadata, autoload=True, autoload_with=engine)
+View_Matrix_growingarea = db.Table('View_Matrix_growingarea', metadata, autoload=True, autoload_with=engine)
 
 
 class plantMtrx_template(Base):
@@ -466,6 +467,8 @@ class ExtensionOwnershipMapping(Base):
     total_value = Column(Float, nullable=True)
     crop_type = Column(String, nullable=True)
     crop_year = Column(String, nullable=True)
+    year = Column(String, nullable=True)
+    split = Column(String, nullable=True)
     status = Column(String, nullable=True)
 
 
