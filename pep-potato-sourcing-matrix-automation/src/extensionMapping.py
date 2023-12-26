@@ -69,6 +69,7 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                  .update({models.ExtensionOwnershipMapping.status: "INACTIVE",
                           models.ExtensionOwnershipMapping.total_value: 0},
                          synchronize_session='fetch'))
+                db.commit()
             else:
                 print("--------positive input--------")
                 record_to_check = db.query(models.ExtensionOwnershipMapping) \
@@ -100,7 +101,7 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
             .filter(models.ExtensionOwnershipMapping.growing_area_id == input_growing_Area_id,
                     models.ExtensionOwnershipMapping.crop_year == input_crop_year,
                     models.ExtensionOwnershipMapping.period * 100 +
-                    (models.ExtensionOwnershipMapping.week > max_period_week)) \
+                    models.ExtensionOwnershipMapping.week > max_period_week) \
             .update({models.ExtensionOwnershipMapping.total_value: 0,
                      models.ExtensionOwnershipMapping.status: "INACTIVE"},
                     synchronize_session='fetch')
