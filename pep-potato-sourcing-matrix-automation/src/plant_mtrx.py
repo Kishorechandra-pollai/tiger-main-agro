@@ -95,7 +95,7 @@ def get_plantMtrx(name: str, year: int, db: Session = Depends(get_db)):
 
 
 @router.get('/growing_area/region/{region_id}/year/{year}')
-def getPlantMtrx_growingArea(region_id: int, year: int, db: Session = Depends(get_db)):
+def getplantmtrx_growingarea(region_id: int, year: int, db: Session = Depends(get_db)):
     """get plantMtrx data based on region_id input for growing_area basis."""
     try:
         data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
@@ -127,7 +127,7 @@ def getPlantMtrx_growingArea(region_id: int, year: int, db: Session = Depends(ge
 
 
 @router.get('/growing_area/country/{name}/year/{year}')
-def getPlantMtrx_growingArea(name: str, year: int, db: Session = Depends(get_db)):
+def getplantmtrx_growingarea(name: str, year: int, db: Session = Depends(get_db)):
     """get plantMtrx data based on country input for growing_area basis."""
     try:
         data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
@@ -160,8 +160,39 @@ def getPlantMtrx_growingArea(name: str, year: int, db: Session = Depends(get_db)
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get('/growing_area/all_data/year/{year}')
+def getplantmtrx_growingarea_all(year: int, db: Session = Depends(get_db)):
+    """get plantMtrx all data for growing_area basis."""
+    try:
+        data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
+                                    models.View_PlantMtrx_table.columns.growing_area_desc)
+                        .label("growing_area_name"),
+                        models.View_PlantMtrx_table.columns.growing_area_id,
+                        models.View_PlantMtrx_table.columns.period,
+                        models.View_PlantMtrx_table.columns.period_with_P,
+                        models.View_PlantMtrx_table.columns.week,
+                        models.View_PlantMtrx_table.columns.year,
+                        func.sum(models.View_PlantMtrx_table.columns.value)
+                        .label('total_value')) \
+            .filter(models.View_PlantMtrx_table.columns.year == year,
+                    models.View_PlantMtrx_table.columns.status == 'active') \
+            .group_by(models.View_PlantMtrx_table.columns.year,
+                      models.View_PlantMtrx_table.columns.growing_area_desc,
+                      models.View_PlantMtrx_table.columns.growing_area_id,
+                      models.View_PlantMtrx_table.columns.growing_area_name,
+                      models.View_PlantMtrx_table.columns.period_with_P,
+                      models.View_PlantMtrx_table.columns.period,
+                      models.View_PlantMtrx_table.columns.week).all()
+        if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Plant Mtrx data not found.")
+        return {"status": "success", "plant_mtrx": data}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @router.get('/only_region_data/year/{year}')
-def getPlantMtrx_region(year: int, db: Session = Depends(get_db)):
+def getplantmtrx_region(year: int, db: Session = Depends(get_db)):
     """get plantMtrx data based on region-wise."""
     try:
         data = db.query(models.View_PlantMtrx_table.columns.region_name,
@@ -278,7 +309,7 @@ def update_plantMtrx(payload: schemas.PlantMtrxPayload, db: Session = Depends(ge
 
 
 @router.post('/createNewMatrix/{year}')
-def createNew_plantMatrix(year: int, db: Session = Depends(get_db)):
+def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):
     """for all plants generate the plant_mtrx from pc_usage data using preferred growing_area"""
     try:
         check_data = db.query(models.plantMtrx.plant_matrix_id).filter(models.plantMtrx.year == year).first()

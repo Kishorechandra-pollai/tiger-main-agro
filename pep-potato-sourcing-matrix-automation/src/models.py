@@ -282,7 +282,8 @@ class vendor_site_code(Base):
     region_id = Column(Integer, nullable=False)
 
 
-View_site_plant_growing_area_mapping = db.Table('View_site_plant_growing_area_mapping', metadata, autoload=True,autoload_with=engine)
+View_site_plant_growing_area_mapping = db.Table('View_site_plant_growing_area_mapping', metadata, autoload=True,
+                                                autoload_with=engine)
 view_plant_growing_area_Alice = db.Table('View_plant_growing_area', metadata, autoload=True, autoload_with=engine)
 view_growing_area_mapping_Alice = db.Table('view_growing_area_mapping', metadata, autoload=True, autoload_with=engine)
 
@@ -348,7 +349,8 @@ View_Ownership = db.Table('View_Ownership', metadata, autoload=True, autoload_wi
 View_OwnershipMetrics_region = db.Table('View_OwnershipMetrics_region', metadata, autoload=True, autoload_with=engine)
 View_OwnershipMetrics_all = db.Table('View_OwnershipMetrics_all', metadata, autoload=True, autoload_with=engine)
 View_OwnershipMetrics_country = db.Table('View_OwnershipMetrics_country', metadata, autoload=True, autoload_with=engine)
-View_growing_area_contract_erp = db.Table('View_growing_area_contract_erp', metadata, autoload=True, autoload_with=engine)
+View_growing_area_contract_erp = db.Table('View_growing_area_contract_erp', metadata, autoload=True,
+                                          autoload_with=engine)
 View_total_sum_growing_area = db.Table('View_total_sum_growing_area', metadata, autoload=True, autoload_with=engine)
 
 
@@ -492,7 +494,8 @@ class price_variance_task_mapping(Base):
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
-    
+
+
 class inflation_deflation_task(Base):
     __tablename__ = "inflation_deflation_task"
     inflation_deflation_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
@@ -511,17 +514,17 @@ class inflation_deflation_task_mappings(Base):
     period = Column(Integer, nullable=True)
     inflation_deflation_task_id = Column(Integer, nullable=True)
     year = Column(Integer, nullable=True)
-    value =Column(Float, nullable=True)
+    value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
 
 
-#freight_cost_period_table = db.Table('View_freight_cost_period', metadata, autoload=True, autoload_with=engine)
-#freight_cost_period_week_table = db.Table('View_freight_cost_weekly', metadata, autoload=True, autoload_with=engine)
-#rate_growing_area_table = db.Table('View_freight_plan_actual_combine', metadata, autoload=True, autoload_with=engine)
-#View_p4p_result_table = db.Table('View_p4p_result', metadata, autoload=True, autoload_with=engine)
-#potato_rate_table_period = db.Table('View_potato_pricing_combine_period', metadata, autoload=True, autoload_with=engine)
-#potato_rate_table_weekly = db.Table('View_price_actual_plan_combine', metadata, autoload=True, autoload_with=engine)
-#solids_rate_table_period = db.Table('View_solid_rate_combine', metadata, autoload=True, autoload_with=engine)
+# freight_cost_period_table = db.Table('View_freight_cost_period', metadata, autoload=True, autoload_with=engine)
+# freight_cost_period_week_table = db.Table('View_freight_cost_weekly', metadata, autoload=True, autoload_with=engine)
+# rate_growing_area_table = db.Table('View_freight_plan_actual_combine', metadata, autoload=True, autoload_with=engine)
+# View_p4p_result_table = db.Table('View_p4p_result', metadata, autoload=True, autoload_with=engine)
+potato_rate_table_period = db.Table('View_potato_pricing_actual_period', metadata, autoload=True, autoload_with=engine)
+potato_rate_table_weekly = db.Table('View_potato_rates_period_week', metadata, autoload=True, autoload_with=engine)
+# solids_rate_table_period = db.Table('View_solid_rate_combine', metadata, autoload=True, autoload_with=engine)
 
 
 class MarketFlexMapping(Base):
@@ -569,4 +572,29 @@ class country_division_name(Base):
     created_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     updated_by = Column(String, nullable=True)
-    updated_time = Column(TIMESTAMP(timezone=False),nullable=False, server_default=func.now())
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+"""Dashboard Views and table plan usage."""
+dashboard_pc_volume_period = db.Table('View_dashboard_pc_volume_ratio', metadata, autoload=True, autoload_with=engine)
+dashboard_weekly_combine = db.Table('View_dashboard_weekly_combine', metadata, autoload=True, autoload_with=engine)
+dashboard_pc_usage_period = db.Table('View_dashboard_pc_usage_period', metadata, autoload=True, autoload_with=engine)
+dashboard_pc_volume_period_country_combine = db.Table('View_dashboard_pc_volume_period_country_combine',
+                                                      metadata, autoload=True, autoload_with=engine)
+dashboard_pc_volume_period_country_yearly = db.Table('View_dashboard_pc_volume_period_country_yearly',
+                                                     metadata, autoload=True, autoload_with=engine)
+dashboard_pc_volume_yearly_country_combine = db.Table('View_dashboard_pc_volume_yearly_country_combine',
+                                                      metadata, autoload=True, autoload_with=engine)
+
+
+class pc_plan_volume_usage(Base):
+    """Class representing plan_volume_usage table"""
+    __tablename__ = "plan_volume_usage"
+    plan_volume_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    crop_type = Column(Integer, nullable=True)
+    period = Column(Integer, nullable=True)
+    week = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    volume = Column(Integer, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())

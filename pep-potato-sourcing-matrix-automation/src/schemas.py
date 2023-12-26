@@ -640,3 +640,20 @@ class PlantMtrxTemplateSchema(BaseModel):
     week: int | None = None
     growing_area_id: int | None = None
 
+
+class planVolumeUsageSchema(BaseModel):
+    __tablename__ = "plan_volume_usage"
+    crop_type: int | None = None
+    period: int | None = None
+    week: int | None = None
+    year: int | None = None
+    volume: float | None = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class planVolumeUsagePayload(BaseModel):
+    data: List[planVolumeUsageSchema]

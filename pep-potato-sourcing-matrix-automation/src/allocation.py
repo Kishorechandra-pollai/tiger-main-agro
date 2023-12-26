@@ -16,7 +16,7 @@ def trim(string):
 
 
 @router.get('/filter/{year}')
-def get_FilteredAllocation(year: int, db: Session = Depends(get_db)):
+def get_filtered_allocation(year: int, db: Session = Depends(get_db)):
     """get api for allocation index based on input year."""
     try:
         data = db.query(models.allocation).filter(models.allocation.year == year).all()
@@ -28,7 +28,7 @@ def get_FilteredAllocation(year: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-def getAllPlants(category_name: str, db: Session = Depends(get_db)):
+def get_all_plants(category_name: str, db: Session = Depends(get_db)):
     """Get the Plants List of that category."""
     crop_category_id = db.query(models.category.crop_category) \
         .filter(models.category.category_name == category_name) \
@@ -55,7 +55,7 @@ def update_volume(item, db: Session = Depends(get_db)):
     category_value = item.category_name
     period_value = int(item.period)
     current_year = int(item.year)
-    plant_id_list = getAllPlants(category_value, db)
+    plant_id_list = get_all_plants(category_value, db)
     for plant_id in plant_id_list:
         lastYear_actual_list = {}
         lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
@@ -105,7 +105,7 @@ def update_volume(item, db: Session = Depends(get_db)):
 
 
 @router.post('/updateAllocation')
-def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)):
+def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)):
     """Main function when index value is changed."""
     today_date = date.today()
     res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
@@ -130,7 +130,7 @@ def updateAllocation(payload: schemas.AllocationPayload, db: Session = Depends(g
 
 
 @router.post('/createNewAllocation/{year}')
-def createAllocation(year: int, db: Session = Depends(get_db)):
+def create_allocation(year: int, db: Session = Depends(get_db)):
     """Create next year allocation table with index as zero."""
     records_count = 0
     category_table = db.query(models.category.category_name, models.category.country).all()

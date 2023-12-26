@@ -8,6 +8,18 @@ import models
 router = APIRouter()
 
 
+@router.get('/')
+def get_extension(db: Session = Depends(get_db)):
+    """Get the extension value."""
+    filtered_ext = db.query(models.ExtensionOwnershipMapping) \
+        .filter(models.ExtensionOwnershipMapping.status == "ACTIVE").all()
+    if not filtered_ext:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No mapping found based on the specified conditions")
+    return {"status": "success", "extensionMapping": filtered_ext}
+
+
 @router.get('/year/{year}')
 def filtered_extension(year: int, db: Session = Depends(get_db)):
     """Get the extension value based on the input year."""
