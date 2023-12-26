@@ -62,11 +62,13 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
         max_period_week = max(item.period * 100 + item.week for item in update_extension)
         for item in update_extension:
             if item.period < 0:
-                record_to_delete = db.query(models.ExtensionOwnershipMapping) \
-                    .filter(models.ExtensionOwnershipMapping.growing_area_id == item.growing_area_id,
-                            models.ExtensionOwnershipMapping.crop_year == item.crop_year).all()
-                db.delete(record_to_delete)
-                db.commit()
+                (db.query(models.ExtensionOwnershipMapping)
+                 .filter(
+                    models.ExtensionOwnershipMapping.growing_area_id == item.growing_area_id,
+                    models.ExtensionOwnershipMapping.crop_year == item.crop_year)
+                 .update({models.ExtensionOwnershipMapping.status: "INACTIVE",
+                          models.ExtensionOwnershipMapping.total_value: 0},
+                         synchronize_session='fetch'))
             else:
                 print("--------positive input--------")
                 record_to_check = db.query(models.ExtensionOwnershipMapping) \
