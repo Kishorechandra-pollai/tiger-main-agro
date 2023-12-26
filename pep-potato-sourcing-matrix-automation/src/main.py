@@ -21,7 +21,7 @@ import pcusage
 import plant_site_growing_area_mapping
 import vendor_site_code
 # import pagination
-# import potatorates
+import potatorates
 # import solidrates
 # import offcontractinfo
 # import generaladministrative
@@ -33,6 +33,7 @@ import period_week_calc
 # import summary_price_variance
 # import solid_task_master
 # import inflation_deflation
+import dashboard
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -63,11 +64,12 @@ app.include_router(plant_mtrx.router, tags=['plant_mtrx'], prefix='/api/plant_mt
 app.include_router(plant_site_growing_area_mapping.router, tags=['plant_site_growing_area_mapping'],
                    prefix='/api/plant_site_growing_area_mapping')
 app.include_router(vendor_site_code.router,tags=['vendor_site_code'],prefix='/api/vendor_site_code')
+app.include_router(dashboard.router, tags=['dashboard'], prefix='/api/dashboard')
+app.include_router(potatorates.router,tags=['potato-rates'], prefix='/api/potato_rates')
 
 # app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
 # app.include_router(erp_raw_data_us.router, tags=['erp_raw_data_us'], prefix='/api/erp_raw_data_us')
 # app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
-# app.include_router(potatorates.router,tags=['potato-rates'], prefix='/api/potato_rates')
 # app.include_router(solidrates.router,tags=['solid-rates'], prefix='/api/solid_rates')
 # app.include_router(pagination.router,tags=['pagination'], prefix='/api/pagination')
 # app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
