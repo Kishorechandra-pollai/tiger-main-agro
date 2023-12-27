@@ -85,48 +85,14 @@ def update_potato_rates_records(payload: potatoRateMappingPayload, db: Session =
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get('/potato_rate_period')
-def potato_rate_period(db: Session = Depends(get_db)):
-    """Function to fetch all records from potato_rate_table for period week view"""
-    try:
-        records = db.query(potato_rate_table_period).all()
-        result = [
-            {
-                "growing_area_id": row.growing_area_id,
-                "growing_area_name": row.growing_area_name,
-                "period": row.UNL_DATE_PD,
-                "actual": row.wgt_avg_potato_price,
-                "year": row.UNLOAD_YEAR,
-                "week": 0,
-                "period_with_P": f'P{row.UNL_DATE_PD}'
-            }
-            for row in records
-        ]
-        return {"potato_rate_period": result}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-
-
 @router.get('/potato_rate_period_year/{year}')
 def potato_rate_period_year(year: int, db: Session = Depends(get_db)):
     """Function to fetch all records from potato_rate table for a particular year """
     try:
         records = db.query(potato_rate_table_period)\
-            .filter(potato_rate_table_period.columns.UNLOAD_YEAR == year)\
+            .filter(potato_rate_table_period.columns.unload_year == year)\
             .all()
-        result = [
-            {
-                "growing_area_id": row.growing_area_id,
-                "growing_area_name": row.growing_area_name,
-                "period": row.UNL_DATE_PD,
-                "actual": row.wgt_avg_potato_price,
-                "year": row.UNLOAD_YEAR,
-                "week": 0,
-                "period_with_P": f'P{row.UNL_DATE_PD}'
-            }
-            for row in records
-        ]
-        return {"potato_rate_period_year": result}
+        return {"potato_rate_period_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -137,37 +103,13 @@ def potato_rate_period_year_growing_area_id(year: int,
     """Function to fetch all records from potato_rate table
     for a particular year and growing area id"""
     try:
-        records = db.query(potato_rate_table_period).filter(
+        records = db.query(potato_rate_table_period)\
+            .filter(
             and_(
                 potato_rate_table_period.columns.UNLOAD_YEAR == year,
                 potato_rate_table_period.columns.growing_area_id == growing_area_id
-            )
-        ).all()
-        period_dict = {f'P{period}': 0 for period in range(1, 14)}
-        for row in records:
-            period_dict[f'P{row.UNL_DATE_PD}'] = row.wgt_avg_potato_price
-        result = [
-            {
-                "growing_area_id": growing_area_id,
-                "growing_area_name": row.growing_area_name,
-                "period": period,
-                "actual": actual,
-                "year": year,
-                "week": 0,
-            }
-            for period, actual in period_dict.items()
-        ]
-        return {"potato_rate_period_year": result}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-
-
-@router.get('/potato_rate_period_week')
-def potato_rate_period_week(db: Session = Depends(get_db)):
-    """Function to fetch all records from potato_rate_table for period week view"""
-    try:
-        records = db.query(potato_rate_table_weekly).all()
-        return {"potato_rate_period_week": records}
+            )).all()
+        return {"potato_rate_period_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
