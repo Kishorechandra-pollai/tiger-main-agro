@@ -1,12 +1,7 @@
 import urllib
-import sqlalchemy
 from sqlalchemy import create_engine
-import pyodbc
-
 from sqlalchemy.orm import sessionmaker
-from config import settings, Settings
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.engine import URL
 import os
 
 
@@ -17,24 +12,21 @@ def get_secret(secret_name):
     except IOError:
         return os.environ[secret_name]
 
-username = get_secret("Username") # Replace with the actual secret name in key vault
-pwd = get_secret("Password") 
 
-driver = settings.MSSQl_DRIVER
-host = settings.MSSQL_HOSTNAME
+username = get_secret("Username")  # Replace with the actual secret name in key vault
+pwd = get_secret("Password")
+
+driver = "{ODBC Driver 18 for SQL Server}"
+host = "cgfpsmadevsql.database.windows.net,1433"
 # username = settings.MSSQL_USER
 # pwd = settings.MSSQL_PASSWORD
-db = settings.MSSQL_DB
-print("driver-name=" + driver)
+db = "cgfpsmadevsqlDB"
 params = urllib.parse.quote_plus("DRIVER=" + driver +
                                  ";SERVER=" + host +
                                  ";DATABASE=" + db +
                                  ";UID=" + username +
                                  ";PWD=" + pwd)
 
-
-
-# params = "DRIVER=" + driver + ";Server=tcp:" + host + ";Database=" + db + ";Uid=" + username + ";Pwd=" + pwd + ";Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30" + ";Authentication=ActiveDirectoryPassword"
 print("---- loading ----")
 
 engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
@@ -42,6 +34,7 @@ engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()

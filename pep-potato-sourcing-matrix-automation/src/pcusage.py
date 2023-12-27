@@ -208,7 +208,7 @@ def getUsage_periodWise(region_id: int, db: Session = Depends(get_db)):
 
 
 @router.post('/createNextYear/{year}')
-def createNewPcUsage(year: int, db: Session = Depends(get_db)):
+def create_new_pcusage(year: int, db: Session = Depends(get_db)):
     try:
         previous_year = year - 1
 
@@ -260,6 +260,7 @@ def createNewPcUsage(year: int, db: Session = Depends(get_db)):
         return {"status": "success", "message": "New forecast records are generated"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post('/temp_insert')
 def temp_insert(db: Session = Depends(get_db)):
