@@ -25,15 +25,11 @@ def get_potato_rates(db: Session = Depends(get_db)):
 def getby_growing_areaid(growing_area_id: int, year: int, db: Session = Depends(get_db)):
     """Function to get potato_rate_id for a growing_area_id"""
     try:
-        record = db.query(potato_rates).filter(potato_rates.growing_area_id == growing_area_id,
-                                               potato_rates.year == year).all()
-        result = [
-            {
-                "potato_rate_id": row.potato_rate_id
-            }
-            for row in record
-        ]
-        return {"getbyGrowingAreaId": result}
+        record = db.query(potato_rates)\
+            .filter(potato_rates.growing_area_id == growing_area_id,
+                    potato_rates.year == year)\
+            .all()
+        return {"getbyGrowingAreaId": record}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -41,10 +37,10 @@ def getby_growing_areaid(growing_area_id: int, year: int, db: Session = Depends(
 @router.get('/potato_rate_mapping_by_year/{year}')
 def get_potato_rate_mapping_data(year: str, db: Session = Depends(get_db)):
     """Function to get all records from potato_rate_mapping."""
-    query = db.query(potato_rate_mapping).all()
-    query = db.query(potato_rate_mapping).join(potato_rates,
-                                               potato_rates.potato_rate_id == potato_rate_mapping
-                                               .potato_rate_id).filter(potato_rates.year == year).all()
+    query = db.query(potato_rate_mapping)\
+        .join(potato_rates,
+              potato_rates.potato_rate_id == potato_rate_mapping.potato_rate_id)\
+        .filter(potato_rates.year == year).all()
     if not query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="No potato_rate_mapping  found")
@@ -115,8 +111,9 @@ def potato_rate_period(db: Session = Depends(get_db)):
 def potato_rate_period_year(year: int, db: Session = Depends(get_db)):
     """Function to fetch all records from potato_rate table for a particular year """
     try:
-        records = db.query(potato_rate_table_period
-                           ).filter(potato_rate_table_period.columns.UNLOAD_YEAR == year).all()
+        records = db.query(potato_rate_table_period)\
+            .filter(potato_rate_table_period.columns.UNLOAD_YEAR == year)\
+            .all()
         result = [
             {
                 "growing_area_id": row.growing_area_id,
@@ -170,20 +167,7 @@ def potato_rate_period_week(db: Session = Depends(get_db)):
     """Function to fetch all records from potato_rate_table for period week view"""
     try:
         records = db.query(potato_rate_table_weekly).all()
-        result = [
-            {
-                "growing_area_id": row.growing_area_id,
-                "growing_area_name": row.growing_area_name,
-                "period": row.period,
-                "fcst": row.rate,
-                "actual": row.actual_rate,
-                "year": row.p_year,
-                "week": row.week,
-                "period_with_P": f'P{row.period}W{row.week}'
-            }
-            for row in records
-        ]
-        return {"potato_rate_period_week": result}
+        return {"potato_rate_period_week": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -192,21 +176,9 @@ def potato_rate_period_week(db: Session = Depends(get_db)):
 def potato_rate_period_week_year(year: int, db: Session = Depends(get_db)):
     """Function to fetch all records from potato_rate table for a particular year """
     try:
-        records = db.query(potato_rate_table_weekly).filter(potato_rate_table_weekly
-                                                            .columns.p_year == year).all()
-        result = [
-            {
-                "growing_area_id": row.growing_area_id,
-                "growing_area_name": row.growing_area_name,
-                "period": row.period,
-                "fcst": row.rate,
-                "actual": row.actual_rate,
-                "year": row.p_year,
-                "week": row.week,
-                "period_with_P": f'P{row.period}W{row.week}'
-            }
-            for row in records
-        ]
-        return {"potato_rate_period_week_year": result}
+        records = db.query(potato_rate_table_weekly)\
+            .filter(potato_rate_table_weekly.columns.p_year == year)\
+            .all()
+        return {"potato_rate_period_week_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
