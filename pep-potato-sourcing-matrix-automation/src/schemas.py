@@ -484,6 +484,7 @@ class ExtensionMappingSchema(BaseModel):
     crop_type: str | None = None
     crop_year: str | None = None
     total_value: float | None = None
+    split: str
     status: str | None = None
 
     class Config:
@@ -621,7 +622,7 @@ class SolidsTaskMappingSchema(BaseModel):
 
 class SolidsTaskMappingSchemaPayload(BaseModel):
     data: List[SolidsTaskMappingSchema]
-    data: List[SolidsTaskMappingSchema]
+
 
 
 class CountryDivisionNameName(BaseModel):
