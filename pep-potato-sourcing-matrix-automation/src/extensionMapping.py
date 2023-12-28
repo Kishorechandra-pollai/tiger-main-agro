@@ -67,19 +67,23 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                     models.ExtensionOwnershipMapping.growing_area_id == item.growing_area_id,
                     models.ExtensionOwnershipMapping.crop_year == item.crop_year)
                  .update({models.ExtensionOwnershipMapping.status: "INACTIVE",
-                          models.ExtensionOwnershipMapping.total_value: 0},
+                          models.ExtensionOwnershipMapping.total_value: 0,
+                          models.ExtensionOwnershipMapping.split: "false"},
                          synchronize_session='fetch'))
                 db.commit()
             else:
                 print("--------positive input--------")
                 record_to_check = db.query(models.ExtensionOwnershipMapping) \
-                    .filter(models.ExtensionOwnershipMapping.extension_id == item.extension_id).first()
+                    .filter(models.ExtensionOwnershipMapping.extension_id == item.extension_id)\
+                    .first()
                 print(record_to_check)
                 if record_to_check is not None:
                     db.query(models.ExtensionOwnershipMapping).filter(
-                        models.ExtensionOwnershipMapping.extension_id == item.extension_id).update(
-                        {models.ExtensionOwnershipMapping.total_value: item.total_value,
-                         models.ExtensionOwnershipMapping.status: 'ACTIVE'}, synchronize_session=False)
+                        models.ExtensionOwnershipMapping.extension_id == item.extension_id)\
+                        .update({models.ExtensionOwnershipMapping.total_value: item.total_value,
+                                 models.ExtensionOwnershipMapping.status: 'ACTIVE',
+                                 models.ExtensionOwnershipMapping.split: item.split},
+                                synchronize_session=False)
                 else:
                     print("--------new input--------")
                     payload = {
@@ -90,8 +94,8 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                         "period": item.period,
                         "week": item.week,
                         "total_value": item.total_value,
+                        "split": item.split,
                         "status": "ACTIVE"}
-                    print(payload)
                     new_records = models.ExtensionOwnershipMapping(**payload)
                     db.add(new_records)
                 db.commit()
@@ -103,7 +107,8 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                     models.ExtensionOwnershipMapping.period * 100 +
                     models.ExtensionOwnershipMapping.week > max_period_week) \
             .update({models.ExtensionOwnershipMapping.total_value: 0,
-                     models.ExtensionOwnershipMapping.status: "INACTIVE"},
+                     models.ExtensionOwnershipMapping.status: "INACTIVE",
+                     models.ExtensionOwnershipMapping.split: "false"},
                     synchronize_session='fetch')
         db.commit()
         update_final_extension_value(input_growing_Area_id, input_crop_year, db)

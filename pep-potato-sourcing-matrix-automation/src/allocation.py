@@ -15,7 +15,7 @@ def trim(string):
     return string.replace(" ", "")
 
 
-@router.get('/filter/{year}')
+@router.get('/year/{year}')
 def get_filtered_allocation(year: int, db: Session = Depends(get_db)):
     """get api for allocation index based on input year."""
     try:
