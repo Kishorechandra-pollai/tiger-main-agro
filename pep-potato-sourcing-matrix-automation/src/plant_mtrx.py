@@ -44,7 +44,7 @@ def get_plantMtrx(name: str, year: int, db: Session = Depends(get_db)):
     """get plantMtrx data based on company_name/country input."""
     filter_dict = {
         'US': 'US',
-        'US-Core': 'Frito',
+        'US-Core': 'FLUS',
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }

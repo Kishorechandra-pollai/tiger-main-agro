@@ -16,7 +16,7 @@ def trim(string):
 def get_FilteredUsage(name: str, db: Session = Depends(get_db)):
     filter_dict = {
         'US': 'US',
-        'US-Core': 'Frito',
+        'US-Core': 'FLUS',
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }
@@ -96,7 +96,7 @@ def get_FilteredUsage(region_id: int, db: Session = Depends(get_db)):
 def getUsage_company_periodWise(name: str, db: Session = Depends(get_db)):
     filter_dict = {
         'US': 'US',
-        'US-Core': 'Frito',
+        'US-Core': 'FLUS',
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }
