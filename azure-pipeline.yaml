@@ -29,5 +29,5 @@ stages:
       isPython: true
       isUI: false
       isfortifyScanRequired: true
-      isSonarScanRequired: false
+      isSonarScanRequired: true
       isSnykScanRequired: true
