@@ -21,24 +21,27 @@ def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
 
         ownership_metric = db.query(models.View_OwnershipMetrics_country) \
             .filter(models.View_OwnershipMetrics_country.columns.country == region,
-                    or_(models.View_OwnershipMetrics_region.columns.year == year - 1,
+                    or_(models.View_OwnershipMetrics_region.columns.year == year -1,
                         models.View_OwnershipMetrics_region.columns.year == year))\
-            .all()
+            .distinct().all()
         if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Ownership data not found for : {region}")
     else:
         data = db.query(models.View_Ownership) \
             .join(models.growing_area,
-                  models.View_Ownership.columns.growing_area_id == models.growing_area.growing_area_id) \
+                  models.View_Ownership.columns.growing_area_id ==
+                  models.growing_area.growing_area_id) \
             .join(models.region, models.growing_area.region == models.region.region_id) \
-            .filter(models.region.region_name == region, or_(models.View_Ownership.columns.year == year - 1,
-                                                             models.View_Ownership.columns.year == year)).all()
+            .filter(models.region.region_name == region,
+                    or_(models.View_Ownership.columns.year == year - 1,
+                        models.View_Ownership.columns.year == year)).all()
 
         ownership_metric = db.query(models.View_OwnershipMetrics_region) \
             .filter(models.View_OwnershipMetrics_region.columns.region_name == region,
-                    or_(models.View_Ownership.columns.year == year - 1,
-                        models.View_Ownership.columns.year == year)).all()
+                    or_(models.View_OwnershipMetrics_region.columns.year == year - 1,
+                        models.View_OwnershipMetrics_region.columns.year == year))\
+            .distinct().all()
         if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Ownership data not found for : {region}")
@@ -48,17 +51,18 @@ def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
 
 @router.get('/year/{year}')
 def get_ownership(year: int, db: Session = Depends(get_db)):
-    ownership = db.query(models.View_Ownership).filter(or_(models.View_Ownership.columns.year == year - 1,
-                                                           models.View_Ownership.columns.year == year)).all()
-
-    ownership_metric_all = db.query(models.View_OwnershipMetrics_all)\
+    ownership = db.query(models.View_Ownership)\
         .filter(or_(models.View_Ownership.columns.year == year - 1,
                     models.View_Ownership.columns.year == year)).all()
-
+    ownership_metric_all = db.query(models.View_OwnershipMetrics_all) \
+        .filter(or_(models.View_OwnershipMetrics_all.columns.year == year - 1,
+                    models.View_OwnershipMetrics_all.columns.year == year))\
+        .distinct().all()
     if not ownership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No ownership_id found")
-    return {"status": "success", "ownership": ownership, "ownership_metric_all": ownership_metric_all}
+    return {"status": "success", "ownership": ownership,
+            "ownership_metric_region": ownership_metric_all}
 
 
 def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
@@ -136,7 +140,8 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
             print("----- mapping data -------")
             print(mapping_data)
             if len(mapping_data) == 0:
-                db.query(models.Ownership).filter(models.Ownership.ownership_id == item.ownership_id) \
+                db.query(models.Ownership)\
+                    .filter(models.Ownership.ownership_id == item.ownership_id) \
                     .update({models.Ownership.contract: 0,
                              models.Ownership.shrinkage: 0,
                              models.Ownership.to_ship: 0}, synchronize_session='fetch')
@@ -150,7 +155,7 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                     models.OwnershipGrowerGrowing.ownership_id) \
                     .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
                             models.OwnershipGrowerGrowing.status == 'ACTIVE',
-                            models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id) \
+                            models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id)\
                     .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
 
                 sums_dict = {}
@@ -180,7 +185,8 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                     ownership_id = ownership_id_dict.get(growing_area_id)
                     if ownership_id is not None:
                         data_list.append(
-                            {"growing_area_id": growing_area_id, "contracted": contracted, "ownership_id": ownership_id})
+                            {"growing_area_id": growing_area_id, "contracted": contracted,
+                             "ownership_id": ownership_id})
 
                 combined_data = [
                     (var1[0], var1[1], var1[2], var2['contracted'], var2['ownership_id'])
@@ -242,6 +248,7 @@ def Create_new_Ownership(year: int, db: Session = Depends(get_db)):
         return {"Status": "success", "records_inserted": "Next year data are added"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post("/update_contract_erp/{crop_year}")
 def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db)):
