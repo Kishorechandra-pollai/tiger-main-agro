@@ -34,7 +34,8 @@ def get_all_plants(category_name: str, db: Session = Depends(get_db)):
         .filter(models.category.category_name == category_name) \
         .first()
     data = db.query(models.Plant.plant_id) \
-        .filter(models.Plant.crop_category_id == crop_category_id[0]) \
+        .filter(models.Plant.crop_category_id == crop_category_id[0],
+                models.Plant.status == 'ACTIVE') \
         .all()
     result_list = [t[0] for t in data]
     return result_list
@@ -129,18 +130,23 @@ def update_forecast_volume(item, db: Session = Depends(get_db)):
         else:
             no_of_week = 5
         while week_value < no_of_week:
-            lastYear_actual_list.setdefault(week_value, 0)
-            if week_value == 5:
-                new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
-            else:
-                new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
-            db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
-                                            models.pcusage.year == current_year,
-                                            models.pcusage.period == period_value,
-                                            models.pcusage.week_no == week_value) \
-                .update({models.pcusage.forecasted_value: new_forecast_value},
-                        synchronize_session=False)
-            db.commit()
+            prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
+                .filter(models.plantMtrx_template.plant_id == item[0],
+                        models.plantMtrx_template.period == period_value,
+                        models.plantMtrx_template.week_no == week_value).first()
+            if prefered_growingarea is not None:
+                lastYear_actual_list.setdefault(week_value, 0)
+                if week_value == 5:
+                    new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
+                else:
+                    new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
+                db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
+                                                models.pcusage.year == current_year,
+                                                models.pcusage.period == period_value,
+                                                models.pcusage.week_no == week_value) \
+                    .update({models.pcusage.forecasted_value: new_forecast_value},
+                            synchronize_session=False)
+                db.commit()
             week_value += 1
 
 
