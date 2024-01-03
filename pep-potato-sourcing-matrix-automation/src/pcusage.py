@@ -258,10 +258,9 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):
                                    "forecasted_value": forecasted_value, "country": trim(country[0]), "week_no": week_value}
                         new_forecast_record = models.pcusage(**payload)
                         db.add(new_forecast_record)
-                        week_value += 1
+                    week_value += 1
+                    db.commit()
                 period_value += 1
-            db.commit()
-
         return {"status": "success", "message": "New forecast records are generated"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
