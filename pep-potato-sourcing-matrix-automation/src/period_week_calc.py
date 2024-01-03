@@ -1,12 +1,12 @@
 """Period and week calculation API"""
-from datetime import date, datetime, timedelta
-from fastapi import APIRouter, HTTPException
+from datetime import date, timedelta
+from fastapi import APIRouter
 
 router = APIRouter()
 
 
 def calculate_period_and_week(year, specified_date: date, start_day=6, periods=13):
-    """Function to return the period, period*week, and 
+    """Function to return the period, period*week, and
     number of weeks for a specific date of a particular year"""
 
     start_date = date(year, 1, 1)
@@ -54,7 +54,6 @@ def calculate_period_and_week(year, specified_date: date, start_day=6, periods=1
                 'End_Date': first_week_end_date,
             }
     return {'Period': 1, 'week': 1, 'year': specified_date.year+1}
-    raise HTTPException(status_code=404, detail="No period found for the specified date")
 
 
 def calculate_period_dates(year, start_day=6, periods=13):
