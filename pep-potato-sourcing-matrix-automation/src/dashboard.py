@@ -69,7 +69,6 @@ def dashboard_pc_volume_period_year(year:int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-
 @router.get('/dashboard_pc_plan_volume_usage')
 def dashboard_pc_plan_volume_usage(db: Session = Depends(get_db)):
     """Function to fetch all records from plan_volume_usage table"""
@@ -266,6 +265,7 @@ def pc_volume_period_country_combine(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+
 @router.get('/pc_volume_period_country_combine"/{year}')
 def pc_volume_period_country_combine_year(year:int, db: Session = Depends(get_db)):
     """Function to fetch all records from
@@ -292,6 +292,7 @@ def pc_volume_period_country_combine_year(year:int, db: Session = Depends(get_db
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+
 @router.get('/pc_volume_period_country_yearly')
 def pc_volume_period_country_yearly(db: Session = Depends(get_db)):
     """Function to fetch all records from dashboard_pc_volume_period_country_yearly view"""
@@ -310,6 +311,7 @@ def pc_volume_period_country_yearly(db: Session = Depends(get_db)):
         return {"dashboard_pc_volume_period_country_yearly": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
 
 @router.get('/pc_volume_period_country_yearly"/{year}')
 def pc_volume_period_country_year(year:int, db: Session = Depends(get_db)):

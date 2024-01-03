@@ -7,7 +7,7 @@ trigger:
 
   tags:
     include:
-      - feature/s2u-dev
+      - feature/agro-dev
       - dev
       - qa
 
@@ -16,7 +16,7 @@ resources:
     - repository: templates
       type: git
       name: EIAP_DevOps/pep-eiap-potato-sourcing-matrix-pipeline-templates
-      ref: master
+      ref: psma
 
 variables:
   - template: variables.yaml@templates
