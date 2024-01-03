@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from sqlalchemy import func
 from fastapi import Depends, HTTPException, status, APIRouter
 import schemas
@@ -12,6 +13,21 @@ router = APIRouter()
 def filtered_market(db: Session = Depends(get_db)):
     filtered_Market = db.query(models.MarketFlexMapping).filter(
         models.MarketFlexMapping.status == "ACTIVE").all()
+    if not filtered_Market:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No mapping found based on the specified conditions")
+    return {"status": "success", "MarketFlexMapping": filtered_Market}
+
+
+@router.get('/year/{year}')
+def filtered_market_year(year: int, db: Session = Depends(get_db)):
+    filtered_Market = db.query(models.MarketFlexMapping)\
+        .join(models.Ownership,
+              models.Ownership.ownership_id == models.MarketFlexMapping.ownership_id)\
+        .filter(models.MarketFlexMapping.status == "ACTIVE",
+                or_(models.Ownership.year == year, models.Ownership.year == year - 1))\
+        .all()
     if not filtered_Market:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
