@@ -369,64 +369,120 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+def update_first_period_data(current_period, current_week, current_year,
+                             new_record_count, db: Session = Depends(get_db)):
+    """Load actual values in Plant Matrix for first period."""
+    records_to_delete = db.query(models.plantMtrx) \
+        .filter(models.plantMtrx.period == current_period,
+                models.plantMtrx.year == current_year).all()
+    for record in records_to_delete:
+        db.delete(record)
+    db.commit()
+    if current_week == -1:
+        if period_week_calc.calculate_week_num(current_year, current_period):
+            total_week = 5
+        else:
+            total_week = 4
+    else:
+        total_week = current_week
+    week = 1
+    while week <= total_week:
+        actual_data_current_week = db.query(models.View_plant_matrix_actual) \
+            .filter(models.View_plant_matrix_actual.columns.period_num == current_period,
+                    models.View_plant_matrix_actual.columns.week_num == week,
+                    models.View_plant_matrix_actual.columns.p_year == current_year) \
+            .all()
+        if not actual_data_current_week:
+            continue
+        for item in actual_data_current_week:
+            new_record_count += 1
+            crop_type, crop_year = func_getcrop_type(item.period_num,
+                                                     item.week_num,
+                                                     current_year,
+                                                     item.growing_area_id, db)
+            PlantMtrx_payload = {"plant_matrix_id": item.row_id,
+                                 "region_id": item.region_id,
+                                 "plant_id": item.Plant_Id,
+                                 "growing_area_id": item.growing_area_id,
+                                 "period": item.period_num,
+                                 "week": item.week_num, "year": item.p_year,
+                                 "crop_type": crop_type, "crop_year": crop_year,
+                                 "value": item.sumof_rec_potato, "status": 'active'}
+            plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
+            db.add(plantMtrx_record)
+            db.commit()
+            week += 1
+    return new_record_count
+
+
 @router.post('/load_actual_value')
 def load_actual_value(db: Session = Depends(get_db)):
     """Load actual values in Plant Matrix."""
     try:
+        new_record_count = 0
         today_date = date.today()
         res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
         current_period = int(res['Period'])
         current_week = int(res['week'])
-        lower_limit = (current_period-1)*5+1       #delete all actual value of previous period.
-        max_limit = current_period*5+current_week  #current_week value.
-        print("lower Limit, max_limit")
-        print(lower_limit, max_limit)
-        """delete of plant_mtrx_data."""
-        records_to_delete = db.query(models.plantMtrx)\
-            .filter((models.plantMtrx.period*5)+models.plantMtrx.week >= lower_limit,
-                    (models.plantMtrx.period*5)+models.plantMtrx.week <= max_limit,
-                    models.plantMtrx.year == today_date.year).all()
-        for record in records_to_delete:
-            db.delete(record)
-        db.commit()
-        """Insert new actual volumes in Plant Matrix."""
-        new_record_count = 0
-        period_value = current_period-1
-        while period_value <= current_period:
-            week_value = 1
-            while period_value*5+week_value <= current_period*5+current_week:
-                actual_data_current_week = db.query(models.View_plant_matrix_actual) \
-                    .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
-                            models.View_plant_matrix_actual.columns.week_num == week_value,
-                            models.View_plant_matrix_actual.columns.p_year == today_date.year)\
-                    .all()
-                if not actual_data_current_week:
-                    continue
-                for item in actual_data_current_week:
-                    new_record_count += 1
-                    crop_type, crop_year = func_getcrop_type(current_period,
-                                                             current_week,
-                                                             today_date.year,
-                                                             item.growing_area_id, db)
-                    PlantMtrx_payload = {"plant_matrix_id": item.row_id,
-                                         "region_id": item.region_id,
-                                         "plant_id": item.Plant_Id,
-                                         "growing_area_id": item.growing_area_id,
-                                         "period": item.period_num,
-                                         "week": item.week_num,"year": item.p_year,
-                                         "crop_type": crop_type,"crop_year": crop_year,
-                                         "value": item.sumof_rec_potato, "status": 'active'}
-                    plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
-                    db.add(plantMtrx_record)
-                    db.commit()
-                    if 6 < item.period_num < 9:
-                        update_extension(item.growing_area_id, int(item.p_year),
-                                         int(item.period_num), int(item.week_num), db)
-                    elif 10 < item.period_num < 13:
-                        update_extension(item.growing_area_id, int(item.p_year),
-                                         int(item.period_num), int(item.week_num), db)
-                week_value += 1
-            period_value += 1
+        current_year = int(res['year'])
+        if current_period == 1:
+            new_record_count = update_first_period_data(13, -1,
+                                                        current_year-1,
+                                                        new_record_count,
+                                                        db)
+            new_record_count = update_first_period_data(1, current_week,
+                                                        current_year, new_record_count,
+                                                        db)
+        else:
+            lower_limit = (current_period-1)*5+1       #delete all actual value of previous period.
+            max_limit = current_period*5+current_week  #current_week value.
+            print("lower Limit, max_limit")
+            print(lower_limit, max_limit)
+            """delete of plant_mtrx_data."""
+            records_to_delete = db.query(models.plantMtrx)\
+                .filter((models.plantMtrx.period*5)+models.plantMtrx.week >= lower_limit,
+                        (models.plantMtrx.period*5)+models.plantMtrx.week <= max_limit,
+                        models.plantMtrx.year == today_date.year).all()
+            for record in records_to_delete:
+                db.delete(record)
+            db.commit()
+            """Insert new actual volumes in Plant Matrix."""
+            period_value = current_period-1
+            while period_value <= current_period:
+                week_value = 1
+                while period_value*5+week_value <= current_period*5+current_week:
+                    actual_data_current_week = db.query(models.View_plant_matrix_actual) \
+                        .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
+                                models.View_plant_matrix_actual.columns.week_num == week_value,
+                                models.View_plant_matrix_actual.columns.p_year == today_date.year)\
+                        .all()
+                    if not actual_data_current_week:
+                        continue
+                    for item in actual_data_current_week:
+                        new_record_count += 1
+                        crop_type, crop_year = func_getcrop_type(item.period_num,
+                                                                 item.week_num,
+                                                                 today_date.year,
+                                                                 item.growing_area_id, db)
+                        PlantMtrx_payload = {"plant_matrix_id": item.row_id,
+                                             "region_id": item.region_id,
+                                             "plant_id": item.Plant_Id,
+                                             "growing_area_id": item.growing_area_id,
+                                             "period": item.period_num,
+                                             "week": item.week_num,"year": item.p_year,
+                                             "crop_type": crop_type,"crop_year": crop_year,
+                                             "value": item.sumof_rec_potato, "status": 'active'}
+                        plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
+                        db.add(plantMtrx_record)
+                        db.commit()
+                        if 6 < item.period_num < 9:
+                            update_extension(item.growing_area_id, int(item.p_year),
+                                             int(item.period_num), int(item.week_num), db)
+                        elif 10 < item.period_num < 13:
+                            update_extension(item.growing_area_id, int(item.p_year),
+                                             int(item.period_num), int(item.week_num), db)
+                    week_value += 1
+                period_value += 1
         return {"status": "success", "record_updated": new_record_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

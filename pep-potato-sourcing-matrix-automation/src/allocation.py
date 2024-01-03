@@ -104,6 +104,44 @@ def update_volume(item, db: Session = Depends(get_db)):
             week_value += 1
 
 
+def update_forecast_volume(item, db: Session = Depends(get_db)):
+    """Function updates forecast volume only."""
+    new_index = int(item.value)
+    category_value = item.category_name
+    period_value = int(item.period)
+    current_year = int(item.year)
+    plant_id_list = get_all_plants(category_value, db)
+    for plant_id in plant_id_list:
+        lastYear_actual_list = {}
+        lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
+                                    models.View_forecast_pcusage.columns.total_actual_value) \
+            .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
+                    models.View_forecast_pcusage.columns.year == current_year - 1,
+                    models.View_forecast_pcusage.columns.period == period_value).all()
+        if not lastYear_actuals:
+            continue
+        lastYear_actual_list = {key: value for key, value in lastYear_actuals}
+        week_value = 1
+        if period_week_calc.calculate_week_num(current_year, int(period_value)):
+            no_of_week = 6
+        else:
+            no_of_week = 5
+        while week_value < no_of_week:
+            lastYear_actual_list.setdefault(week_value, 0)
+            if week_value == 5:
+                new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
+            else:
+                new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
+            db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
+                                            models.pcusage.year == current_year,
+                                            models.pcusage.period == period_value,
+                                            models.pcusage.week_no == week_value) \
+                .update({models.pcusage.forecasted_value: new_forecast_value},
+                        synchronize_session=False)
+            db.commit()
+            week_value += 1
+
+
 @router.post('/updateAllocation')
 def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)):
     """Main function when index value is changed."""
@@ -124,6 +162,10 @@ def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
                 update_volume(item, db)
+            else:
+                update_only_allocation(item.allocation_id, item.value, db)
+                update_count += 1
+                update_forecast_volume(item, db)
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
