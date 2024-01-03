@@ -44,7 +44,7 @@ def update_only_allocation(allocation_id, index, db: Session = Depends(get_db)):
     """function to update index values in active_allocation table."""
     db.query(models.allocation) \
         .filter(models.allocation.allocation_id == allocation_id) \
-        .update({models.allocation.value: int(index)},
+        .update({models.allocation.value: float(index)},
                 synchronize_session='fetch')
     db.commit()
 
@@ -90,6 +90,8 @@ def update_volume(item, db: Session = Depends(get_db)):
                         models.plantMtrx.year == current_year,
                         models.plantMtrx.period == period_value,
                         models.plantMtrx.week == week_value).first()
+            if plant_matrix is None:
+                continue
             plant_mtrx.value = new_forecast_value
             db.commit()
             """Update Extension values if present."""
@@ -106,7 +108,7 @@ def update_volume(item, db: Session = Depends(get_db)):
 
 def update_forecast_volume(item, db: Session = Depends(get_db)):
     """Function updates forecast volume only."""
-    new_index = int(item.value)
+    new_index = float(item.value)
     category_value = item.category_name
     period_value = int(item.period)
     current_year = int(item.year)
@@ -181,7 +183,7 @@ def create_allocation(year: int, db: Session = Depends(get_db)):
         while i <= 13:  # No. of period
             allocation_id = category_item[0] + "#" + str(i) + "#" + str(year)
             payload = {"allocation_id": allocation_id, "category_name": category_item[0], "year": year,
-                       "country": trim(category_item[1]), "period": i, "value": 0}
+                       "country": trim(category_item[1]), "period": i, "value": 100}
             new_allocation = models.allocation(**payload)
             db.add(new_allocation)
             i += 1

@@ -468,7 +468,7 @@ class inflation_deflation_task_mappings(Base):
 # freight_cost_period_week_table = db.Table('View_freight_cost_weekly', metadata, autoload=True, autoload_with=engine)
 # rate_growing_area_table = db.Table('View_freight_plan_actual_combine', metadata, autoload=True, autoload_with=engine)
 # View_p4p_result_table = db.Table('View_p4p_result', metadata, autoload=True, autoload_with=engine)
-potato_rate_table_period = db.Table('View_potato_pricing_actual_period', metadata, autoload=True, autoload_with=engine)
+potato_rate_table_period = db.Table('View_potato_pricing_actual', metadata, autoload=True, autoload_with=engine)
 potato_rate_table_weekly = db.Table('View_potato_rates_period_week', metadata, autoload=True, autoload_with=engine)
 # solids_rate_table_period = db.Table('View_solid_rate_combine', metadata, autoload=True, autoload_with=engine)
 
