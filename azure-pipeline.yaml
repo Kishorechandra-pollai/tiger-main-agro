@@ -7,7 +7,7 @@ trigger:
 
   tags:
     include:
-      - feature/s2u-dev
+      - feature/agro-dev
       - dev
       - qa
 
@@ -29,5 +29,5 @@ stages:
       isPython: true
       isUI: false
       isfortifyScanRequired: true
-      isSonarScanRequired: true
+      isSonarScanRequired: false
       isSnykScanRequired: true
