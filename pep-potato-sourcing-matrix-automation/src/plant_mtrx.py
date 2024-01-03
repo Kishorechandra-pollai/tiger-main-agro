@@ -316,8 +316,7 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):
         record_count = 0
         if check_data is None:
             plant_list = db.query(models.Plant.plant_id, models.Plant.region_id) \
-                .filter(models.Plant.status == "ACTIVE",
-                        models.Plant.plant_id != 45, models.Plant.plant_id != 28, models.Plant.plant_id != 37).all()
+                .filter(models.Plant.status == "ACTIVE").all()
             for plant in plant_list:
                 plant_id = plant[0]
                 region = plant[1]
@@ -358,7 +357,6 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):
                             newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
                             db.add(newplantMtrx_record)
                             record_count += 1
-                            print(record_count)
                             week_value += 1
                         else:
                             week_value += 1

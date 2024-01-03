@@ -212,7 +212,8 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):
     try:
         previous_year = year - 1
 
-        plants = db.query(models.Plant.plant_id, models.Plant.region_id, models.Plant.crop_category_id) \
+        plants = db.query(models.Plant.plant_id, models.Plant.region_id,
+                          models.Plant.crop_category_id) \
             .filter(models.Plant.status == "ACTIVE").all()
         # Get all the Plants
         for item in plants:
@@ -242,22 +243,17 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):
                 else:
                     no_of_week = 5
                 while week_value < no_of_week:
-                    prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
-                        .filter(models.plantMtrx_template.plant_id == item[0],
-                                models.plantMtrx_template.period == period_value,
-                                models.plantMtrx_template.week_no == week_value).first()
-                    if prefered_growingarea is not None:
-                        previous_actual_dict.setdefault(week_value, 0)
-                        if week_value == 5:
-                            forecasted_value = (previous_actual_dict[week_value-1] * index_dict[period_value]) / 100
-                        else:
-                            forecasted_value = (previous_actual_dict[week_value] * index_dict[period_value]) / 100
-                        # Calculate the forecast value
-                        pc_usage_id = str(item[0]) + "#" + str(year) + "#" + str(period_value) + "#" + str(week_value)
-                        payload = {"pcusage_id": pc_usage_id, "year": year, "period": period_value, "plant_id": item[0],
-                                   "forecasted_value": forecasted_value, "country": trim(country[0]), "week_no": week_value}
-                        new_forecast_record = models.pcusage(**payload)
-                        db.add(new_forecast_record)
+                    previous_actual_dict.setdefault(week_value, 0)
+                    if week_value == 5:
+                        forecasted_value = (previous_actual_dict[week_value-1] * index_dict[period_value]) / 100
+                    else:
+                        forecasted_value = (previous_actual_dict[week_value] * index_dict[period_value]) / 100
+                    # Calculate the forecast value
+                    pc_usage_id = str(item[0]) + "#" + str(year) + "#" + str(period_value) + "#" + str(week_value)
+                    payload = {"pcusage_id": pc_usage_id, "year": year, "period": period_value, "plant_id": item[0],
+                                "forecasted_value": forecasted_value, "country": trim(country[0]), "week_no": week_value}
+                    new_forecast_record = models.pcusage(**payload)
+                    db.add(new_forecast_record)
                     week_value += 1
                     db.commit()
                 period_value += 1
