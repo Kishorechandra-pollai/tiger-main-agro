@@ -52,7 +52,7 @@ def update_only_allocation(allocation_id, index, db: Session = Depends(get_db)):
 
 def update_volume(item, db: Session = Depends(get_db)):
     """Function updates forecast and plantMtrx volume."""
-    new_index = int(item.value)
+    new_index = float(item.value)
     category_value = item.category_name
     period_value = int(item.period)
     current_year = int(item.year)
@@ -131,7 +131,7 @@ def update_forecast_volume(item, db: Session = Depends(get_db)):
             no_of_week = 5
         while week_value < no_of_week:
             prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
-                .filter(models.plantMtrx_template.plant_id == item[0],
+                .filter(models.plantMtrx_template.plant_id == plant_id,
                         models.plantMtrx_template.period == period_value,
                         models.plantMtrx_template.week_no == week_value).first()
             if prefered_growingarea is not None:

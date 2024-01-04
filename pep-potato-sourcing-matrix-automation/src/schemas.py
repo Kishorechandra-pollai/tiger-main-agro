@@ -89,7 +89,7 @@ class ActiveAllocation(BaseModel):
     year: int | None = None
     country: str | None = None
     period: int | None = None
-    value: float | None = None
+    value: str | None = None
 
     class Config:
         orm_mode = True
