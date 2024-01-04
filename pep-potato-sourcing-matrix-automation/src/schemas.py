@@ -258,63 +258,6 @@ class plantMtrx_template(BaseModel):
     percentage_value: float
 
 
-class ErpRawDataUsSchema(BaseModel):
-    BPA_Number: int | None = None
-    AGREED_QUANTITY: int | None = None
-    UOM: str | None = None
-    REMAINING_QTY: int | None = None
-    RECEIVED_QTY: int | None = None
-    OUTSTANDING_ORD: float | None = None
-    QUANTITY_REJECTED: int | None = None
-    CROP_TYPE: str | None = None
-    Release_No: int | None = None
-    Line_No: int | None = None
-    Shipment: int | None = None
-    ITEM: int | None = None
-    UOM_CODE: str | None = None
-    Ship_To_Organization: str | None = None
-    SHIP_TO_LOCATION_CODE: str | None = None
-    UNIT_PRICE: float | None = None
-    QUANTITY: int | None = None
-    QUANTITY_RECEIVED: int | None = None
-    QUANTITY_CANCELLED: int | None = None
-    QUANTITY_REJECTED_1: int | None = None
-    QUANTITY_BILLED: int | None = None
-    VENDOR_NAME: str | None = None
-    VENDOR_SITE_CODE: str | None = None
-    BPA_BUYER: str | None = None
-    RELEASE_BUYER: str | None = None
-    AUTHORIZATION_STATUS: str | None = None
-    NEED_BY_DATE: datetime | None = None
-    RECEIPT_NUM: int | None = None
-    RECEIPT_QUANTITY: int | None = None
-    RECEIPT_DATE: datetime | None = None
-    UNLOAD_DATE: str | None = None
-    SOLID: float | None = None
-    TIER: float | None = None
-    SHIPPED_DATE: datetime | None = None
-    status: str | None = None
-    PROCESS_TIME: datetime | None = None
-    Plant_Id: int | None = None
-    growignarea_id: int | None = None
-    Region_Id: int | None = None
-    Site_Id: int | None = None
-    grower_Id: int | None = None
-    spend: float | None = None
-    BU: str | None = None
-    Unl_Date_Wk_Num: int | None = None
-    Unl_Date_PxW: str | None = None
-    Rec_Date_wk_num: int | None = None
-    Rec_Date_PxW: str | None = None
-    Rec_Date_PxW: str | None = None
-    crop_year: str | None = None
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-
-
 class VendorSiteCodeSchema(BaseModel):
     VENDOR_SITE_CODE: int | None = None
     created_by: str | None = None

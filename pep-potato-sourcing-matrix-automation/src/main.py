@@ -14,13 +14,10 @@ import plants
 import region
 import ownership
 import plantGrowingMapping
-# import erp_raw_data_us
 import OwnershipGrowerGrowing
 import pcusage
-# import erprawdata
 import plant_site_growing_area_mapping
 import vendor_site_code
-# import pagination
 import potatorates
 # import solidrates
 # import offcontractinfo
@@ -59,7 +56,6 @@ app.include_router(extensionMapping.router, tags=['extensionMapping'], prefix='/
 app.include_router(MarketFlexMapping.router, tags=['MarketFlexMapping'], prefix='/api/MarketFlexMapping')
 app.include_router(OwnershipGrowerGrowing.router, tags=['OwnershipGrowerGrowingMapping'],
                    prefix='/api/ownershipMapping')
-# app.include_router(erprawdata.router, tags=['erp-raw-data'], prefix='/api/erp-raw-data')
 app.include_router(plant_mtrx.router, tags=['plant_mtrx'], prefix='/api/plant_mtrx')
 app.include_router(plant_site_growing_area_mapping.router, tags=['plant_site_growing_area_mapping'],
                    prefix='/api/plant_site_growing_area_mapping')
@@ -68,10 +64,8 @@ app.include_router(dashboard.router, tags=['dashboard'], prefix='/api/dashboard'
 app.include_router(potatorates.router,tags=['potato-rates'], prefix='/api/potato_rates')
 
 # app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
-# app.include_router(erp_raw_data_us.router, tags=['erp_raw_data_us'], prefix='/api/erp_raw_data_us')
 # app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
 # app.include_router(solidrates.router,tags=['solid-rates'], prefix='/api/solid_rates')
-# app.include_router(pagination.router,tags=['pagination'], prefix='/api/pagination')
 # app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
 # app.include_router(generaladministrative.router, tags=['general-administrative'], prefix='/api/general_administrative')
 # app.include_router(freighttaskinfo.router, tags=['freight-task-info'], prefix='/api/freight_task_info')
