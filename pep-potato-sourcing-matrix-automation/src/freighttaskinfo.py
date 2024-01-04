@@ -46,13 +46,13 @@ async def update_freight_task_mappings(year: int, db: Session = Depends(get_db))
 
     existingTaskNames = []
     for record in all_records:
-        existingRecord = db.query(freight_task_mappings).filter(freight_task_mappings.year==year,freight_task_mappings.freight_task_id==record.freight_task_id).first();
+        existingRecord = db.query(freight_task_mappings).filter(freight_task_mappings.year==year,freight_task_mappings.freight_task_id==record.freight_task_id).first()
         if existingRecord:
             existingTaskNames.append(record.task_name)
             continue
         for period in range(1,14):
             for con in countries:
-                new_record = freight_task_mappings(freight_task_id = record.freight_task_id, period=period, year=year, value=0.0, company_name=con.division_name)
+                new_record = freight_task_mappings(freight_task_id = record.freight_task_id, period=period, year=year, value=0.001, company_name=con.task_desc)
                 db.add(new_record)
                 db.commit()
 
