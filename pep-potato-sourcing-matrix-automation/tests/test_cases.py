@@ -9,7 +9,7 @@ from main import app
 import models
 import schemas
 from plants import create_plant
-from ownership import Create_new_Ownership, Update_Ownership
+from ownership import Create_new_Ownership, Update_Ownership, update_ownership_contract_erp
 from extensionMapping import update_extension_mapping, update_extension_plantMtrx
 from MarketFlexMapping import update_Market_flex, filtered_market_year
 from OwnershipGrowerGrowing import (update_contract_erp, delete_post, create_grower_growing_area_mapping)
@@ -193,11 +193,36 @@ def test_mock_update_ownership(mock_get_db):
     assert result["status"] == "success"
 
 
+@patch('database.get_db')
+def test_update_ownership_contract_erp(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    mock_view_data = [
+        MagicMock(growing_area_id=1, totalsum=500),
+        MagicMock(growing_area_id=2, totalsum=700)]
+
+    db_mock.query().filter().all.return_value = mock_view_data
+    existing_record_mock = models.Ownership(
+        growing_area_id=1,
+        crop_year="2023",
+        contract_erp_value=200
+    )
+    db_mock.query().filter().first.return_value = existing_record_mock
+
+    result = update_ownership_contract_erp(crop_year="2023", db=db_mock)
+    assert result["message"] == "Total Contract ERP updated for 2023 in Ownership table"
+
+
 """--------extensionMapping.py---------"""
 
 
 def test_get_extension_mapping():
     response = client.get('/api/extensionMapping/')
+    assert response.status_code == 200
+
+
+def test_get_filtered_extension():
+    response = client.get('/api/extensionMapping/year/2023')
     assert response.status_code == 200
 
 

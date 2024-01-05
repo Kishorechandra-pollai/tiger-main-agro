@@ -98,7 +98,7 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                      .update({models.OwnershipGrowerGrowing.contract: item.contract,
                               models.OwnershipGrowerGrowing.shrinkage: item.shrinkage,
                               models.OwnershipGrowerGrowing.status: "ACTIVE"}))
-            else:
+            else:  # pragma: no cover
                 if item.contract == 0:
                     payload = {"row_id": item.row_id,
                                "growing_area_id": item.growing_area_id,

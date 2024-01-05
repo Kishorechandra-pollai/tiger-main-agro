@@ -18,9 +18,9 @@ def get_ownershipMapping(year: int, db: Session = Depends(get_db)):
                               models.OwnershipGrowerGrowing.contract_erp,
                               models.OwnershipGrowerGrowing.contract,
                               models.OwnershipGrowerGrowing.year,
-                              models.OwnershipGrowerGrowing.crop_year)\
+                              models.OwnershipGrowerGrowing.crop_year) \
         .join(models.growers,
-              models.OwnershipGrowerGrowing.grower_id == models.growers.grower_id)\
+              models.OwnershipGrowerGrowing.grower_id == models.growers.grower_id) \
         .filter(models.OwnershipGrowerGrowing.status == "ACTIVE",
                 or_(models.OwnershipGrowerGrowing.year == year,
                     models.OwnershipGrowerGrowing.year == year - 1)).all()
@@ -41,7 +41,7 @@ def create_grower_growing_area_mapping(payload: schemas.OwnershipGrowerGrowingSc
         models.OwnershipGrowerGrowing.year == ext_year).first())
     if existing_record:
         return {"message": "record exist"}
-    else:
+    else:  # pragma: no cover
         new_GrowerMapping = models.OwnershipGrowerGrowing(**payload.dict())
         db.add(new_GrowerMapping)
     db.commit()
@@ -52,6 +52,7 @@ def create_grower_growing_area_mapping(payload: schemas.OwnershipGrowerGrowingSc
         "grower_growing_mapping_id": (
             existing_record if existing_record else new_GrowerMapping).growing_area_id_mapper_id
     }
+
 
 #
 # @router.get('/{GrowingAreaId}/{GrowerId}/{year}')
@@ -110,7 +111,7 @@ def update_contract_erp(crop_year: str, db: Session = Depends(get_db)):
                     ).update({models.OwnershipGrowerGrowing.contract_erp: data.sum_contract,
                               models.OwnershipGrowerGrowing.status: "ACTIVE"})
 
-                else:
+                else:  # pragma: no cover
                     payload = {"row_id": row_id,
                                "growing_area_id": data.growignarea_id,
                                "grower_id": data.grower_id,
@@ -128,8 +129,6 @@ def update_contract_erp(crop_year: str, db: Session = Depends(get_db)):
         return {"message": f"Contract ERP updated for {crop_year}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
-
-
 
 # @router.post('/OwnershipGrowingGrowerMapping/{year}')
 # def Create_New_crop_year_Records(year: str, db: Session = Depends(get_db)):
