@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 from models import off_contract_info, off_contract_task_mapping, country_division_name
 from schemas import OffContractInfoSchema, OffContractTaskMappingSchema, OffContractTaskMappingPayload
 from sqlalchemy.orm import Session
@@ -60,7 +60,7 @@ async def update_off_contract_task_mapping(year: int, db: Session = Depends(get_
             continue
         for period in range(1,14):
             for con in countries:
-                new_record = off_contract_task_mapping(off_contract_task_id = record.off_contract_task_id, period=period, year=year,value=0.0, company_name=con.division_name)
+                new_record = off_contract_task_mapping(off_contract_task_id = record.off_contract_task_id, period=period, year=year,value=0.001, company_name=con.task_desc)
                 db.add(new_record)
                 db.commit()
 

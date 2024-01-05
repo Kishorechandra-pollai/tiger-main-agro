@@ -60,7 +60,7 @@ async def update_general_administrative_mappings(year: int, db: Session = Depend
             continue
         for period in range(1,14):
             for con in countries:
-                new_record = general_administrative_mappings(general_administrative_id = record.general_administrative_id, period=period, year=year, value=0.0, company_name=con.division_name)
+                new_record = general_administrative_mappings(general_administrative_id = record.general_administrative_id, period=period, year=year, value=0.001, company_name=con.task_desc)
                 db.add(new_record)
                 db.commit()
 

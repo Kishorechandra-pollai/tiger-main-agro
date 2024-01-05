@@ -6,11 +6,10 @@ import allocation
 import plant_mtrx
 import uvicorn
 import category
-import dummy
 import growers
 import growingarea
 import plants
-# import freightcost
+import freightcost
 import region
 import ownership
 import plantGrowingMapping
@@ -19,17 +18,17 @@ import pcusage
 import plant_site_growing_area_mapping
 import vendor_site_code
 import potatorates
-# import solidrates
-# import offcontractinfo
-# import generaladministrative
-# import freighttaskinfo
+import solidrates
+import offcontractinfo
+import generaladministrative
+import freighttaskinfo
 import extensionMapping
 import MarketFlexMapping
 import period_week_calc
-# import p4p_master_info
-# import summary_price_variance
-# import solid_task_master
-# import inflation_deflation
+import p4p_master_info
+import summary_price_variance
+import solid_task_master
+import inflation_deflation
 import dashboard
 from database import engine
 
@@ -48,7 +47,6 @@ app.include_router(region.router, tags=['region'], prefix='/api/region')
 app.include_router(period_week_calc.router, tags=['period_week_calc'], prefix='/api/period_week')
 app.include_router(allocation.router, tags=['allocation'], prefix='/api/allocation')
 app.include_router(plantGrowingMapping.router, tags=['plant-growing-mapping'], prefix='/api/plant-growing-mapping')
-app.include_router(dummy.router, tags=['dummy'], prefix='/api/dummy')
 app.include_router(category.router, tags=['category'], prefix='/api/category')
 app.include_router(pcusage.router, tags=['pcusage'], prefix='/api/pcusage')
 app.include_router(ownership.router, tags=['ownership'], prefix='/api/ownership')
@@ -63,17 +61,17 @@ app.include_router(vendor_site_code.router,tags=['vendor_site_code'],prefix='/ap
 app.include_router(dashboard.router, tags=['dashboard'], prefix='/api/dashboard')
 app.include_router(potatorates.router,tags=['potato-rates'], prefix='/api/potato_rates')
 
-# app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
-# app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
-# app.include_router(solidrates.router,tags=['solid-rates'], prefix='/api/solid_rates')
-# app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
-# app.include_router(generaladministrative.router, tags=['general-administrative'], prefix='/api/general_administrative')
-# app.include_router(freighttaskinfo.router, tags=['freight-task-info'], prefix='/api/freight_task_info')
-# app.include_router(p4p_master_info.router, tags=['p4p-master-info'], prefix='/api/p4p-master-info')
-#
-# app.include_router(summary_price_variance.router, tags=['summary_price_variance'], prefix='/api/summary_price_variance')
-# app.include_router(inflation_deflation.router, tags=['inflation_deflation'], prefix='/api/inflation_deflation')
-# app.include_router(solid_task_master.router, tags=['solid-task-master'], prefix='/api/solid-task-master')
+app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
+app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
+app.include_router(solidrates.router,tags=['solid-rates'], prefix='/api/solid_rates')
+app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
+app.include_router(generaladministrative.router, tags=['general-administrative'], prefix='/api/general_administrative')
+app.include_router(freighttaskinfo.router, tags=['freight-task-info'], prefix='/api/freight_task_info')
+app.include_router(p4p_master_info.router, tags=['p4p-master-info'], prefix='/api/p4p-master-info')
+
+app.include_router(summary_price_variance.router, tags=['summary_price_variance'], prefix='/api/summary_price_variance')
+app.include_router(inflation_deflation.router, tags=['inflation_deflation'], prefix='/api/inflation_deflation')
+app.include_router(solid_task_master.router, tags=['solid-task-master'], prefix='/api/solid-task-master')
 
 app.add_middleware(
     CORSMiddleware,
