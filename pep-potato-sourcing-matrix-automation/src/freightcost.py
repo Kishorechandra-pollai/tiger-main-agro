@@ -52,6 +52,7 @@ def create_freight_cost(payload: schemas.FreightCostRateSchema, db: Session = De
     freight_records.append(freight_record)
     return freight_records
 
+
 @router.post("/update_freight_cost_records/{freight_cost_id}")
 def update_freight(freight_cost_id: int, payload: schemas.FreightCostRateSchema ,
                    db: Session = Depends(get_db)):
@@ -143,6 +144,7 @@ def create_freight_mapping(
 
     return freight_cost_mapping_data
 
+
 @router.post("/update_freight_mapping/{freight_cost_id}/{year}/{period}")
 def update_freight_mapping(
     freight_cost_id: int,
@@ -165,6 +167,7 @@ def update_freight_mapping(
         db.commit()
     return records_to_update
 
+
 @router.delete('delete/{year}')
 def delete_post(year:int, db: Session = Depends(get_db)):
     """Function to delete records from freight cost mapping"""
@@ -176,6 +179,7 @@ def delete_post(year:int, db: Session = Depends(get_db)):
         db.delete(record)
     db.commit()
     return {"message": f"Records for the year {year} deleted successfully."}
+
 
 @router.get('/freight_cost_period_view')
 def freight_cost_period_view(db: Session = Depends(get_db)):
@@ -199,6 +203,7 @@ def freight_cost_period_view(db: Session = Depends(get_db)):
         return {"freight_cost_period_view": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
 
 @router.get('/freight_cost_period_view/{year}')
 def freight_cost_period_view_year(year:int, db: Session = Depends(get_db)):
@@ -224,6 +229,7 @@ def freight_cost_period_view_year(year:int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+
 @router.get('/freight_cost_period_week_view')
 def freight_cost_period_week_view(db: Session = Depends(get_db)):
     """Function to fetch all records from freight period week view table """
@@ -246,6 +252,7 @@ def freight_cost_period_week_view(db: Session = Depends(get_db)):
         return {"freight_cost_period_week_view": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
 
 @router.get('/freight_cost_period_week_view/{year}')
 def freight_cost_period_week_view_year(year: int,db: Session = Depends(get_db)):
@@ -271,6 +278,7 @@ def freight_cost_period_week_view_year(year: int,db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+
 @router.get('/rate_growing_area')
 def rate_growing_area(db: Session = Depends(get_db)):
     """Function to fetch all records from rate growing area table """
@@ -295,6 +303,7 @@ def rate_growing_area(db: Session = Depends(get_db)):
         return {"freight_cost_rate_growing_area": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
 
 @router.get("/get_rate_gowing_area/{year}")
 def get_rate_growing_area_year(year: int, db: Session = Depends(get_db)):

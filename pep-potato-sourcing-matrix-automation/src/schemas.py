@@ -9,7 +9,6 @@ class PlantSchema(BaseModel):
     plant_name: str
     company_name: str | None = None
     region_id: int
-    # country: str
     status: str
     crop_category_id: int | None = None
     created_time: datetime | None = None
@@ -315,6 +314,7 @@ class solidRateMappingSchema(BaseModel):
     period: int | None = None
     solids_rate_id: int | None = None
     rate: float | None = None
+    period_year: int | None = None
 
     class Config:
         orm_mode = True
@@ -418,6 +418,10 @@ class GeneralAdministrativeMappingsSchema(BaseModel):
         arbitrary_types_allowed = True
 
 
+class GeneralAdministrativeMappingsPayload(BaseModel):
+    data: List[GeneralAdministrativeMappingsSchema]
+
+
 class ExtensionMappingSchema(BaseModel):
     """Class representing schema for extension_ownership_mapping table"""
     extension_id: str
@@ -438,10 +442,6 @@ class ExtensionMappingSchema(BaseModel):
 
 class ExtensionOwnershipPayload(BaseModel):
     ExtensionData: List[ExtensionMappingSchema]
-
-
-class GeneralAdministrativeMappingsPayload(BaseModel):
-    data: List[GeneralAdministrativeMappingsSchema]
 
 
 class PriceVarianceMappingSchema(BaseModel):
@@ -565,7 +565,6 @@ class SolidsTaskMappingSchema(BaseModel):
 
 class SolidsTaskMappingSchemaPayload(BaseModel):
     data: List[SolidsTaskMappingSchema]
-
 
 
 class CountryDivisionNameName(BaseModel):

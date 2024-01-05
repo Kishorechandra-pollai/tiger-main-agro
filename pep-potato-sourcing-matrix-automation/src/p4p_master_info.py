@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 from models import p4p_master_info, p4p_task_mappings, View_p4p_result_table, country_division_name, View_p4p_result_update
 from schemas import p4pMasterInfoSchema, p4pTaskMappingsSchema, p4pTaskMappingsPayload, TaskItemPayload
 from sqlalchemy.orm import Session
@@ -63,7 +63,7 @@ async def update_p4p_task_mappings(year: int, db: Session = Depends(get_db)):
             continue
         for period in range(1,14):
             for con in countries:
-                new_record = p4p_task_mappings(p4p_id = record.p4p_id, period=period, year=year, value=0.0, company_name=con.division_name)
+                new_record = p4p_task_mappings(p4p_id = record.p4p_id, period=period, year=year, value=0.001, company_name=con.task_desc)
                 db.add(new_record)
                 db.commit()
 
@@ -102,5 +102,3 @@ def update_p4p_task_mappings_records(payload: p4pTaskMappingsPayload, db: Sessio
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
