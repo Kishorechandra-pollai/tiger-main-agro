@@ -1,0 +1,5 @@
+[run]
+command_line = -m pytest tests
+
+[xml]
+output = coverage-reports/coverage.xml

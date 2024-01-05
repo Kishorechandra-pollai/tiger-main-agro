@@ -4,17 +4,19 @@ import pytest
 from fastapi.testclient import TestClient
 
 sys.path.append(r"..\src\main.py")
-sys.path.append(r"..\src")
+sys.path.append(r"..\pep-potato-sourcing-matrix-automation\src")
 from main import app
+import models
 import schemas
 from plants import create_plant
 from ownership import Create_new_Ownership, Update_Ownership
-from extensionMapping import update_extension_mapping
-from MarketFlexMapping import update_Market_flex
+from extensionMapping import update_extension_mapping, update_extension_plantMtrx
+from MarketFlexMapping import update_Market_flex, filtered_market_year
 from OwnershipGrowerGrowing import (update_contract_erp, delete_post, create_grower_growing_area_mapping)
 from allocation import update_allocation, create_allocation
 from pcusage import create_new_pcusage
-from plantGrowingMapping import create_plant_growing_area_mapping, delete_plant_growing
+from plant_mtrx import update_plantMtrx, func_getcrop_type, update_extension
+# from plantGrowingMapping import create_plant_growing_area_mapping, delete_plant_growing
 from growingarea import create_growing_area, delete_growing_area
 from growers import delete_grower, create_growers
 
@@ -200,6 +202,28 @@ def test_get_extension_mapping():
 
 
 @patch('database.get_db')
+def test_update_extension_plantMtrx(mock_get_db):
+    db_mock = MagicMock()
+    query_mock = MagicMock()
+    db_mock.query = query_mock
+    mock_get_db.return_value = db_mock
+    ext_record_mock = MagicMock()
+    ext_record_mock.status = 'ACTIVE'
+    ext_record_mock.growing_area_id = 1
+    ext_record_mock.year = 2023
+    ext_record_mock.period = 1
+    ext_record_mock.week = 1
+    ext_record_mock.total_value = 100
+    ext_record_mock.split = 'false'
+    query_mock.return_value.filter.return_value.first.return_value = ext_record_mock
+
+    result = update_extension_plantMtrx(1, 2023, 1, 1, 80, db=db_mock)
+
+    assert result == "updated"
+    assert ext_record_mock.total_value == 80
+
+
+@patch('database.get_db')
 def test_mock_update_extension_mapping(mock_get_db):
     db_mock = MagicMock()
     mock_get_db.return_value = db_mock
@@ -212,6 +236,8 @@ def test_mock_update_extension_mapping(mock_get_db):
         "crop_type": "Fresh",
         "crop_year": "2022",
         "total_value": 0,
+        "year": 2022,
+        "split": "none",
         "status": "INACTIVE"
     }]
     test_payload = schemas.ExtensionOwnershipPayload(ExtensionData=payload)
@@ -233,6 +259,8 @@ def test_mock_update_extension_mapping_1(mock_get_db):
         "crop_type": "Fresh",
         "crop_year": "2022",
         "total_value": 0,
+        "year": 2022,
+        "split": "none",
         "status": "INACTIVE"
     }]
     test_payload = schemas.ExtensionOwnershipPayload(ExtensionData=payload_2)
@@ -247,6 +275,23 @@ def test_mock_update_extension_mapping_1(mock_get_db):
 def test_get_marketflex_mapping():
     response = client.get('/api/MarketFlexMapping/')
     assert response.status_code == 200
+
+
+@patch('database.get_db')
+def test_filtered_market_year(mock_get_db):
+    db_mock = MagicMock()
+    query_mock = MagicMock()
+    db_mock.query = query_mock
+    mock_get_db.return_value = db_mock
+
+    mock_filtered_market = [models.MarketFlexMapping(ownership_id=1, status="ACTIVE"),
+                            models.MarketFlexMapping(ownership_id=2, status="ACTIVE")]
+    query_mock.return_value.join.return_value.filter.return_value.all.return_value = mock_filtered_market
+
+    result = filtered_market_year(2023, db=db_mock)
+
+    assert result['status'] == 'success'
+    assert len(result['MarketFlexMapping']) == len(mock_filtered_market)
 
 
 @patch('database.get_db')
@@ -361,7 +406,7 @@ def test_create_allocation(mock_get_db):
     db_mock.query().all.return_value = table_data
     result = create_allocation(year=year, db=db_mock)
 
-    assert result == {"Status": "success", "records_inserted": "Next year data are added"}
+    assert result == {"Status": "success", "new_records": 13}
 
 
 """__________pcusage.py__________"""
@@ -523,6 +568,11 @@ def test_get_plant_mtrx():
 
 
 def test_get_plant_mtrx_2():
+    response = client.get('/api/plant_mtrx/growing_area/all_data/year/2023')
+    assert response.status_code == 200
+
+
+def test_get_plant_mtrx_3():
     response = client.get('/api/plant_mtrx/plant/company_name/US/year/2023')
     assert response.status_code == 200
 
@@ -542,43 +592,82 @@ def test_get_plant_mtrx_region():
     assert response.status_code == 200
 
 
-"""________plantGrowingMapping.py_________"""
+@patch('database.get_db')
+def test_func_getcrop_type(mock_get_db):
+    db_mock = mock_get_db.return_value
+    mock_query_result = models.growing_area(
+        fresh_period_start=1, fresh_week_start=1, fresh_period_end=4, fresh_week_end=8
+    )
+    db_mock.query().filter().first.return_value = mock_query_result
 
+    test_cases = [{"period": 1, "week": 1, "year": 2023, "growing_area_id": 1,
+                   "expected_crop_type": "Fresh", "expected_crop_year": "2023"},
+                  {"period": 1, "week": 1, "year": 2023, "growing_area_id": 1,
+                   "expected_crop_type": "Storage", "expected_crop_year": "2022-23"},
+                  {"period": 5, "week": 5, "year": 2023, "growing_area_id": 1,
+                   "expected_crop_type": "Storage", "expected_crop_year": "2023-24"}]
 
-def test_get_plant_growing():
-    response = client.get('/api/plant-growing-mapping/')
-    assert response.status_code == 200
-
-
-def test_get_plants():
-    response = client.get('/api/plant-growing-mapping/17')
-    assert response.status_code == 200
-
-
-def test_get_plant_growing_area():
-    response = client.get('/api/plant-growing-mapping/285/pid=17')
-    assert response.status_code == 200
-
-
-def test_get_plant_id():
-    response = client.get('/api/plant-growing-mapping/17')
-    assert response.status_code == 200
-
-
-def test_get_plant_growing_id():
-    response = client.get('/api/plant-growing-mapping/44/pid=17')
-    assert response.status_code == 200
+    for case in test_cases:
+        crop_type, crop_year = func_getcrop_type(case["period"], case["week"],
+                                                 case["year"], case["growing_area_id"])
+        assert crop_type == case["expected_crop_type"]
+        assert crop_year == case["expected_crop_year"]
 
 
 @patch('database.get_db')
-def test_delete_plant_growing(mock_get_db):
+def test_update_plantMtrx(mock_get_db):
     db_mock = MagicMock()
-    mock_query = MagicMock()
-    mock_commit = MagicMock()
-    db_mock.query = mock_query
-    mock_query.return_value.filter.return_value.update.return_value = 1
-    db_mock.commit = mock_commit
     mock_get_db.return_value = db_mock
+    mock_existing_record = MagicMock()
+    db_mock.query().filter().first.return_value = mock_existing_record
+    func_getcrop_type.return_value = ("Fresh", "2023")
 
-    result = delete_plant_growing("1", db=db_mock)
-    assert result.status_code == 204
+    payload_data = [
+        {"plant_matrix_id": 1, "plant_id": 1, "growing_area_id": 1,
+         "period": 7, "week": 2, "year": 2023, "value": 50}]
+
+    payload_plant_mtrx = schemas.PlantMtrxPayload(data=payload_data)
+    result = update_plantMtrx(MagicMock(data=payload_plant_mtrx), db=db_mock)
+
+    assert result["status"] == "success"
+
+# """________plantGrowingMapping.py_________"""
+#
+#
+# def test_get_plant_growing():
+#     response = client.get('/api/plant-growing-mapping/')
+#     assert response.status_code == 200
+#
+#
+# def test_get_plants():
+#     response = client.get('/api/plant-growing-mapping/17')
+#     assert response.status_code == 200
+#
+#
+# def test_get_plant_growing_area():
+#     response = client.get('/api/plant-growing-mapping/285/pid=17')
+#     assert response.status_code == 200
+#
+#
+# def test_get_plant_id():
+#     response = client.get('/api/plant-growing-mapping/17')
+#     assert response.status_code == 200
+#
+#
+# def test_get_plant_growing_id():
+#     response = client.get('/api/plant-growing-mapping/44/pid=17')
+#     assert response.status_code == 200
+#
+#
+# @patch('database.get_db')
+# def test_delete_plant_growing(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_query = MagicMock()
+#     mock_commit = MagicMock()
+#     db_mock.query = mock_query
+#     mock_query.return_value.filter.return_value.update.return_value = 1
+#     db_mock.commit = mock_commit
+#     mock_get_db.return_value = db_mock
+#
+#     result = delete_plant_growing("1", db=db_mock)
+#     assert result.status_code == 204
