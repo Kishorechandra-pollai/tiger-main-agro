@@ -1,6 +1,5 @@
-from __future__ import annotations
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -8,14 +7,14 @@ class PlantSchema(BaseModel):
     plant_id: int
     plant_code: str
     plant_name: str
-    company_name: str | None = None
+    company_name: Optional[str] = None
     region_id: int
     status: str
-    crop_category_id: int | None = None
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
+    crop_category_id: Optional[int] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -29,15 +28,15 @@ class GrowingAreaSchema(BaseModel):
     region: int
     country: str
     status: str
-    growing_area_desc: str | None = None
-    fresh_period_start: int | None = None
-    fresh_week_start: int | None = None
-    fresh_period_end: int | None = None
-    fresh_week_end: int | None = None
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
+    growing_area_desc: Optional[str] = None
+    fresh_period_start: Optional[int] = None
+    fresh_week_start: Optional[int] = None
+    fresh_period_end: Optional[int] = None
+    fresh_week_end: Optional[int] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -52,10 +51,10 @@ class GrowerSchema(BaseModel):
     country: str
     status: str
     volume: str
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -67,10 +66,10 @@ class Region(BaseModel):
     region_name: str
     country: str
     status: str
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -85,11 +84,11 @@ class PlantGrowingMappingSchema(BaseModel):
 
 class ActiveAllocation(BaseModel):
     allocation_id: str
-    category_name: str | None = None
-    year: int | None = None
-    country: str | None = None
-    period: int | None = None
-    value: str | None = None
+    category_name: Optional[str] = None
+    year: Optional[int] = None
+    country: Optional[str] = None
+    period: Optional[int] = None
+    value: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -105,10 +104,10 @@ class Category(BaseModel):
     category_name: str
     country: str
     status: str
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -119,16 +118,16 @@ class Category(BaseModel):
 class OwnershipGrowerGrowingSchema(BaseModel):
     """Class representing schema for ownership_grower_growing_area_mapping table"""
     row_id: str
-    growing_area_id: int | None = None
-    grower_id: int | None = None
-    contract: int | None = None
-    year: int | None = None
-    shrinkage: float | None = None
-    contract_erp: float | None = None
+    growing_area_id: Optional[int] = None
+    grower_id: Optional[int] = None
+    contract: Optional[int] = None
+    year: Optional[int] = None
+    shrinkage: Optional[float] = None
+    contract_erp: Optional[float] = None
     ownership_id: str
-    crop_type: str | None = None
+    crop_type: Optional[str] = None
     crop_year: str
-    status: str | None = None
+    status: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -173,13 +172,13 @@ class PlantSiteGrowingAreaMappingSchema(BaseModel):
 
 class FreightCostRateSchema(BaseModel):
     """Class representing schema for freight_cost_rate table"""
-    currency: str | None = None
-    comment: str | None = None
-    year: int | None = None
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
+    currency: Optional[str] = None
+    comment: Optional[str] = None
+    year: Optional[int] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -189,8 +188,8 @@ class FreightCostRateSchema(BaseModel):
 
 class FreightCostMappingSchema(BaseModel):
     """Class representing schema for freight_cost_mapping table"""
-    year: int | None = None
-    rate: float | None = None
+    year: Optional[int] = None
+    rate: Optional[float] = None
 
     class Config:
         orm_mode = True
@@ -203,38 +202,37 @@ class OwnershipSchema(BaseModel):
     ownership_id: str
     growing_area_id: int
     contract: int
-    contract_erp_value: int | None = None
+    contract_erp_value: Optional[int] = None
     shrinkage: float
     to_ship: int
     crop_type: str
     crop_year: str
-    market_and_flex: int | None = None
-    total_ship: int | None = None
-    year: int | None = None
-    extension: float | None = None
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
+    market_and_flex: Optional[int] = None
+    total_ship: Optional[int] = None
+    year: Optional[int] = None
+    extension: Optional[float] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-
 class PlantMatrix(BaseModel):
     plant_matrix_id: str
-    plant_id: int | None = None
-    year: int | None = None
-    period: int | None = None
-    region_id: int | None = None
-    week: int | None = None
-    growing_area_id: int | None = None
-    value: float | None = None
-    crop_type: str | None = None
-    crop_year: str | None = None
-    status: str | None = None
+    plant_id: Optional[int] = None
+    year: Optional[int] = None
+    period: Optional[int] = None
+    region_id: Optional[int] = None
+    week: Optional[int] = None
+    growing_area_id: Optional[int] = None
+    value: Optional[float] = None
+    crop_type: Optional[str] = None
+    crop_year: Optional[str] = None
+    status: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -259,13 +257,13 @@ class plantMtrx_template(BaseModel):
 
 
 class VendorSiteCodeSchema(BaseModel):
-    VENDOR_SITE_CODE: int | None = None
-    created_by: str | None = None
-    created_time: datetime | None = None
-    status: str | None = None
-    updated_by: str | None = None
-    updated_time: datetime | None = None
-    region_id: int | None = None
+    VENDOR_SITE_CODE: Optional[int] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    status: Optional[str] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+    region_id: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -274,31 +272,31 @@ class VendorSiteCodeSchema(BaseModel):
 
 
 class SolidRatesSchema(BaseModel):
-    year: int | None = None
-    growing_area_id: int | None = None
-    currency: str | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
+    year: Optional[int] = None
+    growing_area_id: Optional[int] = None
+    currency: Optional[str] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
 
 
 class PotatoRatesSchema(BaseModel):
-    year: int | None = None
-    growing_area_id: int | None = None
-    currency: str | None = None
-    created_by: str | None = None
-    updated_by: str | None = None
-    created_time: datetime | None = None
-    updated_time: datetime | None = None
+    year: Optional[int] = None
+    growing_area_id: Optional[int] = None
+    currency: Optional[str] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
 
 
 class potatoRateMappingSchema(BaseModel):
     __tablename__ = "potato_rate_mapping"
-    period: int | None = None
-    potato_rate_id: int | None = None
-    week: int | None = None
-    rate: float | None = None
+    period: Optional[int] = None
+    potato_rate_id: Optional[int] = None
+    week: Optional[int] = None
+    rate: Optional[float] = None
 
     class Config:
         orm_mode = True
@@ -312,10 +310,10 @@ class potatoRateMappingPayload(BaseModel):
 
 class solidRateMappingSchema(BaseModel):
     __tablename__ = "solid_rate_mapping"
-    period: int | None = None
-    solids_rate_id: int | None = None
-    rate: float | None = None
-    period_year: int | None = None
+    period: Optional[int] = None
+    solids_rate_id: Optional[int] = None
+    rate: Optional[float] = None
+    period_year: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -328,13 +326,13 @@ class solidRateMappingPayload(BaseModel):
 
 
 class OffContractInfoSchema(BaseModel):
-    task_name: str | None = None
-    task_desc: str | None = None
-    status: str | None = None
-    created_by: str | None = None
-    created_time: datetime | None = None
-    updated_by: str | None = None
-    updated_time: datetime | None = None
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
 
     class Config:
         orm_mode = True
@@ -343,11 +341,11 @@ class OffContractInfoSchema(BaseModel):
 
 
 class OffContractTaskMappingSchema(BaseModel):
-    period: int | None = None
-    off_contract_task_id: int | None = None
-    year: int | None = None
-    value: float | None = None
-    company_name: str | None = None
+    period: Optional[int] = None
+    off_contract_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -360,13 +358,13 @@ class OffContractTaskMappingPayload(BaseModel):
 
 
 class FreightTaskInfoSchema(BaseModel):
-    task_name: str | None = None
-    task_desc: str | None = None
-    status: str | None = None
-    created_by: str | None = None
-    created_time: datetime | None = None
-    updated_by: str | None = None
-    updated_time: datetime | None = None
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
 
     class Config:
         orm_mode = True
@@ -375,30 +373,29 @@ class FreightTaskInfoSchema(BaseModel):
 
 
 class FreightTaskMappingsSchema(BaseModel):
-    period: int | None = None
-    freight_task_id: int | None = None
-    year: int | None = None
-    value: float | None = None
-    company_name: str | None = None
+    period: Optional[int] = None
+    freight_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-
 class FreightTaskMappingsPayload(BaseModel):
     data: List[FreightTaskMappingsSchema]
 
 
 class GeneralAdministrativeTaskSchema(BaseModel):
-    task_name: str | None = None
-    task_desc: str | None = None
-    status: str | None = None
-    created_by: str | None = None
-    created_time: datetime | None = None
-    updated_by: str | None = None
-    updated_time: datetime | None = None
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
 
     class Config:
         orm_mode = True
@@ -407,11 +404,11 @@ class GeneralAdministrativeTaskSchema(BaseModel):
 
 
 class GeneralAdministrativeMappingsSchema(BaseModel):
-    period: int | None = None
-    general_administrative_id: int | None = None
-    year: int | None = None
-    value: float | None = None
-    company_name: str | None = None
+    period: Optional[int] = None
+    general_administrative_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -426,14 +423,14 @@ class GeneralAdministrativeMappingsPayload(BaseModel):
 class ExtensionMappingSchema(BaseModel):
     """Class representing schema for extension_ownership_mapping table"""
     extension_id: str
-    growing_area_id: int | None = None
-    period: int | None = None
-    week: int | None = None
-    crop_type: str | None = None
-    crop_year: str | None = None
-    total_value: float | None = None
+    growing_area_id: Optional[int] = None
+    period: Optional[int] = None
+    week: Optional[int] = None
+    crop_type: Optional[str] = None
+    crop_year: Optional[str] = None
+    total_value: Optional[float] = None
     split: str
-    status: str | None = None
+    status: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -446,11 +443,11 @@ class ExtensionOwnershipPayload(BaseModel):
 
 
 class PriceVarianceMappingSchema(BaseModel):
-    period: int | None = None
-    price_variance_task_id: int | None = None
-    year: int | None = None
-    value: float | None = None
-    company_name: str | None = None
+    period: Optional[int] = None
+    price_variance_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -463,11 +460,11 @@ class PriceVarianceMappingPayload(BaseModel):
 
 
 class InflationDeflationMappingSchema(BaseModel):
-    period: int | None = None
-    inflation_deflation_task_id: int | None = None
-    year: int | None = None
-    value: float | None = None
-    company_name: str | None = None
+    period: Optional[int] = None
+    inflation_deflation_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -480,27 +477,25 @@ class InflationDeflationMappingPayload(BaseModel):
 
 
 class p4pMasterInfoSchema(BaseModel):
-    p4p_name: str | None = None
-    description: str | None = None
-    status: str | None = None
-    created_by: str | None = None
-    created_time: datetime | None = None
-    updated_by: str | None = None
-    updated_time: datetime | None = None
+    p4p_name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-
 class p4pTaskMappingsSchema(BaseModel):
-    # row_id: int| None = None
-    period: int | None = None
-    p4p_id: int | None = None
-    year: int | None = None
-    value: float | None = None
-    company_name: str | None = None
+    period: Optional[int] = None
+    p4p_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -524,23 +519,21 @@ class TaskItemPayload(BaseModel):
 
 
 class MarketFlexMappingSchema(BaseModel):
-    """Class representing schema for ownership_grower_growing_area_market_area_mapping table"""
     row_id: str
-    growing_area_id: int | None = None
-    grower_id: int | None = None
-    ownership_id: str | None = None
-    status: str | None = None
-    market_flex_value: int
-
+    growing_area_id: Optional[int] = None
+    grower_id: Optional[int] = None
+    ownership_id: Optional[str] = None
+    status: Optional[str] = None
+    market_flex_value: Optional[int] = None
 
 class SolidTaskMasterSchema(BaseModel):
-    task_name: str | None = None
-    task_desc: str | None = None
-    status: str | None = None
-    created_by: str | None = None
-    created_time: datetime | None = None
-    updated_by: str | None = None
-    updated_time: datetime | None = None
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
 
     class Config:
         orm_mode = True
@@ -553,10 +546,10 @@ class MarketFlexPayload(BaseModel):
 
 
 class SolidsTaskMappingSchema(BaseModel):
-    period: int | None = None
-    solid_task_id: int | None = None
-    year: int | None = None
-    value: float | None = None
+    period: Optional[int] = None
+    solid_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
 
     class Config:
         orm_mode = True
@@ -569,29 +562,29 @@ class SolidsTaskMappingSchemaPayload(BaseModel):
 
 
 class CountryDivisionNameName(BaseModel):
-    division_name: str | None = None
-    task_desc: str | None = None
-    status: str | None = None
-    created_by: str | None = None
-    created_time: datetime | None = None
-    updated_by: str | None = None
-    updated_time: datetime | None = None
+    division_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
 
 
 class PlantMtrxTemplateSchema(BaseModel):
-    period: int | None = None
-    plant_id: int | None = None
-    week: int | None = None
-    growing_area_id: int | None = None
+    period: Optional[int] = None
+    plant_id: Optional[int] = None
+    week: Optional[int] = None
+    growing_area_id: Optional[int] = None
 
 
 class planVolumeUsageSchema(BaseModel):
     __tablename__ = "plan_volume_usage"
-    crop_type: int | None = None
-    period: int | None = None
-    week: int | None = None
-    year: int | None = None
-    volume: float | None = None
+    crop_type: Optional[int] = None
+    period: Optional[int] = None
+    week: Optional[int] = None
+    year: Optional[int] = None
+    volume: Optional[float] = None
 
     class Config:
         orm_mode = True
