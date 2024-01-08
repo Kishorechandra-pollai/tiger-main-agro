@@ -3,8 +3,9 @@ from unittest.mock import Mock, patch, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-sys.path.append(r"..\src\main.py")
-sys.path.append(r"..\pep-potato-sourcing-matrix-automation\src")
+#sys.path.append(r"..\src\main.py")
+#sys.path.append(r"..\pep-potato-sourcing-matrix-automation\src")
+sys.path.append(r"..\src\")
 from main import app
 import models
 import schemas
