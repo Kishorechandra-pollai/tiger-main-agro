@@ -19,6 +19,7 @@ from plant_mtrx import update_plantMtrx, func_getcrop_type, update_extension
 # from plantGrowingMapping import create_plant_growing_area_mapping, delete_plant_growing
 from growingarea import create_growing_area, delete_growing_area
 from growers import delete_grower, create_growers
+from category import delete_category, create_category
 
 client = TestClient(app)
 
@@ -257,7 +258,7 @@ def test_mock_update_extension_mapping(mock_get_db):
         "extension_id": "10#5#1#2022",
         "growing_area_id": 10,
         "period": 5,
-        "week": 1,
+        "week": -1,
         "crop_type": "Fresh",
         "crop_year": "2022",
         "total_value": 0,
@@ -655,6 +656,64 @@ def test_update_plantMtrx(mock_get_db):
     result = update_plantMtrx(MagicMock(data=payload_plant_mtrx), db=db_mock)
 
     assert result["status"] == "success"
+
+
+"""______________category.py______________"""
+
+
+def test_get_category():
+    response = client.get('/api/category/')
+    assert response.status_code == 200
+
+
+def test_get_by_categoryid():
+    response = client.get('/api/category/1')
+    assert response.status_code == 200
+
+
+def test_get_by_categoryid_exception():
+    response = client.get('/api/category/100')
+    assert response.status_code == 404
+
+
+@patch('database.get_db')
+def test_delete_category(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    db_mock.query().filter().update.return_value = 1
+
+    result = delete_category(categoryId="1", db=db_mock)
+    assert result.status_code == 204
+
+
+@patch('database.get_db')
+def test_create_category(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    payload_category = {
+        "category_name": "TEST",
+        "country": "US",
+        "status": "INACTIVE",
+        "created_time": "2024-01-08T08:07:40.901Z",
+        "updated_time": "2024-01-08T08:07:40.901Z",
+        "created_by": "string",
+        "updated_by": "string"
+    }
+    mock_payload = schemas.Category(**payload_category)
+    result = create_category(payload=mock_payload, db=db_mock)
+    assert result["status"] == "success"
+
+# """________dashboard.py_________"""
+
+# def test_get_category():
+#     response = client.get('/api/category/')
+#     assert response.status_code == 200
+#
+#
+# def test_get_by_categoryid():
+#     response = client.get('/api/category/1')
+#     assert response.status_code == 200
+
 
 # """________plantGrowingMapping.py_________"""
 #
