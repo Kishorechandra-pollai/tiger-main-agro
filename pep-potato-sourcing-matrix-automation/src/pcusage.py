@@ -1,7 +1,8 @@
 from sqlalchemy import func
 import models
+from models import View_forecast_pcusage, Plant
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, status, APIRouter, Response
+from fastapi import Depends, HTTPException, APIRouter
 from database import get_db
 import period_week_calc
 
@@ -12,199 +13,132 @@ def trim(string):
     return string.replace(" ", "")
 
 
-@router.get('/company_name/{name}')
-def get_FilteredUsage(name: str, db: Session = Depends(get_db)):
+def get_filtered_usage_week_common(db, filter_conditions, year, detail_message=None):
+    try:
+        result = db.query(View_forecast_pcusage) \
+            .filter(View_forecast_pcusage.columns.year == year,
+                    *filter_conditions) \
+            .order_by(View_forecast_pcusage.columns.plant_id,
+                      View_forecast_pcusage.columns.period,
+                      View_forecast_pcusage.columns.week).all()
+
+        total_forecast_volume = db.query(func.sum(View_forecast_pcusage.columns.forecasted_value)
+                                         .label('total_forecast_volume'), View_forecast_pcusage.columns.year)\
+            .filter(View_forecast_pcusage.columns.year == year,
+                    *filter_conditions)\
+            .group_by(View_forecast_pcusage.columns.year).all()
+
+        total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
+                                       .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
+            .filter(View_forecast_pcusage.columns.year == year,
+                    *filter_conditions) \
+            .group_by(View_forecast_pcusage.columns.year).all()
+
+        return {"status": "success", "pcusage": result,
+                "total_forecast_volume": total_forecast_volume,
+                "total_actual_volume": total_actual_volume}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e) or detail_message or "Error processing request")
+
+
+@router.get('/company_name/{name}/year/{year}')
+def get_filtered_usage_by_company_name(name: str, year: int, db: Session = Depends(get_db)):
     filter_dict = {
         'US': 'US',
         'US-Core': 'FLUS',
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }
-    if filter_dict[name] == 'US' or filter_dict[name] == 'Canada':
-
-        result = db.query(models.View_forecast_pcusage) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-            .join(models.region, models.region.region_id == models.Plant.region_id) \
-            .filter(models.region.country == filter_dict[name])\
-            .order_by(models.View_forecast_pcusage.columns.plant_id, models.View_forecast_pcusage.columns.year).all()
-
-        Total_Forecast_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.forecasted_value).label('total_forecast_volume'),
-                                         models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-            .join(models.region, models.region.region_id == models.Plant.region_id) \
-            .filter(models.region.country == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
-
-        Total_Actual_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_volume'), models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-            .join(models.region, models.region.region_id == models.Plant.region_id) \
-            .filter(models.region.country == 'US') \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
-
-        return {"status": "success", "pcusage": result,
-                "Total_forecast_Volume": Total_Forecast_Volume,
-                "Total_Actual_Volume": Total_Actual_Volume}
+    if filter_dict[name] == 'Co-Man':
+        filter_conditions = [View_forecast_pcusage.columns.company_name == filter_dict[name]]
     else:
-        result = db.query(models.View_forecast_pcusage) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-            .filter(models.Plant.company_name == filter_dict[name])\
-            .order_by(models.View_forecast_pcusage.columns.plant_id, models.View_forecast_pcusage.columns.year).all()
+        filter_conditions = [View_forecast_pcusage.columns.country == filter_dict[name]]
+    return get_filtered_usage_week_common(db, filter_conditions, year,
+                                          f"Plant Mtrx data not found for company name: {name}")
 
-        Total_Forecast_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.forecasted_value)
-                                         .label('total_forecast_volume'), models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-            .filter(models.Plant.company_name == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
 
-        Total_Actual_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.total_actual_value)
-                                       .label('total_actual_volume'), models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-            .filter(models.Plant.company_name == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
+@router.get('/region_id/{region_id}/year/{year}')
+def get_filtered_usage_by_region_id(region_id: int, year: int, db: Session = Depends(get_db)):
+    filter_conditions = [View_forecast_pcusage.columns.region_id == region_id]
+    return get_filtered_usage_week_common(db, filter_conditions, year,
+                                          f"Plant Mtrx data not found for region ID: {region_id}")
+
+
+@router.get('/all_week_data/year/{year}')
+def get_week_usage_all_data(year: int, db: Session = Depends(get_db)):
+    filter_conditions = []
+    return get_filtered_usage_week_common(db, filter_conditions, year,
+                                          "Plant Mtrx data not found")
+
+
+def get_filtered_usage_period_common(db, filter_conditions, year, detail_message=None):
+    try:
+        result = db.query(View_forecast_pcusage.columns.plant_id,
+                          View_forecast_pcusage.columns.plant_name,
+                          View_forecast_pcusage.columns.year,
+                          View_forecast_pcusage.columns.period,
+                          View_forecast_pcusage.columns.Period_with_P,
+                          View_forecast_pcusage.columns.year.label("week"),
+                          func.sum(View_forecast_pcusage.columns.forecasted_value).label('total_forecast_value'),
+                          func.sum(View_forecast_pcusage.columns.total_actual_value).label('total_actual_value')) \
+            .filter(View_forecast_pcusage.columns.year == year,
+                    *filter_conditions) \
+            .group_by(View_forecast_pcusage.columns.year,
+                      View_forecast_pcusage.columns.Period_with_P,
+                      View_forecast_pcusage.columns.plant_name,
+                      View_forecast_pcusage.columns.period, View_forecast_pcusage.columns.plant_id)\
+            .order_by(View_forecast_pcusage.columns.plant_name,
+                      View_forecast_pcusage.columns.period).all()
+
+        total_forecast_volume = db.query(func.sum(View_forecast_pcusage.columns.forecasted_value)
+                                         .label('total_forecast_volume'), View_forecast_pcusage.columns.year)\
+            .filter(View_forecast_pcusage.columns.year == year,
+                    *filter_conditions)\
+            .group_by(View_forecast_pcusage.columns.year).all()
+
+        total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
+                                       .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
+            .filter(View_forecast_pcusage.columns.year == year,
+                    *filter_conditions) \
+            .group_by(View_forecast_pcusage.columns.year).all()
 
         return {"status": "success", "pcusage": result,
-                "Total_forecast_Volume": Total_Forecast_Volume,
-                "Total_Actual_Volume": Total_Actual_Volume}
+                "total_forecast_volume": total_forecast_volume,
+                "total_actual_volume": total_actual_volume}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e) or detail_message or "Error processing request")
 
 
-@router.get('/region_id/{region_id}')
-def get_FilteredUsage(region_id: int, db: Session = Depends(get_db)):
-    result = db.query(models.View_forecast_pcusage) \
-        .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-        .filter(models.Plant.region_id == region_id)\
-        .order_by(models.View_forecast_pcusage.columns.plant_id, models.View_forecast_pcusage.columns.year).all()
-
-    Total_Forecast_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.forecasted_value)
-                                     .label('total_forecast_volume'), models.View_forecast_pcusage.columns.year) \
-        .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-        .filter(models.Plant.region_id == region_id) \
-        .group_by(models.View_forecast_pcusage.columns.year).all()
-
-    Total_Actual_Volume = db.query(
-        func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_volume'),
-        models.View_forecast_pcusage.columns.year) \
-        .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-        .filter(models.Plant.region_id == region_id) \
-        .group_by(models.View_forecast_pcusage.columns.year).all()
-
-    return {"status": "success", "pcusage": result,
-            "Total_forecast_Volume": Total_Forecast_Volume,
-            "Total_Actual_Volume": Total_Actual_Volume}
-
-
-@router.get('/period_wise/company_name/{name}')
-def getUsage_company_periodWise(name: str, db: Session = Depends(get_db)):
+@router.get('/period_wise/company_name/{name}/year/{year}')
+def getUsage_company_periodWise(name: str, year: int, db: Session = Depends(get_db)):
     filter_dict = {
         'US': 'US',
         'US-Core': 'FLUS',
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }
-    if filter_dict[name] == 'US' or filter_dict[name] == 'Canada':
-        data = db.query(models.View_forecast_pcusage.columns.plant_id,
-                        models.View_forecast_pcusage.columns.year,
-                        models.View_forecast_pcusage.columns.period,
-                        models.View_forecast_pcusage.columns.Period_with_P,
-                        models.View_forecast_pcusage.columns.year.label("week"),
-                        func.sum(models.View_forecast_pcusage.columns.forecasted_value).label('total_forecast_value'),
-                        func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_value')) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-            .join(models.region, models.region.region_id == models.Plant.region_id) \
-            .filter(models.region.country == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year, models.View_forecast_pcusage.columns.Period_with_P,
-                      models.View_forecast_pcusage.columns.period, models.View_forecast_pcusage.columns.plant_id) \
-            .order_by(models.View_forecast_pcusage.columns.plant_id, models.View_forecast_pcusage.columns.year,
-                      models.View_forecast_pcusage.columns.Period_with_P).all()
-        if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"No Plant found for this category: {name}")
-
-        Total_Forecast_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.forecasted_value).label('total_forecast_volume'),
-                                         models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id)\
-            .join(models.region, models.region.region_id == models.Plant.region_id) \
-            .filter(models.region.country == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
-
-        Total_Actual_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_volume'), models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id)\
-            .join(models.region, models.region.region_id == models.Plant.region_id) \
-            .filter(models.region.country == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
-
-        return {"status": "success", "pcusage_period": data,
-                "Total_forecast_Volume": Total_Forecast_Volume,
-                "Total_Actual_Volume": Total_Actual_Volume}
+    if filter_dict[name] == 'Co-Man':
+        filter_conditions = [View_forecast_pcusage.columns.company_name == filter_dict[name]]
     else:
-        data = db.query(models.View_forecast_pcusage.columns.plant_id,
-                        models.View_forecast_pcusage.columns.year,
-                        models.View_forecast_pcusage.columns.period,
-                        models.View_forecast_pcusage.columns.Period_with_P,
-                        models.View_forecast_pcusage.columns.year.label("week"),
-                        func.sum(models.View_forecast_pcusage.columns.forecasted_value).label('total_forecast_value'),
-                        func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_value')) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id)  \
-            .filter(models.Plant.company_name == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year, models.View_forecast_pcusage.columns.Period_with_P,
-                      models.View_forecast_pcusage.columns.period, models.View_forecast_pcusage.columns.plant_id) \
-            .order_by(models.View_forecast_pcusage.columns.plant_id, models.View_forecast_pcusage.columns.year,
-                      models.View_forecast_pcusage.columns.Period_with_P).all()
-        if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"No Plant found for this category: {name}")
-
-        Total_Forecast_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.forecasted_value).label('total_forecast_volume'),
-                                         models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id)\
-            .filter(models.Plant.company_name == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
-
-        Total_Actual_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_volume'),
-                                       models.View_forecast_pcusage.columns.year) \
-            .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id)\
-            .filter(models.Plant.company_name == filter_dict[name]) \
-            .group_by(models.View_forecast_pcusage.columns.year).all()
-
-        return {"status": "success", "pcusage_period": data,
-                "Total_forecast_Volume": Total_Forecast_Volume,
-                "Total_Actual_Volume": Total_Actual_Volume}
+        filter_conditions = [View_forecast_pcusage.columns.country == filter_dict[name]]
+    return get_filtered_usage_period_common(db, filter_conditions, year,
+                                            f"Plant Mtrx data not found for company name: {name}")
 
 
-@router.get('/period_wise/region_id/{region_id}')
-def getUsage_periodWise(region_id: int, db: Session = Depends(get_db)):
-    data = db.query(models.View_forecast_pcusage.columns.plant_id,
-                    models.View_forecast_pcusage.columns.year,
-                    models.View_forecast_pcusage.columns.period,
-                    models.View_forecast_pcusage.columns.Period_with_P,
-                    models.View_forecast_pcusage.columns.year.label("week"),
-                    func.sum(models.View_forecast_pcusage.columns.forecasted_value).label('total_forecast_value'),
-                    func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_value')) \
-        .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-        .filter(models.Plant.region_id == region_id) \
-        .group_by(models.View_forecast_pcusage.columns.year, models.View_forecast_pcusage.columns.Period_with_P,
-                  models.View_forecast_pcusage.columns.period, models.View_forecast_pcusage.columns.plant_id) \
-        .order_by(models.View_forecast_pcusage.columns.plant_id, models.View_forecast_pcusage.columns.year,
-                  models.View_forecast_pcusage.columns.Period_with_P).all()
-    if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"No Plant found for this region: {region_id}")
+@router.get('/period_wise/region_id/{region_id}/year/{year}')
+def getUsage_periodWise(region_id: int, year: int, db: Session = Depends(get_db)):
+    filter_conditions = [View_forecast_pcusage.columns.region_id == region_id]
+    return get_filtered_usage_period_common(db, filter_conditions, year,
+                                            f"Plant Mtrx data not found for region ID: {region_id}")
 
-    Total_Forecast_Volume = db.query(func.sum(models.View_forecast_pcusage.columns.forecasted_value).label('total_forecast_volume'),
-                                     models.View_forecast_pcusage.columns.year) \
-        .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-        .filter(models.Plant.region_id == region_id) \
-        .group_by(models.View_forecast_pcusage.columns.year).all()
 
-    Total_Actual_Volume = db.query(
-        func.sum(models.View_forecast_pcusage.columns.total_actual_value).label('total_actual_volume'),
-        models.View_forecast_pcusage.columns.year) \
-        .join(models.Plant, models.View_forecast_pcusage.columns.plant_id == models.Plant.plant_id) \
-        .filter(models.Plant.region_id == region_id) \
-        .group_by(models.View_forecast_pcusage.columns.year).all()
-
-    return {"status": "success", "pcusage_period": data,
-            "Total_forecast_Volume": Total_Forecast_Volume,
-            "Total_Actual_Volume": Total_Actual_Volume}
+@router.get('/all_period_data/year/{year}')
+def get_week_usage_all_data(year: int, db: Session = Depends(get_db)):
+    filter_conditions = []
+    return get_filtered_usage_period_common(db, filter_conditions, year,
+                                            "Plant Mtrx data not found")
 
 
 @router.post('/createNextYear/{year}')
@@ -212,9 +146,9 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):
     try:
         previous_year = year - 1
 
-        plants = db.query(models.Plant.plant_id, models.Plant.region_id,
-                          models.Plant.crop_category_id) \
-            .filter(models.Plant.status == "ACTIVE").all()
+        plants = db.query(Plant.plant_id, Plant.region_id,
+                          Plant.crop_category_id) \
+            .filter(Plant.status == "ACTIVE").all()
         # Get all the Plants
         for item in plants:
             category_id = item[2]
@@ -230,11 +164,11 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):
             index_dict = {key: value for key, value in index_value}
             period_value = 1
             while period_value < 14:  # Period_Value
-                last_year_actual = db.query(models.View_forecast_pcusage.columns.week,
-                                            models.View_forecast_pcusage.columns.total_actual_value) \
-                    .filter(models.View_forecast_pcusage.columns.year == previous_year,
-                            models.View_forecast_pcusage.columns.plant_id == item[0],
-                            models.View_forecast_pcusage.columns.period == period_value).all()
+                last_year_actual = db.query(View_forecast_pcusage.columns.week,
+                                            View_forecast_pcusage.columns.total_actual_value) \
+                    .filter(View_forecast_pcusage.columns.year == previous_year,
+                            View_forecast_pcusage.columns.plant_id == item[0],
+                            View_forecast_pcusage.columns.period == period_value).all()
                 previous_actual_dict = {key: value for key, value in last_year_actual}
                 # get the last year actual value
                 week_value = 1
@@ -245,13 +179,13 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):
                 while week_value < no_of_week:
                     previous_actual_dict.setdefault(week_value, 0)
                     if week_value == 5:
-                        forecasted_value = (previous_actual_dict[week_value-1] * index_dict[period_value]) / 100
+                        forecasted_value = (previous_actual_dict[week_value - 1] * index_dict[period_value]) / 100
                     else:
                         forecasted_value = (previous_actual_dict[week_value] * index_dict[period_value]) / 100
                     # Calculate the forecast value
                     pc_usage_id = str(item[0]) + "#" + str(year) + "#" + str(period_value) + "#" + str(week_value)
                     payload = {"pcusage_id": pc_usage_id, "year": year, "period": period_value, "plant_id": item[0],
-                                "forecasted_value": forecasted_value, "country": trim(country[0]), "week_no": week_value}
+                               "forecasted_value": forecasted_value, "country": trim(country[0]), "week_no": week_value}
                     new_forecast_record = models.pcusage(**payload)
                     db.add(new_forecast_record)
                     week_value += 1

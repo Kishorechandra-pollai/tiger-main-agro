@@ -36,7 +36,7 @@ def get_preferred_grower(db: Session = Depends(get_db)):
 
 
 @router.get('/{growing_areaId}')
-def get_post(growing_areaId: str, db: Session = Depends(get_db)):
+def get_growingid(growing_areaId: str, db: Session = Depends(get_db)):
     growing_area = db.query(models.growing_area).filter(
         models.growing_area.growing_area_id == growing_areaId).first()
     if not growing_area:

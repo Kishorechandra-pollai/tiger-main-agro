@@ -212,7 +212,7 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                 total_ship_calculation(item.ownership_id, db)
 
         return {"status": "success", "records_updated": update_count}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -270,5 +270,5 @@ def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db))
 
                 db.commit()
         return {"message": f"Total Contract ERP updated for {crop_year} in Ownership table"}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")

@@ -105,7 +105,7 @@ def update_solid_rates_records(payload: solidRateMappingPayload,db: Session = De
         db.commit()
 
         return {"status": "success", "records_updated": update_count}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 @router.get('/solids_rate_period')
@@ -127,7 +127,7 @@ def solids_rate_period(db: Session = Depends(get_db)):
             for row in records
         ]
         return {"solids_rate_period": result}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 @router.get('/solid_rate_period_year/{year}')
@@ -150,5 +150,5 @@ def solid_rate_period_year(year:int, db: Session = Depends(get_db)):
             for row in records
         ]
         return {"solids_rate_period_year": result}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e)) from e

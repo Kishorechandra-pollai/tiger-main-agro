@@ -4,6 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
 import models
+from models import View_PlantMtrx_table
 import schemas
 import extensionMapping
 import period_week_calc
@@ -11,208 +12,135 @@ import period_week_calc
 router = APIRouter()
 
 
-@router.get('/plant/region_id/{region_id}/year/{year}')
-def get_plantMtrx(region_id: int, year: int, db: Session = Depends(get_db)):
-    """get plantMtrx data based on region_id input."""
+def get_plantMtrx_common(filter_conditions, name_or_id, year, db):
     try:
-        data = db.query(models.View_PlantMtrx_table.columns.plant_matrix_id,
-                        models.View_PlantMtrx_table.columns.plant_id,
-                        models.View_PlantMtrx_table.columns.plant_name,
-                        models.View_PlantMtrx_table.columns.period,
-                        models.View_PlantMtrx_table.columns.period_with_P,
-                        models.View_PlantMtrx_table.columns.week,
-                        models.View_PlantMtrx_table.columns.year,
-                        models.View_PlantMtrx_table.columns.value,
-                        models.View_PlantMtrx_table.columns.growing_area_id,
-                        models.View_PlantMtrx_table.columns.growing_area_name) \
-            .filter(models.View_PlantMtrx_table.columns.year == year,
-                    models.View_PlantMtrx_table.columns.status == 'active',
-                    models.View_PlantMtrx_table.columns.region_id == region_id) \
-            .order_by(models.View_PlantMtrx_table.columns.plant_id).all()
-        if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"Plant Mtrx data not found for region : {region_id}")
         position_data = db.query(models.View_PlantMtrx_position) \
             .filter(models.View_PlantMtrx_position.columns.year == year).all()
+
+        data = db.query(View_PlantMtrx_table.columns.plant_matrix_id,
+                        View_PlantMtrx_table.columns.plant_id,
+                        View_PlantMtrx_table.columns.plant_name,
+                        View_PlantMtrx_table.columns.period,
+                        View_PlantMtrx_table.columns.period_with_P,
+                        View_PlantMtrx_table.columns.week,
+                        View_PlantMtrx_table.columns.year,
+                        View_PlantMtrx_table.columns.value,
+                        View_PlantMtrx_table.columns.growing_area_id,
+                        View_PlantMtrx_table.columns.growing_area_name) \
+            .filter(View_PlantMtrx_table.columns.year == year,
+                    View_PlantMtrx_table.columns.status == 'active', *filter_conditions) \
+            .order_by(View_PlantMtrx_table.columns.plant_name,
+                      View_PlantMtrx_table.columns.period,
+                      View_PlantMtrx_table.columns.week).all()
+        if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Plant Mtrx data not found for : {name_or_id}")
+
         return {"status": "success", "plant_mtrx": data, "position_data": position_data}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get('/plant/region_id/{region_id}/year/{year}')
+def get_plantMtrx_by_region(region_id: int, year: int, db: Session = Depends(get_db)):
+    """Get plantMtrx data based on region_id input."""
+    filter_conditions = [
+        View_PlantMtrx_table.columns.region_id == region_id
+    ]
+    return get_plantMtrx_common(filter_conditions, region_id, year, db)
+
+
 @router.get('/plant/company_name/{name}/year/{year}')
-def get_plantMtrx(name: str, year: int, db: Session = Depends(get_db)):
-    """get plantMtrx data based on company_name/country input."""
+def get_plantMtrx_by_company(name: str, year: int, db: Session = Depends(get_db)):
+    """Get plantMtrx data based on company_name/country input."""
     filter_dict = {
         'US': 'US',
+        'Canada': 'Canada',
         'US-Core': 'FLUS',
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }
+    filter_conditions = [
+        View_PlantMtrx_table.columns.status == 'active',
+        View_PlantMtrx_table.columns.country == filter_dict[name]
+        if filter_dict[name] in ['US', 'Canada']
+        else View_PlantMtrx_table.columns.company_name == filter_dict[name]
+    ]
+    return get_plantMtrx_common(filter_conditions, name, year, db)
+
+
+def get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db):
     try:
-        position_data = db.query(models.View_PlantMtrx_position) \
-            .filter(models.View_PlantMtrx_position.columns.year == year).all()
-
-        if filter_dict[name] == 'US' or filter_dict[name] == 'Canada':
-            data = db.query(models.View_PlantMtrx_table.columns.plant_matrix_id,
-                            models.View_PlantMtrx_table.columns.plant_id,
-                            models.View_PlantMtrx_table.columns.plant_name,
-                            models.View_PlantMtrx_table.columns.period,
-                            models.View_PlantMtrx_table.columns.period_with_P,
-                            models.View_PlantMtrx_table.columns.week,
-                            models.View_PlantMtrx_table.columns.year,
-                            models.View_PlantMtrx_table.columns.value,
-                            models.View_PlantMtrx_table.columns.growing_area_id,
-                            models.View_PlantMtrx_table.columns.growing_area_name) \
-                .filter(models.View_PlantMtrx_table.columns.year == year,
-                        models.View_PlantMtrx_table.columns.status == 'active',
-                        models.View_PlantMtrx_table.columns.country == filter_dict[name]) \
-                .order_by(models.View_PlantMtrx_table.columns.plant_id).all()
-            if not data:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                    detail=f"Plant Matrix data not found for : {name}")
-        else:
-            data = db.query(models.View_PlantMtrx_table.columns.plant_matrix_id,
-                            models.View_PlantMtrx_table.columns.plant_id,
-                            models.View_PlantMtrx_table.columns.plant_name,
-                            models.View_PlantMtrx_table.columns.period,
-                            models.View_PlantMtrx_table.columns.period_with_P,
-                            models.View_PlantMtrx_table.columns.week,
-                            models.View_PlantMtrx_table.columns.year,
-                            models.View_PlantMtrx_table.columns.value,
-                            models.View_PlantMtrx_table.columns.growing_area_id,
-                            models.View_PlantMtrx_table.columns.growing_area_name) \
-                .filter(models.View_PlantMtrx_table.columns.year == year,
-                        models.View_PlantMtrx_table.columns.status == 'active',
-                        models.View_PlantMtrx_table.columns.company_name == filter_dict[name]) \
-                .order_by(models.View_PlantMtrx_table.columns.plant_id).all()
-            if not data:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                    detail=f"Plant Mtrx data not found for region : {name}")
-
-        return {"status": "success", "plant_mtrx": data, "position_data": position_data}
+        data = db.query(func.concat(View_PlantMtrx_table.columns.growing_area_name, " | ",
+                                    View_PlantMtrx_table.columns.growing_area_desc).label("growing_area_name"),
+                        View_PlantMtrx_table.columns.growing_area_id,
+                        View_PlantMtrx_table.columns.period,
+                        View_PlantMtrx_table.columns.period_with_P,
+                        View_PlantMtrx_table.columns.week,
+                        View_PlantMtrx_table.columns.year,
+                        func.sum(View_PlantMtrx_table.columns.value).label('total_value'))\
+            .filter(View_PlantMtrx_table.columns.year == year,
+                    *filter_conditions) \
+            .group_by(View_PlantMtrx_table.columns.year,
+                      View_PlantMtrx_table.columns.growing_area_desc,
+                      View_PlantMtrx_table.columns.growing_area_id,
+                      View_PlantMtrx_table.columns.growing_area_name,
+                      View_PlantMtrx_table.columns.period_with_P,
+                      View_PlantMtrx_table.columns.period,
+                      View_PlantMtrx_table.columns.week) \
+            .order_by(View_PlantMtrx_table.columns.growing_area_name,
+                      View_PlantMtrx_table.columns.period,
+                      View_PlantMtrx_table.columns.week).all()
+        if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail_message)
+        return {"status": "success", "plant_mtrx": data}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get('/growing_area/region/{region_id}/year/{year}')
-def getplantmtrx_growingarea(region_id: int, year: int, db: Session = Depends(get_db)):
-    """get plantMtrx data based on region_id input for growing_area basis."""
-    try:
-        data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
-                                    models.View_PlantMtrx_table.columns.growing_area_desc)
-                        .label("growing_area_name"),
-                        models.View_PlantMtrx_table.columns.growing_area_id,
-                        models.View_PlantMtrx_table.columns.period,
-                        models.View_PlantMtrx_table.columns.period_with_P,
-                        models.View_PlantMtrx_table.columns.week,
-                        models.View_PlantMtrx_table.columns.year,
-                        func.sum(models.View_PlantMtrx_table.columns.value)
-                        .label('total_value')) \
-            .filter(models.View_PlantMtrx_table.columns.year == year,
-                    models.View_PlantMtrx_table.columns.status == 'active',
-                    models.View_PlantMtrx_table.columns.ga_region_id == region_id) \
-            .group_by(models.View_PlantMtrx_table.columns.year,
-                      models.View_PlantMtrx_table.columns.growing_area_desc,
-                      models.View_PlantMtrx_table.columns.growing_area_id,
-                      models.View_PlantMtrx_table.columns.growing_area_name,
-                      models.View_PlantMtrx_table.columns.period_with_P,
-                      models.View_PlantMtrx_table.columns.period,
-                      models.View_PlantMtrx_table.columns.week).all()
-        if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"Plant Mtrx data not found for region : {region_id}")
-        return {"status": "success", "plant_mtrx": data}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+def getplantmtrx_growingarea_by_region(region_id: int, year: int, db: Session = Depends(get_db)):
+    filter_conditions = [View_PlantMtrx_table.columns.ga_region_id == region_id]
+    detail_message = f"Plant Mtrx data not found for region: {region_id}"
+    return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/country/{name}/year/{year}')
-def getplantmtrx_growingarea(name: str, year: int, db: Session = Depends(get_db)):
-    """get plantMtrx data based on country input for growing_area basis."""
-    try:
-        data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
-                                    models.View_PlantMtrx_table.columns.growing_area_desc)
-                        .label("growing_area_name"),
-                        models.View_PlantMtrx_table.columns.growing_area_id,
-                        models.View_PlantMtrx_table.columns.period,
-                        models.View_PlantMtrx_table.columns.period_with_P,
-                        models.View_PlantMtrx_table.columns.week,
-                        models.View_PlantMtrx_table.columns.year,
-                        func.sum(models.View_PlantMtrx_table.columns.value)
-                        .label('total_value')) \
-            .join(models.region,
-                  models.View_PlantMtrx_table.columns.ga_region_id == models.region.region_id) \
-            .filter(models.View_PlantMtrx_table.columns.year == year,
-                    models.View_PlantMtrx_table.columns.status == 'active',
-                    models.region.country == name) \
-            .group_by(models.View_PlantMtrx_table.columns.year,
-                      models.View_PlantMtrx_table.columns.growing_area_desc,
-                      models.View_PlantMtrx_table.columns.growing_area_id,
-                      models.View_PlantMtrx_table.columns.growing_area_name,
-                      models.View_PlantMtrx_table.columns.period_with_P,
-                      models.View_PlantMtrx_table.columns.period,
-                      models.View_PlantMtrx_table.columns.week).all()
-        if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"Plant Mtrx data not found for : {name}")
-        return {"status": "success", "plant_mtrx": data}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+def getplantmtrx_growingarea_by_country(name: str, year: int, db: Session = Depends(get_db)):
+    filter_conditions = [View_PlantMtrx_table.columns.ga_country == name]
+    detail_message = f"Plant Mtrx data not found for country: {name}"
+    return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/all_data/year/{year}')
 def getplantmtrx_growingarea_all(year: int, db: Session = Depends(get_db)):
-    """get plantMtrx all data for growing_area basis."""
-    try:
-        data = db.query(func.concat(models.View_PlantMtrx_table.columns.growing_area_name, " | ",
-                                    models.View_PlantMtrx_table.columns.growing_area_desc)
-                        .label("growing_area_name"),
-                        models.View_PlantMtrx_table.columns.growing_area_id,
-                        models.View_PlantMtrx_table.columns.period,
-                        models.View_PlantMtrx_table.columns.period_with_P,
-                        models.View_PlantMtrx_table.columns.week,
-                        models.View_PlantMtrx_table.columns.year,
-                        func.sum(models.View_PlantMtrx_table.columns.value)
-                        .label('total_value')) \
-            .filter(models.View_PlantMtrx_table.columns.year == year,
-                    models.View_PlantMtrx_table.columns.status == 'active') \
-            .group_by(models.View_PlantMtrx_table.columns.year,
-                      models.View_PlantMtrx_table.columns.growing_area_desc,
-                      models.View_PlantMtrx_table.columns.growing_area_id,
-                      models.View_PlantMtrx_table.columns.growing_area_name,
-                      models.View_PlantMtrx_table.columns.period_with_P,
-                      models.View_PlantMtrx_table.columns.period,
-                      models.View_PlantMtrx_table.columns.week).all()
-        if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="Plant Mtrx data not found.")
-        return {"status": "success", "plant_mtrx": data}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    filter_conditions = []
+    detail_message = "Plant Mtrx data not found."
+    return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/only_region_data/year/{year}')
 def getplantmtrx_region(year: int, db: Session = Depends(get_db)):
     """get plantMtrx data based on region-wise."""
     try:
-        data = db.query(models.View_PlantMtrx_table.columns.region_name,
-                        models.View_PlantMtrx_table.columns.period,
-                        models.View_PlantMtrx_table.columns.period_with_P,
-                        models.View_PlantMtrx_table.columns.week,
-                        models.View_PlantMtrx_table.columns.year,
-                        func.sum(models.View_PlantMtrx_table.columns.value)
+        data = db.query(View_PlantMtrx_table.columns.region_name,
+                        View_PlantMtrx_table.columns.period,
+                        View_PlantMtrx_table.columns.period_with_P,
+                        View_PlantMtrx_table.columns.week,
+                        View_PlantMtrx_table.columns.year,
+                        func.sum(View_PlantMtrx_table.columns.value)
                         .label('totalValue_regionWise')) \
-            .filter(models.View_PlantMtrx_table.columns.year == year,
-                    models.View_PlantMtrx_table.columns.status == 'active') \
-            .group_by(models.View_PlantMtrx_table.columns.year,
-                      models.View_PlantMtrx_table.columns.region_id,
-                      models.View_PlantMtrx_table.columns.region_name,
-                      models.View_PlantMtrx_table.columns.period,
-                      models.View_PlantMtrx_table.columns.period_with_P,
-                      models.View_PlantMtrx_table.columns.week) \
-            .order_by(models.View_PlantMtrx_table.columns.region_id,
-                      models.View_PlantMtrx_table.columns.period,
-                      models.View_PlantMtrx_table.columns.week).all()
+            .filter(View_PlantMtrx_table.columns.year == year,
+                    View_PlantMtrx_table.columns.status == 'active') \
+            .group_by(View_PlantMtrx_table.columns.year,
+                      View_PlantMtrx_table.columns.region_id,
+                      View_PlantMtrx_table.columns.region_name,
+                      View_PlantMtrx_table.columns.period,
+                      View_PlantMtrx_table.columns.period_with_P,
+                      View_PlantMtrx_table.columns.week) \
+            .order_by(View_PlantMtrx_table.columns.region_id,
+                      View_PlantMtrx_table.columns.period,
+                      View_PlantMtrx_table.columns.week).all()
         if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"No data is found for this region:")
@@ -278,7 +206,7 @@ def update_plantMtrx(payload: schemas.PlantMtrxPayload, db: Session = Depends(ge
                 models.plantMtrx.plant_matrix_id == item.plant_matrix_id).first()
             if existing_record is None:
                 """New record is added to the plantMtrx."""
-                region_id = db.query(models.Plant.region_id)\
+                region_id = db.query(models.Plant.region_id) \
                     .filter(models.Plant.plant_id == item.plant_id).first()
                 crop_type, crop_year = func_getcrop_type(item.period, item.week, item.year,
                                                          item.growing_area_id, db)
@@ -425,34 +353,32 @@ def load_actual_value(db: Session = Depends(get_db)):
         current_year = int(res['year'])
         if current_period == 1:
             new_record_count = update_first_period_data(13, -1,
-                                                        current_year-1,
+                                                        current_year - 1,
                                                         new_record_count,
                                                         db)
             new_record_count = update_first_period_data(1, current_week,
                                                         current_year, new_record_count,
                                                         db)
         else:
-            lower_limit = (current_period-1)*5+1       #delete all actual value of previous period.
-            max_limit = current_period*5+current_week  #current_week value.
-            print("lower Limit, max_limit")
-            print(lower_limit, max_limit)
+            lower_limit = (current_period - 1) * 5 + 1  # delete all actual value of previous period.
+            max_limit = current_period * 5 + current_week  # current_week value.
             """delete of plant_mtrx_data."""
-            records_to_delete = db.query(models.plantMtrx)\
-                .filter((models.plantMtrx.period*5)+models.plantMtrx.week >= lower_limit,
-                        (models.plantMtrx.period*5)+models.plantMtrx.week <= max_limit,
+            records_to_delete = db.query(models.plantMtrx) \
+                .filter((models.plantMtrx.period * 5) + models.plantMtrx.week >= lower_limit,
+                        (models.plantMtrx.period * 5) + models.plantMtrx.week <= max_limit,
                         models.plantMtrx.year == today_date.year).all()
             for record in records_to_delete:
                 db.delete(record)
             db.commit()
             """Insert new actual volumes in Plant Matrix."""
-            period_value = current_period-1
+            period_value = current_period - 1
             while period_value <= current_period:
                 week_value = 1
-                while period_value*5+week_value <= current_period*5+current_week:
+                while period_value * 5 + week_value <= current_period * 5 + current_week:
                     actual_data_current_week = db.query(models.View_plant_matrix_actual) \
                         .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
                                 models.View_plant_matrix_actual.columns.week_num == week_value,
-                                models.View_plant_matrix_actual.columns.p_year == today_date.year)\
+                                models.View_plant_matrix_actual.columns.p_year == today_date.year) \
                         .all()
                     if not actual_data_current_week:
                         continue
@@ -467,8 +393,8 @@ def load_actual_value(db: Session = Depends(get_db)):
                                              "plant_id": item.Plant_Id,
                                              "growing_area_id": item.growing_area_id,
                                              "period": item.period_num,
-                                             "week": item.week_num,"year": item.p_year,
-                                             "crop_type": crop_type,"crop_year": crop_year,
+                                             "week": item.week_num, "year": item.p_year,
+                                             "crop_type": crop_type, "crop_year": crop_year,
                                              "value": item.sumof_rec_potato, "status": 'active'}
                         plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
                         db.add(plantMtrx_record)
@@ -486,50 +412,6 @@ def load_actual_value(db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# @router.post('/load_previous_data')
-# def temp_insert(period: int, year: int, db: Session = Depends(get_db)):
-#     try:
-#         new_record_count = 0
-#         today_date = date.today()
-#         res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
-#         period_value = period
-#         current_week = 1
-#         if period_week_calc.calculate_week_num(year, int(period_value)):
-#             no_of_week = 5
-#         else:
-#             no_of_week = 4
-#         while current_week <= no_of_week:
-#             # delete of forecast data
-#             records_to_delete = db.query(models.plantMtrx).filter(models.plantMtrx.period == period_value,
-#                                                                   models.plantMtrx.week == current_week,
-#                                                                   models.plantMtrx.year == year).all()
-#             for record in records_to_delete:
-#                 db.delete(record)
-#             db.commit()
-#             actual_data_current_week = db.query(models.View_plant_matrix_actual) \
-#                 .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
-#                         models.View_plant_matrix_actual.columns.week_num == current_week,
-#                         models.View_plant_matrix_actual.columns.p_year == year).all()
-#             for item in actual_data_current_week:
-#                 new_record_count += 1
-#                 crop_type, crop_year = func_getcrop_type(period_value, current_week, year,
-#                                                          item.growing_area_id, db)
-#
-#                 PlantMtrx_payload = {"plant_matrix_id": item.row_id,
-#                                      "region_id": item.region_id, "plant_id": item.Plant_Id,
-#                                      "growing_area_id": item.growing_area_id, "period": item.period_num,
-#                                      "week": item.week_num, "year": item.p_year, "crop_type": crop_type,
-#                                      "crop_year": crop_year, "value": item.sumof_rec_potato, "status": 'active'}
-#                 newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
-#                 db.add(newplantMtrx_record)
-#
-#             db.commit()
-#             current_week += 1
-#         return {"status": "success", "record_updated": new_record_count}
-#     except Exception as e:
-#         raise HTTPException(status_code=400, detail=str(e))
-
-
 @router.post('/load_previous_data_week_wise')
 def temp_insert_week_wise(period: int, week: int, year: int,
                           db: Session = Depends(get_db)):
@@ -538,7 +420,7 @@ def temp_insert_week_wise(period: int, week: int, year: int,
         new_record_count = 0
         period_value = period
         current_week = week
-        records_to_delete = db.query(models.plantMtrx)\
+        records_to_delete = db.query(models.plantMtrx) \
             .filter(models.plantMtrx.period == period_value,
                     models.plantMtrx.week == current_week,
                     models.plantMtrx.year == year).all()
@@ -576,12 +458,10 @@ def temp_insert_week_wise(period: int, week: int, year: int,
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post('/load_previous_2022_year_data')
+@router.post('/load_previous_year_data')
 def prev_year_insert(year: int, db: Session = Depends(get_db)):
     try:
         new_record_count = 0
-        today_date = date.today()
-        # res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
         period_value = 1
         while period_value <= 13:
             current_week = 1

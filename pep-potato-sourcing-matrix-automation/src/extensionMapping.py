@@ -114,7 +114,7 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
         update_final_extension_value(input_growing_Area_id, input_crop_year, db)
         return {"status": "success",
                 "message": f"Extension updated Successfully for growing_area_id {input_growing_Area_id}"}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e))
 
 
