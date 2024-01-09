@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 sys.path.append(r"..\src\main.py")
-#sys.path.append(r"..\pep-potato-sourcing-matrix-automation\src")
+# sys.path.append(r"..\pep-potato-sourcing-matrix-automation\src")
 sys.path.append("src/")
 sys.path.append("../")
 sys.path.append("../src/")
@@ -26,7 +26,80 @@ from category import delete_category, create_category
 
 client = TestClient(app)
 
-"""--------OwnershipGrowerGrowing.py---------"""
+"""________dashboard.py_________"""
+
+
+def test_dashboard_pc_volume_period_view_1():
+    response = client.get('/api/dashboard/dashboard_pc_volume_period')
+    assert response.status_code == 200
+
+
+def test_dashboard_pc_volume_period_year_2():
+    response = client.get('/api/dashboard/dashboard_pc_volume_period/2023')
+    assert response.status_code == 200
+
+
+def test_dashboard_pc_plan_volume_usage_3():
+    response = client.get('/api/dashboard/dashboard_pc_plan_volume_usage')
+    assert response.status_code == 200
+
+
+def test_dashboard_pc_plan_volume_usage_year_4():
+    response = client.get('/api/dashboard/dashboard_pc_plan_volume_usage/2023')
+    assert response.status_code == 200
+
+
+def test_dashboard_weekly_combine_view_5():
+    response = client.get('/api/dashboard/dashboard_weekly_combine')
+    assert response.status_code == 200
+
+
+def test_dashboard_weekly_combine_year_6():
+    response = client.get('/api/dashboard/dashboard_weekly_combine/2023')
+    assert response.status_code == 200
+
+
+def test_dashboard_pc_usage_period_view_7():
+    response = client.get('/api/dashboard/pc_usage_period')
+    assert response.status_code == 200
+
+
+def test_dashboard_pc_period_view_year_country_8():
+    response = client.get('/api/dashboard/pc_usage_period view"/2023/CANADA')
+    assert response.status_code == 200
+
+
+def test_pc_volume_period_country_combine_9():
+    response = client.get('/api/dashboard/pc_volume_period_country_combine')
+    assert response.status_code == 200
+
+
+def test_pc_volume_period_country_combine_year_10():
+    response = client.get('/api/dashboard/pc_volume_period_country_combine"/2023')
+    assert response.status_code == 200
+
+
+def test_pc_volume_period_country_yearly_11():
+    response = client.get('/api/dashboard/pc_volume_period_country_yearly')
+    assert response.status_code == 200
+
+
+def test_pc_volume_period_country_year_12():
+    response = client.get('/api/dashboard/pc_volume_period_country_yearly"/2023')
+    assert response.status_code == 200
+
+
+def test_pc_volume_yearly_country_combine_13():
+    response = client.get('/api/dashboard/pc_volume_yearly_country_combine')
+    assert response.status_code == 200
+
+
+def test_pc_volume_yearly_country_combine_year_14():
+    response = client.get('/api/dashboard/dashboard_pc_volume_yearly_country_combine"/2023')
+    assert response.status_code == 200
+
+
+"""________OwnershipGrowerGrowing.py_________"""
 
 
 def test_get_OwnershipGrowerGrowing():
@@ -396,13 +469,8 @@ def test_get_plant():
 """________allocation.py_________"""
 
 
-def test_get_allocation():
-    response = client.get('/api/allocation/get_all')
-    assert response.status_code == 200
-
-
 def test_get_allocation_year():
-    response = client.get('/api/allocation/filter/2023')
+    response = client.get('/api/allocation/year/2023')
     assert response.status_code == 200
 
 
@@ -644,7 +712,7 @@ def test_func_getcrop_type(mock_get_db):
 
 
 @patch('database.get_db')
-def test_update_plantMtrx(mock_get_db):
+def test_update_plantmtrx(mock_get_db):
     db_mock = MagicMock()
     mock_get_db.return_value = db_mock
     mock_existing_record = MagicMock()
@@ -705,17 +773,6 @@ def test_create_category(mock_get_db):
     mock_payload = schemas.Category(**payload_category)
     result = create_category(payload=mock_payload, db=db_mock)
     assert result["status"] == "success"
-
-# """________dashboard.py_________"""
-
-# def test_get_category():
-#     response = client.get('/api/category/')
-#     assert response.status_code == 200
-#
-#
-# def test_get_by_categoryid():
-#     response = client.get('/api/category/1')
-#     assert response.status_code == 200
 
 
 # """________plantGrowingMapping.py_________"""
