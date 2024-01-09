@@ -16,8 +16,8 @@ def get_freight_task_info(db: Session = Depends(get_db)):
                             detail="No freight_task_info found")
     return {"status": "success", "data": query}
 
-@router.get('/getByoff_contract_task_id/{freight_task_id}')
-def getByoff_contract_task_id(freight_task_id: int, db: Session = Depends(get_db)):
+@router.get('/getByfreight_task_id/{freight_task_id}')
+def getByfreight__task_id(freight_task_id: int, db: Session = Depends(get_db)):
     freight_task = db.query(freight_task_info).filter(freight_task_info.freight_task_id == freight_task_id).first()
     if not freight_task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
