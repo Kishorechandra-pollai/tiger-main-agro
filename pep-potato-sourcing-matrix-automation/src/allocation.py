@@ -149,7 +149,7 @@ def update_only_allocation(allocation_id, index, db: Session = Depends(get_db)):
 #                 db.commit()
 #             week_value += 1
 
-def update_forecast_volume(item, db: Session = Depends(get_db), is_forecast_only=False):
+def update_forecast_volume(is_forecast_only, item, db: Session = Depends(get_db)):
     """Function updates forecast and plantMtrx volume."""
     new_index = float(item.value)
     category_value = item.category_name
@@ -172,7 +172,7 @@ def update_forecast_volume(item, db: Session = Depends(get_db), is_forecast_only
         else:
             no_of_week = 5
         while week_value < no_of_week:
-            if not is_forecast_only == True:
+            if is_forecast_only == True:
                 prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
                 .filter(models.plantMtrx_template.plant_id == plant_id,
                         models.plantMtrx_template.period == period_value,
@@ -189,7 +189,7 @@ def update_forecast_volume(item, db: Session = Depends(get_db), is_forecast_only
                                                 models.pcusage.week_no == week_value)\
                     .update({models.pcusage.forecasted_value: new_forecast_value},
                             synchronize_session=False)
-            if not is_forecast_only == True:
+            if is_forecast_only == True:
                 db.commit()
                 week_value += 1
             else:
@@ -230,15 +230,15 @@ def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
                 """Below function updates forecast and plantMtrx volume."""
-                update_forecast_volume(item, db, False)
+                update_forecast_volume(item, db, is_forecast_only=False)
             elif year_data == int(item.year) and current_period < item.period:
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
-                update_forecast_volume(item, db, False)
+                update_forecast_volume(item, db, is_forecast_only=False)
             else:
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
-                update_forecast_volume(item, db, True)
+                update_forecast_volume(item, db, is_forecast_only=True)
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

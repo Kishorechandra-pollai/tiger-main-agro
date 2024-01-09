@@ -486,48 +486,48 @@ def load_actual_value(db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post('/load_previous_data')
-def temp_insert(period: int, year: int, db: Session = Depends(get_db)):
-    try:
-        new_record_count = 0
-        today_date = date.today()
-        res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
-        period_value = period
-        current_week = 1
-        if period_week_calc.calculate_week_num(year, int(period_value)):
-            no_of_week = 5
-        else:
-            no_of_week = 4
-        while current_week <= no_of_week:
-            # delete of forecast data
-            records_to_delete = db.query(models.plantMtrx).filter(models.plantMtrx.period == period_value,
-                                                                  models.plantMtrx.week == current_week,
-                                                                  models.plantMtrx.year == year).all()
-            for record in records_to_delete:
-                db.delete(record)
-            db.commit()
-            actual_data_current_week = db.query(models.View_plant_matrix_actual) \
-                .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
-                        models.View_plant_matrix_actual.columns.week_num == current_week,
-                        models.View_plant_matrix_actual.columns.p_year == year).all()
-            for item in actual_data_current_week:
-                new_record_count += 1
-                crop_type, crop_year = func_getcrop_type(period_value, current_week, year,
-                                                         item.growing_area_id, db)
-
-                PlantMtrx_payload = {"plant_matrix_id": item.row_id,
-                                     "region_id": item.region_id, "plant_id": item.Plant_Id,
-                                     "growing_area_id": item.growing_area_id, "period": item.period_num,
-                                     "week": item.week_num, "year": item.p_year, "crop_type": crop_type,
-                                     "crop_year": crop_year, "value": item.sumof_rec_potato, "status": 'active'}
-                newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
-                db.add(newplantMtrx_record)
-
-            db.commit()
-            current_week += 1
-        return {"status": "success", "record_updated": new_record_count}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+# @router.post('/load_previous_data')
+# def temp_insert(period: int, year: int, db: Session = Depends(get_db)):
+#     try:
+#         new_record_count = 0
+#         today_date = date.today()
+#         res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
+#         period_value = period
+#         current_week = 1
+#         if period_week_calc.calculate_week_num(year, int(period_value)):
+#             no_of_week = 5
+#         else:
+#             no_of_week = 4
+#         while current_week <= no_of_week:
+#             # delete of forecast data
+#             records_to_delete = db.query(models.plantMtrx).filter(models.plantMtrx.period == period_value,
+#                                                                   models.plantMtrx.week == current_week,
+#                                                                   models.plantMtrx.year == year).all()
+#             for record in records_to_delete:
+#                 db.delete(record)
+#             db.commit()
+#             actual_data_current_week = db.query(models.View_plant_matrix_actual) \
+#                 .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
+#                         models.View_plant_matrix_actual.columns.week_num == current_week,
+#                         models.View_plant_matrix_actual.columns.p_year == year).all()
+#             for item in actual_data_current_week:
+#                 new_record_count += 1
+#                 crop_type, crop_year = func_getcrop_type(period_value, current_week, year,
+#                                                          item.growing_area_id, db)
+#
+#                 PlantMtrx_payload = {"plant_matrix_id": item.row_id,
+#                                      "region_id": item.region_id, "plant_id": item.Plant_Id,
+#                                      "growing_area_id": item.growing_area_id, "period": item.period_num,
+#                                      "week": item.week_num, "year": item.p_year, "crop_type": crop_type,
+#                                      "crop_year": crop_year, "value": item.sumof_rec_potato, "status": 'active'}
+#                 newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
+#                 db.add(newplantMtrx_record)
+#
+#             db.commit()
+#             current_week += 1
+#         return {"status": "success", "record_updated": new_record_count}
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post('/load_previous_data_week_wise')
