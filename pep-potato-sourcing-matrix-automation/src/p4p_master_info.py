@@ -94,7 +94,7 @@ def update_p4p_task_mappings_records(payload: p4pTaskMappingsPayload, db: Sessio
         for item in data:
             if item.p4p_id<=0 or item.period<=0 or item.year<=0:
                 return {"status": "error", "message":"Please check details"}
-            db.query(p4p_task_mappings).filter(p4p_task_mappings.p4p_id == item.p4p_id, p4p_task_mappings.year==item.year, p4p_task_mappings.period==item.period, p4p_task_mappings.company_name==item.company_name).update(
+            db.query(p4p_task_mappings).filter(p4p_task_mappings.p4p_id == item.p4p_id, p4p_task_mappings.year==item.year, p4p_task_mappings.period==item.period, p4p_task_mappings.company_name==item.company_name,p4p_task_mappings.company_name==item.company_name).update(
                 {p4p_task_mappings.value: item.value}, synchronize_session='fetch')
             update_count += 1
         db.commit()

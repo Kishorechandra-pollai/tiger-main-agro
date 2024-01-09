@@ -91,7 +91,7 @@ def update_general_administrative_records(payload: GeneralAdministrativeMappings
         for item in data:
             if item.general_administrative_id<=0 or item.period<=0 or item.year<=0:
                 return {"status": "error", "message":"Please check details"}
-            db.query(general_administrative_mappings).filter(general_administrative_mappings.general_administrative_id == item.general_administrative_id, general_administrative_mappings.period==item.period, general_administrative_mappings.year==item.year).update(
+            db.query(general_administrative_mappings).filter(general_administrative_mappings.general_administrative_id == item.general_administrative_id, general_administrative_mappings.period==item.period, general_administrative_mappings.year==item.year,general_administrative_mappings.company_name==item.company_name).update(
                 {general_administrative_mappings.value: item.value}, synchronize_session='fetch')
             update_count += 1
         db.commit()
