@@ -189,6 +189,7 @@ class FreightCostRateSchema(BaseModel):
 class FreightCostMappingSchema(BaseModel):
     """Class representing schema for freight_cost_mapping table"""
     year: int | None = None
+    country_code:str | None= None
     rate: float | None = None
 
     class Config:

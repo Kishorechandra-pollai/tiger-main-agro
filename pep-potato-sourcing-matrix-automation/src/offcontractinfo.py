@@ -112,7 +112,7 @@ def update_off_contract_records(payload: OffContractTaskMappingPayload, db: Sess
         for item in data:
             if item.off_contract_task_id<=0 or item.period<=0 or item.year<=0:
                 return {"status": "error", "message":"Please check details"}
-            db.query(off_contract_task_mapping).filter(off_contract_task_mapping.off_contract_task_id == item.off_contract_task_id, off_contract_task_mapping.period == item.period, off_contract_task_mapping.year == item.year).update(
+            db.query(off_contract_task_mapping).filter(off_contract_task_mapping.off_contract_task_id == item.off_contract_task_id, off_contract_task_mapping.period == item.period, off_contract_task_mapping.year == item.year,off_contract_task_mapping.company_name==item.company_name).update(
                 {off_contract_task_mapping.value: item.value}, synchronize_session='fetch')
             update_count += 1
         db.commit()

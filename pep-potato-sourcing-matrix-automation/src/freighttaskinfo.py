@@ -83,7 +83,7 @@ def update_freight_task_records(payload: FreightTaskMappingsPayload, db: Session
         for item in data:
             if item.freight_task_id<=0 or item.period<=0 or item.year<=0:
                 return {"status": "error", "message":"Please check details"}
-            db.query(freight_task_mappings).filter(freight_task_mappings.freight_task_id == item.freight_task_id, freight_task_mappings.period==item.period, freight_task_mappings.year==item.year).update(
+            db.query(freight_task_mappings).filter(freight_task_mappings.freight_task_id == item.freight_task_id, freight_task_mappings.period==item.period, freight_task_mappings.year==item.year, freight_task_mappings.company_name==item.company_name).update(
                 {freight_task_mappings.value: item.value, freight_task_mappings.period: item.period}, synchronize_session='fetch')
             update_count += 1
         db.commit()
