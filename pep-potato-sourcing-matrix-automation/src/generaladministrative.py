@@ -72,7 +72,7 @@ def create_general_administrative_task(payload: GeneralAdministrativeTaskSchema,
     db.add(new_record)
     db.commit()
     db.refresh(new_record)
-    return {"status": "success", "general_administrative_id": new_record.general_administrative_id}
+    return {"status": "success"}
 
 @router.post('/create_general_administrative_mappings', status_code=status.HTTP_201_CREATED)
 def create_general_administrative_mappings(payload: GeneralAdministrativeMappingsSchema, db: Session = Depends(get_db)):
@@ -80,7 +80,7 @@ def create_general_administrative_mappings(payload: GeneralAdministrativeMapping
     db.add(new_record)
     db.commit()
     db.refresh(new_record)
-    return {"status": "success", "row_id": new_record.row_id}
+    return {"status": "success", "general_administrative_id": new_record.general_administrative_id}
 
 @router.post("/update_general_administrative_records/")
 def update_general_administrative_records(payload: GeneralAdministrativeMappingsPayload, db: Session = Depends(get_db)):

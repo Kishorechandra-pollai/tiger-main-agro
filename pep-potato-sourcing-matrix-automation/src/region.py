@@ -45,10 +45,11 @@ def delete_region(regionId: str, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get('/{name}')
-def get_region_name(region_name: str, db: Session = Depends(get_db)):  # pragma: no cover
-    region = db.query(models.region.region_id).filter(models.region.region_name == region_name,
-                                                      models.region.status == "ACTIVE").first()
-    if not region:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'No region with this id: {id} found')
-    return {"status": "success", "region": region}
+# @router.get('/{name}')
+# def get_region_name(region_name: str, db: Session = Depends(get_db)):
+#     region = (db.query(models.region.region_id)
+#               .filter(models.region.region_name == region_name, models.region.status == "ACTIVE")
+#               .all())
+#     if not region:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'No region with this id: {id} found')
+#     return {"status": "success", "region": region}

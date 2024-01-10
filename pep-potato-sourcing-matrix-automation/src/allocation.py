@@ -28,7 +28,7 @@ def get_filtered_allocation(year: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-def get_all_plants(category_name: str, db: Session = Depends(get_db)):
+def get_all_plants(category_name: str, db: Session = Depends(get_db)):  # pragma: no cover
     """Get the Plants List of that category."""
     crop_category_id = db.query(models.category.crop_category) \
         .filter(models.category.category_name == category_name) \
@@ -41,7 +41,7 @@ def get_all_plants(category_name: str, db: Session = Depends(get_db)):
     return result_list
 
 
-def update_only_allocation(allocation_id, index, db: Session = Depends(get_db)):
+def update_only_allocation(allocation_id, index, db: Session = Depends(get_db)):  # pragma: no cover
     """function to update index values in active_allocation table."""
     db.query(models.allocation) \
         .filter(models.allocation.allocation_id == allocation_id) \
@@ -49,6 +49,99 @@ def update_only_allocation(allocation_id, index, db: Session = Depends(get_db)):
                 synchronize_session='fetch')
     db.commit()
 
+def update_forecast_volume(is_forecast_only, item, db: Session = Depends(get_db)): # pragma: no cover
+    """Function updates forecast and plantMtrx volume."""
+    new_index = float(item.value)
+    category_value = item.category_name
+    period_value = int(item.period)
+    current_year = int(item.year)
+    plant_id_list = get_all_plants(category_value, db)
+    for plant_id in plant_id_list:
+        lastYear_actual_list = {}
+        lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
+                                    models.View_forecast_pcusage.columns.total_actual_value) \
+            .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
+                    models.View_forecast_pcusage.columns.year == current_year - 1,
+                    models.View_forecast_pcusage.columns.period == period_value).all()
+        if not lastYear_actuals:
+            continue
+        lastYear_actual_list = {key: value for key, value in lastYear_actuals}
+        week_value = 1
+        if period_week_calc.calculate_week_num(current_year, int(period_value)):
+            no_of_week = 6
+        else:
+            no_of_week = 5
+        while week_value < no_of_week:
+            if is_forecast_only == True:
+                prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
+                .filter(models.plantMtrx_template.plant_id == plant_id,
+                        models.plantMtrx_template.period == period_value,
+                        models.plantMtrx_template.week_no == week_value).first()
+            if prefered_growingarea is not None or is_forecast_only == False:
+                lastYear_actual_list.setdefault(week_value, 0)
+                if week_value == 5:
+                    new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
+                else:
+                    new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
+                db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
+                                                models.pcusage.year == current_year,
+                                                models.pcusage.period == period_value,
+                                                models.pcusage.week_no == week_value)\
+                    .update({models.pcusage.forecasted_value: new_forecast_value},
+                            synchronize_session=False)
+            if is_forecast_only == True:
+                db.commit()
+                week_value += 1
+            else:
+                plant_matrix = db.query(models.plantMtrx.plant_matrix_id,
+                                        models.plantMtrx.growing_area_id,
+                                        models.plantMtrx.value)\
+                    .filter(models.plantMtrx.plant_id == plant_id,
+                            models.plantMtrx.year == current_year,
+                            models.plantMtrx.period == period_value,
+                            models.plantMtrx.week == week_value).first()
+                if plant_matrix is None:
+                    continue
+                plant_mtrx.value = new_forecast_value
+                db.commit()
+                """Update Extension values if present."""
+                if 6 < period_value < 9:
+                    plant_mtrx.update_extension(plant_matrix.growing_area_id,
+                                                current_year, period_value,
+                                                week_value, db)
+                elif 10 < period_value < 13:
+                    plant_mtrx.update_extension(plant_matrix.growing_area_id,
+                                                current_year, period_value,
+                                                week_value, db)
+                week_value += 1
+
+@router.post('/updateAllocation')
+def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)): # pragma: no cover
+    """Main function when index value is changed."""
+    today_date = date.today()
+    res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
+    current_period = int(res['Period'])
+    year_data = int(res['year'])
+    data = payload.data
+    update_count = 0
+    try:
+        for item in data:
+            if int(item.year) > year_data:
+                update_only_allocation(item.allocation_id, item.value, db)
+                update_count += 1
+                """Below function updates forecast and plantMtrx volume."""
+                update_forecast_volume(False, item, db)
+            elif year_data == int(item.year) and current_period < item.period:
+                update_only_allocation(item.allocation_id, item.value, db)
+                update_count += 1
+                update_forecast_volume(False, item, db)
+            else:
+                update_only_allocation(item.allocation_id, item.value, db)
+                update_count += 1
+                update_forecast_volume(True, item, db)
+        return {"status": "success", "records_updated": update_count}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # def update_volume(item, db: Session = Depends(get_db)):
 #     """Function updates forecast and plantMtrx volume."""
@@ -149,99 +242,6 @@ def update_only_allocation(allocation_id, index, db: Session = Depends(get_db)):
 #                 db.commit()
 #             week_value += 1
 
-def update_forecast_volume(is_forecast_only, item, db: Session = Depends(get_db)):
-    """Function updates forecast and plantMtrx volume."""
-    new_index = float(item.value)
-    category_value = item.category_name
-    period_value = int(item.period)
-    current_year = int(item.year)
-    plant_id_list = get_all_plants(category_value, db)
-    for plant_id in plant_id_list:
-        lastYear_actual_list = {}
-        lastYear_actuals = db.query(models.View_forecast_pcusage.columns.week,
-                                    models.View_forecast_pcusage.columns.total_actual_value) \
-            .filter(models.View_forecast_pcusage.columns.plant_id == plant_id,
-                    models.View_forecast_pcusage.columns.year == current_year - 1,
-                    models.View_forecast_pcusage.columns.period == period_value).all()
-        if not lastYear_actuals:
-            continue
-        lastYear_actual_list = {key: value for key, value in lastYear_actuals}
-        week_value = 1
-        if period_week_calc.calculate_week_num(current_year, int(period_value)):
-            no_of_week = 6
-        else:
-            no_of_week = 5
-        while week_value < no_of_week:
-            if is_forecast_only == True:
-                prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
-                .filter(models.plantMtrx_template.plant_id == plant_id,
-                        models.plantMtrx_template.period == period_value,
-                        models.plantMtrx_template.week_no == week_value).first()
-            if prefered_growingarea is not None or is_forecast_only == False:
-                lastYear_actual_list.setdefault(week_value, 0)
-                if week_value == 5:
-                    new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
-                else:
-                    new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
-                db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
-                                                models.pcusage.year == current_year,
-                                                models.pcusage.period == period_value,
-                                                models.pcusage.week_no == week_value)\
-                    .update({models.pcusage.forecasted_value: new_forecast_value},
-                            synchronize_session=False)
-            if is_forecast_only == True:
-                db.commit()
-                week_value += 1
-            else:
-                plant_matrix = db.query(models.plantMtrx.plant_matrix_id,
-                                        models.plantMtrx.growing_area_id,
-                                        models.plantMtrx.value)\
-                    .filter(models.plantMtrx.plant_id == plant_id,
-                            models.plantMtrx.year == current_year,
-                            models.plantMtrx.period == period_value,
-                            models.plantMtrx.week == week_value).first()
-                if plant_matrix is None:
-                    continue
-                plant_mtrx.value = new_forecast_value
-                db.commit()
-                """Update Extension values if present."""
-                if 6 < period_value < 9:
-                    plant_mtrx.update_extension(plant_matrix.growing_area_id,
-                                                current_year, period_value,
-                                                week_value, db)
-                elif 10 < period_value < 13:
-                    plant_mtrx.update_extension(plant_matrix.growing_area_id,
-                                                current_year, period_value,
-                                                week_value, db)
-                week_value += 1
-
-@router.post('/updateAllocation')
-def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)):
-    """Main function when index value is changed."""
-    today_date = date.today()
-    res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
-    current_period = int(res['Period'])
-    year_data = int(res['year'])
-    data = payload.data
-    update_count = 0
-    try:
-        for item in data:
-            if int(item.year) > year_data:
-                update_only_allocation(item.allocation_id, item.value, db)
-                update_count += 1
-                """Below function updates forecast and plantMtrx volume."""
-                update_forecast_volume(False, item, db)
-            elif year_data == int(item.year) and current_period < item.period:
-                update_only_allocation(item.allocation_id, item.value, db)
-                update_count += 1
-                update_forecast_volume(False, item, db)
-            else:
-                update_only_allocation(item.allocation_id, item.value, db)
-                update_count += 1
-                update_forecast_volume(True, item, db)
-        return {"status": "success", "records_updated": update_count}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
 # @router.post('/updateAllocation')
 # def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(get_db)):

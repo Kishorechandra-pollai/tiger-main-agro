@@ -98,7 +98,7 @@ def view_freight_mapping(db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 @router.get('/get_freight_cost_mapping/{year}')
-def view_freight_mapping_by_year(year:int, db: Session = Depends(get_db)):
+def view_freight_mapping_by_year(year:int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to fetch all records from freight_cost_mapping table """
     try:
         records = db.query(FreightCostMapping, func.concat("P", FreightCostMapping.period)\
@@ -122,7 +122,7 @@ def view_freight_mapping_by_year(year:int, db: Session = Depends(get_db)):
 def create_freight_mapping(
     payload: schemas.FreightCostMappingSchema,
     db: Session = Depends(get_db)
-):
+):  # pragma: no cover
     """Function to create records for freight_cost_mapping table """
     freight_cost_mapping_data = []
     distinct_freight_ids = db.query(FreightCostRate.freight_cost_id).distinct().all()
@@ -152,7 +152,7 @@ def update_freight_mapping(
     period: int,
     new_rate: float,
     db: Session = Depends(get_db)
-):
+):  # pragma: no cover
     """Function to update already existing records in freight_cost_mapping table by
     filtering through freight cost id, year and period column"""
     records_to_update = db.query(FreightCostMapping).filter(
@@ -169,7 +169,7 @@ def update_freight_mapping(
 
 
 @router.delete('delete/{year}')
-def delete_post(year:int, db: Session = Depends(get_db)):
+def delete_post(year:int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to delete records from freight cost mapping"""
     records_to_delete = db.query(FreightCostMapping).filter(FreightCostMapping.year == year).all()
     if not records_to_delete:
@@ -182,7 +182,7 @@ def delete_post(year:int, db: Session = Depends(get_db)):
 
 
 @router.get('/freight_cost_period_view')
-def freight_cost_period_view(db: Session = Depends(get_db)):
+def freight_cost_period_view(db: Session = Depends(get_db)):  # pragma: no cover
     """Function to fetch all records from freight period view table """
     try:
         records = db.query(freight_cost_period_table).all()

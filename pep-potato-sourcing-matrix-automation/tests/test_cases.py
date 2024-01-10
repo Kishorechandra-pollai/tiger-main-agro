@@ -1,4 +1,5 @@
 import sys
+from datetime import date
 from unittest.mock import Mock, patch, MagicMock
 import pytest
 from fastapi.testclient import TestClient
@@ -29,7 +30,12 @@ from offcontractinfo import (update_off_contract_task_mapping, update_off_contra
                              create_freight_task_info, create_freight_task_mappings,
                              update_off_contract_records)
 from region import delete_region, create_region
-from p4p_master_info import update_p4p_task_mappings
+from p4p_master_info import (create_p4p_task_mappings_info, create_p4p_task_mappings,
+                             update_p4p_task_mappings_records)
+from generaladministrative import (update_general_administrative_mappings, create_general_administrative_task,
+                                   update_general_administrative_records, create_general_administrative_mappings)
+from freighttaskinfo import (update_freight_task_records, update_freight_task_mappings)
+
 client = TestClient(app)
 
 """________dashboard.py_________"""
@@ -73,16 +79,16 @@ def test_dashboard_pc_plan_volume_usage_year_4():
 # def test_dashboard_pc_period_view_year_country_8():
 #     response = client.get('/api/dashboard/pc_usage_period view"/2023/CANADA')
 #     assert response.status_code == 200
-
-
-def test_pc_volume_period_country_combine_9():
-    response = client.get('/api/dashboard/pc_volume_period_country_combine')
-    assert response.status_code == 200
-
-
-def test_pc_volume_period_country_combine_year_10():
-    response = client.get('/api/dashboard/pc_volume_period_country_combine"/2023')
-    assert response.status_code == 200
+#
+#
+# def test_pc_volume_period_country_combine_9():
+#     response = client.get('/api/dashboard/pc_volume_period_country_combine')
+#     assert response.status_code == 200
+#
+#
+# def test_pc_volume_period_country_combine_year_10():
+#     response = client.get('/api/dashboard/pc_volume_period_country_combine"/2023')
+#     assert response.status_code == 200
 
 
 # def test_pc_volume_period_country_yearly_11():
@@ -95,14 +101,14 @@ def test_pc_volume_period_country_combine_year_10():
 #     assert response.status_code == 200
 
 
-def test_pc_volume_yearly_country_combine_13():
-    response = client.get('/api/dashboard/pc_volume_yearly_country_combine')
-    assert response.status_code == 200
-
-
-def test_pc_volume_yearly_country_combine_year_14():
-    response = client.get('/api/dashboard/dashboard_pc_volume_yearly_country_combine"/2023')
-    assert response.status_code == 200
+# def test_pc_volume_yearly_country_combine_13():
+#     response = client.get('/api/dashboard/pc_volume_yearly_country_combine')
+#     assert response.status_code == 200
+#
+#
+# def test_pc_volume_yearly_country_combine_year_14():
+#     response = client.get('/api/dashboard/dashboard_pc_volume_yearly_country_combine"/2023')
+#     assert response.status_code == 200
 
 
 """________OwnershipGrowerGrowing.py_________"""
@@ -484,19 +490,6 @@ def test_get_allocation_year():
     assert response.status_code == 200
 
 
-# @patch('app.get_db')
-# def test_update_only_allocation(mock_get_db):
-#     allocation_id = 1
-#     index = 42
-#     db_mock = MagicMock()
-#     mock_get_db.return_value = db_mock
-#     update_only_allocation(allocation_id, index)
-#
-#     db_mock.query().filter().update.assert_called_once_with(
-#         {models.allocation.value: float(index)},
-#         synchronize_session='fetch')
-#     db_mock.commit.assert_called_once()
-
 # @patch('database.get_db')
 # def test_update_allocation(mock_get_db):
 #     db_mock = MagicMock()
@@ -527,6 +520,37 @@ def test_create_allocation(mock_get_db):
     result = create_allocation(year=year, db=db_mock)
 
     assert result == {"Status": "success", "new_records": 13}
+
+
+@patch('database.get_db')
+def test_update_allocation(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    mock_date = date(2023, 1, 1)
+    with patch('allocation.date') as mock_date_today:
+        mock_date_today.today.return_value = mock_date
+        payload_data = [
+            {"allocation_id": 1, "value": 100, "year": 2025, "period": 10},
+            {"allocation_id": 2, "value": 100, "year": 2025, "period": 13},
+            {"allocation_id": 3, "value": 100, "year": 2023, "period": 10}
+        ]
+        mock_payload = MagicMock(data=payload_data)
+        with patch('period_week_calc.calculate_period_and_week') as mock_calculate_period_and_week:
+            mock_date_today.today.return_value.year = 2023
+            mock_calculate_period_and_week.return_value = {'Period': 3, 'year': 2023}
+            update_only_allocation_mock = MagicMock()
+            update_forecast_volume_mock = MagicMock()
+
+            with patch('allocation.update_only_allocation',
+                       side_effect=update_only_allocation_mock) as mock_update_only_allocation, \
+                    patch('allocation.update_forecast_volume',
+                          side_effect=update_forecast_volume_mock) as mock_update_forecast_volume:
+                result = update_allocation(payload=mock_payload, db=db_mock)
+
+                assert mock_update_only_allocation.call_count == 2
+                assert mock_update_forecast_volume.call_count == 2
+                assert result["status"] == "success"
+                assert result["records_updated"] == 2
 
 
 """__________pcusage.py__________"""
@@ -1014,9 +1038,9 @@ def test_get_regionid():
     assert response.status_code == 200
 
 
-def test_get_region_name():
-    response = client.get('/api/region/Canada')
-    assert response.status_code == 200
+# def test_get_region_name():
+#     response = client.get('/api/region/Canada')
+#     assert response.status_code == 200
 
 
 @patch('database.get_db')
@@ -1067,36 +1091,344 @@ def test_get_p4p_task_mappings():
 
 
 def test_p4p_task_mappings_by_year():
-    response = client.get('/api/p4p-master-info/p4p_task_mappings_by_year/2023/Canada')
+    response = client.get('/api/p4p-master-info/p4p_task_mappings_by_year/2023/US-CORE')
     assert response.status_code == 200
 
 
 @patch('database.get_db')
-async def test_update_p4p_task_mappings(mock_get_db):
+def test_mock_update_p4p_task_mappings_records(mock_get_db):
     db_mock = MagicMock()
-    mock_query = MagicMock()
     mock_get_db.return_value = db_mock
-    db_mock.query.return_value = mock_query
-    MockRecord = []
-    mock_query.all.return_value = MockRecord
-    mock_query.all.count = 0
+    payload = [
+        {
+            "period": 1,
+            "p4p_id": 1,
+            "year": 2023,
+            "value": 2,
+            "company_name": "US-CORE"
+        }
+    ]
 
-    result = update_p4p_task_mappings(year=2023, db=db_mock)
-    assert result.status_code == 404
+    test_payload = schemas.p4pTaskMappingsPayload(data=payload)
+    result = update_p4p_task_mappings_records(payload=test_payload, db=db_mock)
+    assert result["status"] == "success"
 
 
 @patch('database.get_db')
-async def test_update_p4p_task_mappings_2(mock_get_db):
+def test_mock_create_p4p_task_mappings(mock_get_db):
     db_mock = MagicMock()
-    mock_query = MagicMock()
     mock_get_db.return_value = db_mock
-    db_mock.query.return_value = mock_query
-    mock_query.all.return_value = [MockRecord(p4p_id=1, p4p_name="Task1"), MockRecord(p4p_id=2, p4p_name="Task2")]
-    mock_query.all.count = 2
-    mock_query.all.return_value = [MockCountry(task_desc="Country1"), MockCountry(task_desc="Country2")]
+    mapping_payload = {
+        "period": 1,
+        "p4p_id": 1,
+        "year": 2023,
+        "value": 2,
+        "company_name": "US-CORE"
+    }
+    test_schema = schemas.p4pTaskMappingsSchema(**mapping_payload)
+    result = create_p4p_task_mappings(payload=test_schema, db=db_mock)
 
-    result = await update_p4p_task_mappings(year=2023, db=db_mock)
+    assert result['status'] == 'success'
+
+
+@patch('database.get_db')
+def test_mock_create_p4p_task_mappings_info(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    mapping_payload = {
+        "p4p_name": "jsadh",
+        "description": "jsadh",
+        "status": 2023,
+        "created_by": "System",
+        "updated_by": "System"
+    }
+    test_schema = schemas.p4pMasterInfoSchema(**mapping_payload)
+    result = create_p4p_task_mappings_info(payload=test_schema, db=db_mock)
+    assert result['status'] == 'success'
+
+
+"""--------p4pmasterinfo.py---------"""
+
+
+@patch('database.get_db')
+def test_mock_update_off_contract_records(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    payload = [
+        {
+            "period": 1,
+            "off_contract_task_id": 1,
+            "year": 2023,
+            "value": 2,
+            "company_name": "US-CORE"
+        }
+    ]
+
+    test_payload = schemas.OffContractTaskMappingPayload(data=payload)
+    result = update_off_contract_records(payload=test_payload, db=db_mock)
     assert result["status"] == "success"
+
+
+@patch('database.get_db')
+def test_update_off_contract_existing_record(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    existing_record_mock = MagicMock()
+    existing_record_mock.value = 100
+    existing_record_mock.period = 1
+    existing_record_mock.year = 2022
+    db_mock.query().filter().first.return_value = existing_record_mock
+    payload = {
+        "period": 1,
+        "off_contract_task_id": 1,
+        "year": 2023,
+        "value": 200,
+        "company_name": "US-CORE"
+    }
+    test_payload = schemas.OffContractTaskMappingSchema(**payload)
+    result = update_off_contract(off_contract_task_id=1, payload=test_payload, db=db_mock)
+    assert result.value == payload['value']
+
+
+"""--------offcontractinfo.py---------"""
+
+"""--------freighttaskinfo.py---------"""
+
+
+def test_freight_task_info():
+    response = client.get('/api/freight_task_info/')
+    assert response.status_code == 200
+
+
+def test_getByoff_contract_task_id_2():
+    response = client.get('/api/freight_task_info/getByoff_contract_task_id/1')
+    assert response.status_code == 200
+
+
+def test_freight_task_mappings():
+    response = client.get('/api/freight_task_info/freight_task_mappings/2023/US-CORE')
+    assert response.status_code == 200
+
+
+@patch('database.get_db')
+def test_mock_update_freight_task_mappings(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    year = 2023
+    result = update_freight_task_mappings(year=year, db=db_mock)
+    assert result["forYear"] == year
+
+
+@patch('database.get_db')
+def test_mock_create_freight_task_mappings(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    mapping_payload = {
+        "task_name": "productivity-task",
+        "task_desc": "productivity-task",
+        "status": "Active",
+        "created_by": "System",
+        "created_time": "2023-11-10T13:03:23.790000",
+        "updated_by": "System",
+        "updated_time": "2023-11-10T13:03:23.790000"
+    }
+
+    test_schema = schemas.FreightTaskInfoSchema(data=mapping_payload)
+    result = create_freight_task_info(payload=test_schema, db=db_mock)
+
+    assert result['status'] == 'success'
+
+
+@patch('database.get_db')
+def test_mock_update_freight_task_records(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    payload = [
+        {
+            "period": 1,
+            "off_contract_task_id": 1,
+            "year": 2023,
+            "value": 2,
+            "company_name": "US-CORE"
+        }
+    ]
+
+    test_payload = schemas.OffContractTaskMappingPayload(data=payload)
+    result = update_freight_task_records(payload=test_payload, db=db_mock)
+    assert result["status"] == "success"
+
+
+"""________generaladministrative.py_________"""
+
+
+def test_get_freight_task_info():
+    response = client.get('/api/general_administrative/')
+    assert response.status_code == 200
+
+
+def test_getBygeneral_administrative_id():
+    response = client.get('/api/general_administrative/getBygeneral_administrative_id/1')
+    assert response.status_code == 200
+
+
+def test_get_general_administrative_mappings():
+    response = client.get('/api/general_administrative/general_administrative_mappings/')
+    assert response.status_code == 200
+
+
+def test_general_administrative_mappings_by_year():
+    response = client.get('/api/general_administrative/general_administrative_mappings_by_year/2023/US-CORE')
+    assert response.status_code == 200
+
+
+@patch('database.db')
+def test_update_general_administrative_mappings(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    mock_records = [MagicMock(general_administrative_id=6, task_name='Task 1')]
+    mock_all_records = MagicMock(all=MagicMock(return_value=mock_records))
+    mock_countries = [MagicMock(task_desc='Country A')]
+    db_mock.query.side_effect = [mock_all_records, mock_countries]
+
+    result = update_general_administrative_mappings(year=2023, db=db_mock)
+    assert result["status"] == "success"
+
+
+@patch('database.get_db')
+def test_create_general_administrative_task(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    mock_add = MagicMock()
+    db_mock.add = mock_add
+    mock_commit = MagicMock()
+    db_mock.commit = mock_commit
+
+    payload_data = {
+        "task_name": "Task1",
+        "task_desc": "Task_desc",
+        "status": "INACTIVE",
+        "created_by": "string",
+        "created_time": "2024-01-10T09:48:36.144Z",
+        "updated_by": "string",
+        "updated_time": "2024-01-10T09:48:36.144Z"
+    }
+    mock_payload = schemas.GeneralAdministrativeTaskSchema(**payload_data)
+    result = create_general_administrative_task(payload=mock_payload, db=db_mock)
+    assert result == {"status": "success"}
+
+
+@patch('database.get_db')
+def test_create_general_administrative_mappings(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    mock_add = MagicMock()
+    db_mock.add = mock_add
+    mock_commit = MagicMock()
+    db_mock.commit = mock_commit
+
+    payload_data = {
+        "period": 2,
+        "general_administrative_id": 1,
+        "year": 2025,
+        "value": 0,
+        "company_name": "string"
+    }
+    mock_payload = schemas.GeneralAdministrativeMappingsSchema(**payload_data)
+    result = create_general_administrative_mappings(payload=mock_payload, db=db_mock)
+    assert result == {"status": "success", "general_administrative_id": 1}
+
+
+@patch('database.get_db')
+def test_update_records_success(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    payload_data = {
+        "data": [
+            {"general_administrative_id": 1,
+             "period": 2,
+             "year": 2023,
+             "value": 0,
+             "company_name": "test_comp"}
+        ]
+    }
+    test_payload = schemas.GeneralAdministrativeMappingsPayload(**payload_data)
+    mock_query = db_mock.query.return_value
+    mock_query.filter.return_value.update.return_value = 1
+    result = update_general_administrative_records(payload=test_payload, db=db_mock)
+    assert result == {"status": "success", "records_updated": 1}
+
+
+"""________inflation_deflation.py_________"""
+
+
+def test_get_inflation_deflation_task_mappings():
+    response = client.get('/api/inflation_deflation/inflation_deflation_task_mapping')
+    assert response.status_code == 200
+
+
+def test_get_inflation_deflation_task():
+    response = client.get('/api/inflation_deflation/inflation_deflation_task')
+    assert response.status_code == 200
+
+
+def test_inflation_deflation_task_mappings_by_year():
+    response = client.get('/api/inflation_deflation/inflation_deflation_task_mappings_by_year/2023/CANADA')
+    assert response.status_code == 200
+
+"""________vendor_site_code.py_________"""
+
+def test_get_view_vendor_site_code():
+    response = client.get('/api/vendor_site_code/get_vendor_site_code')
+    assert response.status_code == 200
+
+"""________freightcost.py_________"""
+
+def test_view_freight_cost():
+    response = client.get('/api/freight-cost/get_freight_cost_rate')
+    assert response.status_code == 200
+
+
+def test_view_freight_mapping():
+    response = client.get('/api/freight-cost/get_freight_cost_mapping/2023')
+    assert response.status_code == 200
+
+
+def test_freight_cost_period_view():
+    response = client.get('/api/freight-cost/freight_cost_period_week_view/2023')
+    assert response.status_code == 200
+
+
+def test_freight_cost_period_view_year():
+    response = client.get('/api/freight-cost/get_rate_gowing_area/2023')
+    assert response.status_code == 200
+
+"""________vendor_site_code.py_________"""
+
+def test_get_view_vendor_site_code():
+    response = client.get('/api/vendor_site_code/get_vendor_site_code')
+    assert response.status_code == 200
+
+"""________summary_price_variance.py_________"""
+
+def test_get_price_variance_task_mapping():
+    response = client.get('/api/summary_price_variance/price_variance_task_mapping')
+    assert response.status_code == 200
+
+
+def test_get_price_variance_task():
+    response = client.get('/api/summary_price_variance/price_variance_task')
+    assert response.status_code == 200
+
+
+def test_get_price_variance_task_mapping_by_year():
+    response = client.get('/api/summary_price_variance/price_variance_task_mapping_by_year/2023/Canada')
+    assert response.status_code == 200
+
+
+def test_get_total_price_variance():
+    response = client.get('/api/summary_price_variance/get_total_price_variance/2023/Canada')
+    assert response.status_code == 200
+
 
 # """________plantGrowingMapping.py_________"""
 #

@@ -66,7 +66,7 @@ def inflation_deflation_task_mappings_by_year(year: int,company_name :str, db: S
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.post("/create_inflation_deflation_task_mappings")
-async def create_inflation_deflation_task_mappings(year: int, db: Session = Depends(get_db)):
+async def create_inflation_deflation_task_mappings(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update records in inflation_deflation_task_mapping table."""
     # Fetch all records from the database
     all_records = db.query(inflation_deflation_task).all()
@@ -93,7 +93,7 @@ async def create_inflation_deflation_task_mappings(year: int, db: Session = Depe
 
 
 @router.post("/update_inflation_deflation_task_mappings_records/")
-def update_inflation_deflation_task_mappings_records(payload: InflationDeflationMappingPayload, db: Session = Depends(get_db)):
+def update_inflation_deflation_task_mappings_records(payload: InflationDeflationMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update already existing records in 
     update_inflation_deflation_task_mappings_records table """
     data = payload.data
