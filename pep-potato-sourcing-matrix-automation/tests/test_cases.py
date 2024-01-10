@@ -1438,11 +1438,6 @@ def test_get_total_price_variance():
 #     assert response.status_code == 200
 #
 #
-# def test_get_plants():
-#     response = client.get('/api/plant-growing-mapping/17')
-#     assert response.status_code == 200
-#
-#
 # def test_get_plant_growing_area():
 #     response = client.get('/api/plant-growing-mapping/285/pid=17')
 #     assert response.status_code == 200
