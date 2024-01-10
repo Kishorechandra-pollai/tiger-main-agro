@@ -37,7 +37,7 @@ def get_post(growerId: str, db: Session = Depends(get_db)):
 
 
 @router.delete('/{growerId}')
-def delete_post(growerId: str, db: Session = Depends(get_db)):
+def delete_grower(growerId: str, db: Session = Depends(get_db)):
     grower_query = db.query(models.growers).filter(models.growers.grower_id == growerId).update({'status': 'IN-ACTIVE'})
     if not grower_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

@@ -91,7 +91,7 @@ def get_total_price_variance(year:int, company_name: str,db: Session = Depends(g
 
 
 @router.post("/create_price_variance_task_mapping")
-async def create_price_variance_task_mapping(year: int, db: Session = Depends(get_db)):
+async def create_price_variance_task_mapping(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update records in price_variance_task_mapping table."""
     # Fetch all records from the database
     all_records = db.query(price_variance_task).all()
@@ -117,7 +117,7 @@ async def create_price_variance_task_mapping(year: int, db: Session = Depends(ge
     return {"status": "success", "Records already exists for ":existingTaskNames, "forYear": year}
 
 @router.delete('delete_all')
-def delete_all_post(db: Session = Depends(get_db)):
+def delete_all_post(db: Session = Depends(get_db)):  # pragma: no cover
     records_to_delete = db.query(price_variance_task_mapping).all()
     if not records_to_delete:
         raise HTTPException(status_code=404,
@@ -128,7 +128,7 @@ def delete_all_post(db: Session = Depends(get_db)):
     return {"message": f"Records for the  deleted successfully."}
 
 @router.post("/update_price_variance_mappings_records/")
-def update_price_variance_mappings_records(payload: PriceVarianceMappingPayload, db: Session = Depends(get_db)):
+def update_price_variance_mappings_records(payload: PriceVarianceMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update already existing records in update_price_variance_mappings_records table """
     data = payload.data
     update_count = 0

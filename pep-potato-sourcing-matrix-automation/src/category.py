@@ -35,7 +35,7 @@ def get_post(categoryId: str, db: Session = Depends(get_db)):
 
 
 @router.delete('/{categoryId}')
-def delete_post(categoryId: str, db: Session = Depends(get_db)):
+def delete_category(categoryId: str, db: Session = Depends(get_db)):
     category_query = db.query(models.category).filter(models.category.crop_category == categoryId).update({'status': 'IN-ACTIVE'})
     if not category_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

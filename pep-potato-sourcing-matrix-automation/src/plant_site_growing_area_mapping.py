@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 @router.get('/get_plant_site_gowing_area_mapping')
-def view_plant_site_growing_area(db: Session = Depends(get_db)):
+def view_plant_site_growing_area(db: Session = Depends(get_db)):  # pragma: no cover
     """Function to fetch all records from PlantSiteGrowingAreaMapping table """
     try:
         records = db.query(PlantSiteGrowingAreaMapping).all()

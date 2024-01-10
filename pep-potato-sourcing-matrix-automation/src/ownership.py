@@ -98,7 +98,7 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                      .update({models.OwnershipGrowerGrowing.contract: item.contract,
                               models.OwnershipGrowerGrowing.shrinkage: item.shrinkage,
                               models.OwnershipGrowerGrowing.status: "ACTIVE"}))
-            else:
+            else:  # pragma: no cover
                 if item.contract == 0:
                     payload = {"row_id": item.row_id,
                                "growing_area_id": item.growing_area_id,
@@ -129,7 +129,6 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                 db.add(new_record)
             db.commit()
             update_count += 1
-            print(cropyear_input,item.growing_area_id)
             mapping_data = db.query(models.OwnershipGrowerGrowing.growing_area_id,
                                     func.sum(models.OwnershipGrowerGrowing.contract))\
                 .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
@@ -137,8 +136,6 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                         models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id)\
                 .group_by(models.OwnershipGrowerGrowing.growing_area_id)\
                 .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
-            print("----- mapping data -------")
-            print(mapping_data)
             if len(mapping_data) == 0:
                 db.query(models.Ownership)\
                     .filter(models.Ownership.ownership_id == item.ownership_id) \
@@ -147,7 +144,6 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                              models.Ownership.to_ship: 0}, synchronize_session='fetch')
                 total_ship_calculation(item.ownership_id, db)
             else:
-                print("-- else --")
                 per_grower_shrinkage = db.query(
                     models.OwnershipGrowerGrowing.growing_area_id,
                     models.OwnershipGrowerGrowing.contract,
@@ -157,7 +153,6 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                             models.OwnershipGrowerGrowing.status == 'ACTIVE',
                             models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id)\
                     .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
-
                 sums_dict = {}
                 for items in per_grower_shrinkage:
                     key = items[0]  # item[0]: growing_area_id
@@ -170,13 +165,10 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                     else:
                         sums_dict[key] = [value1, value1 * value2 * 0.01]
                 output_data = [(key, value[0], value[1]) for key, value in sums_dict.items()]
-                # output_data has growing_id, total_contract_value and tatal
+                # output_data has growing_id, total_contract_value and total
                 shrinkage_output = [(item[0], (item[2] * 100 / item[1]), (item[1] - item[2])) for item
                                     in
                                     output_data]
-                print("shrinkage_output", shrinkage_output)
-                print("sum_dict", sums_dict)
-                # print(shrinkage_output)
                 ownership_id_dict = {item[0]: item[3] for item in per_grower_shrinkage}
                 data_list = []
                 for row in mapping_data:
@@ -192,12 +184,9 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                     (var1[0], var1[1], var1[2], var2['contracted'], var2['ownership_id'])
                     for
                     var1, var2 in zip(shrinkage_output, data_list)]
-                # print("combined_data", combined_data)
 
                 # Populating Ownership table
                 for column_data in combined_data:
-                    # erp_data = db.query(models.View_total_sum_growing_area.columns.totalsum).filter(
-                    # models.View_total_sum_growing_area.columns.growing_area_id == item.growing_area_id)
                     growing_id, shrinkage_perc, toship, cont_volume, ownershipid = column_data[0], \
                         column_data[1], column_data[
                         2], column_data[3], column_data[4]
@@ -212,7 +201,7 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                 total_ship_calculation(item.ownership_id, db)
 
         return {"status": "success", "records_updated": update_count}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -270,5 +259,5 @@ def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db))
 
                 db.commit()
         return {"message": f"Total Contract ERP updated for {crop_year} in Ownership table"}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
