@@ -16,9 +16,9 @@ from ownership import Create_new_Ownership, Update_Ownership, update_ownership_c
 from extensionMapping import update_extension_mapping, update_extension_plantMtrx
 from MarketFlexMapping import update_Market_flex, filtered_market_year
 from OwnershipGrowerGrowing import (update_contract_erp, delete_post, create_grower_growing_area_mapping)
-from allocation import update_allocation, create_allocation
+from allocation import (update_allocation, create_allocation, get_all_plants, update_only_allocation)
 from pcusage import create_new_pcusage
-from plant_mtrx import update_plantMtrx, func_getcrop_type, update_extension, get_plantMtrx_common
+from plant_mtrx import (update_plantMtrx, func_getcrop_type, update_extension, get_plantMtrx_common)
 # from plantGrowingMapping import create_plant_growing_area_mapping, delete_plant_growing
 from growingarea import create_growing_area, delete_growing_area
 from growers import delete_grower, create_growers
@@ -28,7 +28,8 @@ from potatorates import (update_potato_rates_records)
 from offcontractinfo import (update_off_contract_task_mapping, update_off_contract,
                              create_freight_task_info, create_freight_task_mappings,
                              update_off_contract_records)
-
+from region import delete_region, create_region
+from p4p_master_info import update_p4p_task_mappings
 client = TestClient(app)
 
 """________dashboard.py_________"""
@@ -462,12 +463,16 @@ def test_create_plant(mock_get_db):
     }
     mock_payload = schemas.PlantSchema(**plant_payload)
     result = create_plant(payload=mock_payload, db=db_mock)
-
     assert result == {"status": "success", "plants_id": 1}
 
 
 def test_get_plant():
     response = client.get('/api/plant/')
+    assert response.status_code == 200
+
+
+def test_get_plantid():
+    response = client.get('/api/plant/10')
     assert response.status_code == 200
 
 
@@ -478,6 +483,19 @@ def test_get_allocation_year():
     response = client.get('/api/allocation/year/2023')
     assert response.status_code == 200
 
+
+# @patch('app.get_db')
+# def test_update_only_allocation(mock_get_db):
+#     allocation_id = 1
+#     index = 42
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     update_only_allocation(allocation_id, index)
+#
+#     db_mock.query().filter().update.assert_called_once_with(
+#         {models.allocation.value: float(index)},
+#         synchronize_session='fetch')
+#     db_mock.commit.assert_called_once()
 
 # @patch('database.get_db')
 # def test_update_allocation(mock_get_db):
@@ -947,6 +965,7 @@ def test_mock_update_off_contract_task_mapping(mock_get_db):
     result = update_off_contract_task_mapping(year=year, db=db_mock)
     assert result["status"] == "success"
 
+
 @patch('database.get_db')
 def test_mock_create_freight_task_info(mock_get_db):
     db_mock = MagicMock()
@@ -979,9 +998,105 @@ def test_mock_create_freight_task_mappings(mock_get_db):
     }
     test_ownership_schema = schemas.OffContractTaskMappingSchema(**mapping_payload)
     result = create_freight_task_mappings(payload=test_ownership_schema, db=db_mock)
-
     assert result['status'] == 'success'
 
+
+"""--------region.py---------"""
+
+
+def test_get_region_all():
+    response = client.get('/api/region/')
+    assert response.status_code == 200
+
+
+def test_get_regionid():
+    response = client.get('/api/region/14')
+    assert response.status_code == 200
+
+
+def test_get_region_name():
+    response = client.get('/api/region/Canada')
+    assert response.status_code == 200
+
+
+@patch('database.get_db')
+def test_delete_existing_region(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    db_mock.query().filter().update.return_value = 1
+    region_id = 8
+
+    response = delete_region(regionId=region_id, db=db_mock)
+    assert response.status_code == 204
+
+
+@patch('database.get_db')
+def test_create_region_success(mock_get_db):
+    db_mock = MagicMock()
+    mock_get_db.return_value = db_mock
+    payload = {
+        "region_name": "string",
+        "country": "string",
+        "status": "string",
+        "created_time": "2024-01-09T19:03:54.166Z",
+        "updated_time": "2024-01-09T19:03:54.166Z",
+        "created_by": "string",
+        "updated_by": "string"
+    }
+    region_payload = schemas.Region(**payload)
+    result = create_region(payload=region_payload, db=db_mock)
+    assert result["status"] == "success"
+
+
+"""--------p4p_master_info.py---------"""
+
+
+def test_get_p4p_master_info():
+    response = client.get('/api/p4p-master-info/')
+    assert response.status_code == 200
+
+
+def test_get_p4p_master_info_byId():
+    response = client.get('/api/p4p-master-info/get_p4p_master_info/1')
+    assert response.status_code == 200
+
+
+def test_get_p4p_task_mappings():
+    response = client.get('/api/p4p-master-info/p4p_task_mappings/')
+    assert response.status_code == 200
+
+
+def test_p4p_task_mappings_by_year():
+    response = client.get('/api/p4p-master-info/p4p_task_mappings_by_year/2023/Canada')
+    assert response.status_code == 200
+
+
+@patch('database.get_db')
+async def test_update_p4p_task_mappings(mock_get_db):
+    db_mock = MagicMock()
+    mock_query = MagicMock()
+    mock_get_db.return_value = db_mock
+    db_mock.query.return_value = mock_query
+    MockRecord = []
+    mock_query.all.return_value = MockRecord
+    mock_query.all.count = 0
+
+    result = update_p4p_task_mappings(year=2023, db=db_mock)
+    assert result.status_code == 404
+
+
+@patch('database.get_db')
+async def test_update_p4p_task_mappings_2(mock_get_db):
+    db_mock = MagicMock()
+    mock_query = MagicMock()
+    mock_get_db.return_value = db_mock
+    db_mock.query.return_value = mock_query
+    mock_query.all.return_value = [MockRecord(p4p_id=1, p4p_name="Task1"), MockRecord(p4p_id=2, p4p_name="Task2")]
+    mock_query.all.count = 2
+    mock_query.all.return_value = [MockCountry(task_desc="Country1"), MockCountry(task_desc="Country2")]
+
+    result = await update_p4p_task_mappings(year=2023, db=db_mock)
+    assert result["status"] == "success"
 
 # """________plantGrowingMapping.py_________"""
 #
