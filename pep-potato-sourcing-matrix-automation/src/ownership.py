@@ -4,58 +4,65 @@ from sqlalchemy.sql import func
 from fastapi import Depends, HTTPException, status, APIRouter
 import schemas
 import models
-from models import (View_Ownership, View_OwnershipMetrics_all,
-                    View_OwnershipMetrics_region, View_OwnershipMetrics_country)
 from database import get_db
 
 router = APIRouter()
 
 
-def get_ownership_common(db, region_filter, metric_filter,
-                         metrics_model, year, detail_message=None):
-    try:
-        data = db.query(View_Ownership) \
-            .join(models.growing_area,
-                  View_Ownership.columns.growing_area_id == models.growing_area.growing_area_id) \
-            .join(models.region,
-                  models.growing_area.region == models.region.region_id) \
-            .filter(region_filter,
-                    or_(View_Ownership.columns.year == year - 1, View_Ownership.columns.year == year))\
-            .order_by(View_Ownership.columns.growing_area_name,
-                      View_Ownership.columns.year).all()
-
-        ownership_metric = db.query(metrics_model) \
-            .filter(metric_filter,
-                    or_(metrics_model.columns.year == year - 1, metrics_model.columns.year == year)) \
-            .distinct().all()
-
-        if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=detail_message or f"Ownership data not found for : {region_filter}")
-
-        return {"status": "success", "ownership": data, "ownership_metric_region": ownership_metric}
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e) or "Error processing request")
-
-
 @router.get('/region/{region}/year/{year}')
 def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
-    region_filter = models.region.country == region if region in ['US', 'Canada'] else models.region.region_name == region
-    metric_filter = models.View_OwnershipMetrics_country.columns.country == region if region in ['US', 'Canada'] \
-        else models.View_OwnershipMetrics_region.columns.region_name == region
-    return get_ownership_common(
-        db, region_filter, metric_filter,
-        View_OwnershipMetrics_country if region in ['US', 'Canada'] else View_OwnershipMetrics_region,
-        year, f"Ownership data not found for : {region}"
-    )
+    if region == 'US' or region == 'Canada':
+        data = db.query(models.View_Ownership) \
+            .join(models.growing_area,
+                  models.View_Ownership.columns.growing_area_id == models.growing_area.growing_area_id) \
+            .join(models.region, models.growing_area.region == models.region.region_id) \
+            .filter(models.region.country == region, or_(models.View_Ownership.columns.year == year - 1,
+                                                         models.View_Ownership.columns.year == year)).all()
+
+        ownership_metric = db.query(models.View_OwnershipMetrics_country) \
+            .filter(models.View_OwnershipMetrics_country.columns.country == region,
+                    or_(models.View_OwnershipMetrics_region.columns.year == year -1,
+                        models.View_OwnershipMetrics_region.columns.year == year))\
+            .distinct().all()
+        if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Ownership data not found for : {region}")
+    else:
+        data = db.query(models.View_Ownership) \
+            .join(models.growing_area,
+                  models.View_Ownership.columns.growing_area_id ==
+                  models.growing_area.growing_area_id) \
+            .join(models.region, models.growing_area.region == models.region.region_id) \
+            .filter(models.region.region_name == region,
+                    or_(models.View_Ownership.columns.year == year - 1,
+                        models.View_Ownership.columns.year == year)).all()
+
+        ownership_metric = db.query(models.View_OwnershipMetrics_region) \
+            .filter(models.View_OwnershipMetrics_region.columns.region_name == region,
+                    or_(models.View_OwnershipMetrics_region.columns.year == year - 1,
+                        models.View_OwnershipMetrics_region.columns.year == year))\
+            .distinct().all()
+        if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Ownership data not found for : {region}")
+
+    return {"status": "success", "ownership": data, "ownership_metric_region": ownership_metric}
 
 
 @router.get('/year/{year}')
 def get_ownership(year: int, db: Session = Depends(get_db)):
-    return get_ownership_common(
-        db, True, True,
-        View_OwnershipMetrics_all, year, "No ownership_id found")
+    ownership = db.query(models.View_Ownership)\
+        .filter(or_(models.View_Ownership.columns.year == year - 1,
+                    models.View_Ownership.columns.year == year)).all()
+    ownership_metric_all = db.query(models.View_OwnershipMetrics_all) \
+        .filter(or_(models.View_OwnershipMetrics_all.columns.year == year - 1,
+                    models.View_OwnershipMetrics_all.columns.year == year))\
+        .distinct().all()
+    if not ownership:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"No ownership_id found")
+    return {"status": "success", "ownership": ownership,
+            "ownership_metric_region": ownership_metric_all}
 
 
 def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
@@ -146,7 +153,6 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                             models.OwnershipGrowerGrowing.status == 'ACTIVE',
                             models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id)\
                     .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
-
                 sums_dict = {}
                 for items in per_grower_shrinkage:
                     key = items[0]  # item[0]: growing_area_id
@@ -178,6 +184,8 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                     (var1[0], var1[1], var1[2], var2['contracted'], var2['ownership_id'])
                     for
                     var1, var2 in zip(shrinkage_output, data_list)]
+
+                # Populating Ownership table
                 for column_data in combined_data:
                     growing_id, shrinkage_perc, toship, cont_volume, ownershipid = column_data[0], \
                         column_data[1], column_data[
