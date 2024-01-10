@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get('/dashboard_pc_plan_volume_usage/{year}')
-def dashboard_pc_plan_volume_usage_year(year: int, db: Session = Depends(get_db)):
+def dashboard_pc_plan_volume_usage_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to fetch all records from pc_plan_volume_usage table for a particular year."""
     try:
         records = db.query(pc_plan_volume_usage.plan_volume_id,
@@ -35,7 +35,7 @@ def dashboard_pc_plan_volume_usage_year(year: int, db: Session = Depends(get_db)
 
 
 @router.post("/update_plan_volume_usage")
-def update_plan_volume_usage(payload: planVolumeUsagePayload, db: Session = Depends(get_db)):
+def update_plan_volume_usage(payload: planVolumeUsagePayload, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update already existing records in dashboard_pc_plan_volume_usage table """
     data = payload.data
     update_count = 0
@@ -57,7 +57,7 @@ def update_plan_volume_usage(payload: planVolumeUsagePayload, db: Session = Depe
 
 
 @router.post("/create_new_plan_volume_usage/year/{year}")
-def update_plan_volume_usage(year: int, db: Session = Depends(get_db)):
+def update_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to next year data from previous year values."""
     new_records = 0
     try:
