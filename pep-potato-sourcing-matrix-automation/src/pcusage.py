@@ -13,6 +13,25 @@ def trim(string):
     return string.replace(" ", "")
 
 
+def total_forcast_volume_func(filter_cond, year, db):
+    total_forecast_volume = db.query(func.sum(View_forecast_pcusage.columns.forecasted_value)
+                                     .label('total_forecast_volume'), View_forecast_pcusage.columns.year) \
+        .filter(View_forecast_pcusage.columns.year == year,
+                *filter_cond) \
+        .group_by(View_forecast_pcusage.columns.year).all()
+
+    return total_forecast_volume
+
+
+def total_actual_volume_func(filter_cond, year, db):
+    total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
+                                   .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
+        .filter(View_forecast_pcusage.columns.year == year,
+                *filter_cond) \
+        .group_by(View_forecast_pcusage.columns.year).all()
+    return total_actual_volume
+
+
 def get_filtered_usage_week_common(db, filter_conditions, year, detail_message=None):
     try:
         result = db.query(View_forecast_pcusage) \
@@ -22,17 +41,9 @@ def get_filtered_usage_week_common(db, filter_conditions, year, detail_message=N
                       View_forecast_pcusage.columns.period,
                       View_forecast_pcusage.columns.week).all()
 
-        total_forecast_volume = db.query(func.sum(View_forecast_pcusage.columns.forecasted_value)
-                                         .label('total_forecast_volume'), View_forecast_pcusage.columns.year)\
-            .filter(View_forecast_pcusage.columns.year == year,
-                    *filter_conditions)\
-            .group_by(View_forecast_pcusage.columns.year).all()
+        total_forecast_volume = total_forcast_volume_func(filter_conditions, year, db)
 
-        total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
-                                       .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
-            .filter(View_forecast_pcusage.columns.year == year,
-                    *filter_conditions) \
-            .group_by(View_forecast_pcusage.columns.year).all()
+        total_actual_volume = total_actual_volume_func(filter_conditions, year, db)
 
         return {"status": "success", "pcusage": result,
                 "total_forecast_volume": total_forecast_volume,
@@ -91,17 +102,9 @@ def get_filtered_usage_period_common(db, filter_conditions, year, detail_message
             .order_by(View_forecast_pcusage.columns.plant_name,
                       View_forecast_pcusage.columns.period).all()
 
-        total_forecast_volume = db.query(func.sum(View_forecast_pcusage.columns.forecasted_value)
-                                         .label('total_forecast_volume'), View_forecast_pcusage.columns.year)\
-            .filter(View_forecast_pcusage.columns.year == year,
-                    *filter_conditions)\
-            .group_by(View_forecast_pcusage.columns.year).all()
+        total_forecast_volume = total_forcast_volume_func(filter_conditions, year, db)
 
-        total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
-                                       .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
-            .filter(View_forecast_pcusage.columns.year == year,
-                    *filter_conditions) \
-            .group_by(View_forecast_pcusage.columns.year).all()
+        total_actual_volume = total_actual_volume_func(filter_conditions, year, db)
 
         return {"status": "success", "pcusage": result,
                 "total_forecast_volume": total_forecast_volume,
