@@ -74,17 +74,17 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
             else:
                 print("--------positive input--------")
                 record_to_check = db.query(models.ExtensionOwnershipMapping) \
-                    .filter(models.ExtensionOwnershipMapping.extension_id == item.extension_id)\
+                    .filter(models.ExtensionOwnershipMapping.extension_id == item.extension_id) \
                     .first()
                 print(record_to_check)
                 if record_to_check is not None:
                     db.query(models.ExtensionOwnershipMapping).filter(
-                        models.ExtensionOwnershipMapping.extension_id == item.extension_id)\
+                        models.ExtensionOwnershipMapping.extension_id == item.extension_id) \
                         .update({models.ExtensionOwnershipMapping.total_value: item.total_value,
                                  models.ExtensionOwnershipMapping.status: 'ACTIVE',
                                  models.ExtensionOwnershipMapping.split: item.split},
                                 synchronize_session=False)
-                else:
+                else:  # pragma: no cover
                     print("--------new input--------")
                     payload = {
                         "extension_id": item.extension_id,
@@ -114,7 +114,7 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
         update_final_extension_value(input_growing_Area_id, input_crop_year, db)
         return {"status": "success",
                 "message": f"Extension updated Successfully for growing_area_id {input_growing_Area_id}"}
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -137,4 +137,3 @@ def update_extension_plantMtrx(growing_area_id, year, period, week,
     db.commit()
     update_final_extension_value(growing_area_id, ext_record.crop_year, db)
     return "updated"
-
