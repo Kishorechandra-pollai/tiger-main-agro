@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get('/')
-def get_plant(db: Session = Depends(get_db)):
+def get_plant_all(db: Session = Depends(get_db)):
     plant = db.query(models.Plant).filter(models.Plant.status == "ACTIVE").all()
     today_date = date.today()
     res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
@@ -35,7 +35,7 @@ def create_plant(payload: schemas.PlantSchema, db: Session = Depends(get_db)):
 
 
 @router.get('/{plantId}')
-def get_post(plantId: str, db: Session = Depends(get_db)):
+def get_plantid(plantId: str, db: Session = Depends(get_db)):
     plant = db.query(models.Plant).filter(models.Plant.plant_id == plantId).first()
     if not plant:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -43,13 +43,13 @@ def get_post(plantId: str, db: Session = Depends(get_db)):
     return {"status": "success", "plant": plant}
 
 
-@router.delete('/{plantId}')
-def delete_post(plantId: str, db: Session = Depends(get_db)):
-    plant_query = db.query(models.Plant).filter(models.Plant.plant_id == plantId)
-    plant = plant.status = 'IN-ACTIVE'
-    if not plant:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'No plants  with this id: {id} found')
-    db.delete(plant)
-    db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+# @router.delete('/{plantId}')
+# def delete_plant(plantId: str, db: Session = Depends(get_db)):
+#     plant_query = db.query(models.Plant).filter(models.Plant.plant_id == plantId)
+#     plant = plant.status = 'IN-ACTIVE'
+#     if not plant:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail=f'No plants  with this id: {id} found')
+#     db.delete(plant)
+#     db.commit()
+#     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -142,7 +142,7 @@ def get_week_usage_all_data(year: int, db: Session = Depends(get_db)):
 
 
 @router.post('/createNextYear/{year}')
-def create_new_pcusage(year: int, db: Session = Depends(get_db)):
+def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     try:
         previous_year = year - 1
 

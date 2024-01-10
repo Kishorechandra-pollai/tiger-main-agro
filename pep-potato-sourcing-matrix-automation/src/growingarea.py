@@ -24,6 +24,7 @@ def create_growing_area(payload: schemas.GrowingAreaSchema, db: Session = Depend
     db.refresh(new_area)
     return {"status": "success", "growing_area_id": new_area.growing_area_id}
 
+
 @router.get('/preferred_grower')
 def get_preferred_grower(db: Session = Depends(get_db)):
     """Function to get preferred grower list for all growing_area."""
@@ -35,18 +36,19 @@ def get_preferred_grower(db: Session = Depends(get_db)):
 
 
 @router.get('/{growing_areaId}')
-def get_post(growing_areaId: str, db: Session = Depends(get_db)):
+def get_growingid(growing_areaId: str, db: Session = Depends(get_db)):
     growing_area = db.query(models.growing_area).filter(
         models.growing_area.growing_area_id == growing_areaId).first()
     if not growing_area:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No Growing area  with this id: {id} found")
-    return {"status": "success", "growing-area":  growing_area}
+    return {"status": "success", "growing-area": growing_area}
 
 
 @router.delete('/{growing_areaId}')
-def delete_post(growing_areaId: str, db: Session = Depends(get_db)):
-    growing_area_query = db.query(models.growing_area).filter(models.growing_area.growing_area_id == growing_areaId).update({'status': 'IN-ACTIVE'})
+def delete_growing_area(growing_areaId: str, db: Session = Depends(get_db)):
+    growing_area_query = db.query(models.growing_area).filter(
+        models.growing_area.growing_area_id == growing_areaId).update({'status': 'IN-ACTIVE'})
     if not growing_area_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growing area  with this id: {id} found')

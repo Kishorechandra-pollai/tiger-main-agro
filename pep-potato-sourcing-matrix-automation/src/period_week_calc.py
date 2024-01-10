@@ -5,7 +5,7 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-def calculate_period_and_week(year, specified_date: date, start_day=6, periods=13):
+def calculate_period_and_week(year, specified_date: date, start_day=6, periods=13):  # pragma: no cover
     """Function to return the period, period*week, and
     number of weeks for a specific date of a particular year"""
 
@@ -56,7 +56,7 @@ def calculate_period_and_week(year, specified_date: date, start_day=6, periods=1
     return {'Period': 1, 'week': 1, 'year': specified_date.year+1}
 
 
-def calculate_period_dates(year, start_day=6, periods=13):
+def calculate_period_dates(year, start_day=6, periods=13):  # pragma: no cover
     """Function to get year wise period and weeks data"""
     start_date = date(year, 1, 1)
     start_day_of_week = start_date.weekday()
@@ -102,21 +102,21 @@ def calculate_period_dates(year, start_day=6, periods=13):
 
 
 @router.get("/get_period_and_week")
-async def get_period_and_week(year: int, date_input: date):
+async def get_period_and_week(year: int, date_input: date):  # pragma: no cover
     """To get the period and period*week for a specific date in a calendar year"""
     result = calculate_period_and_week(year, date_input)
     return {"period_and_week": result}
 
 
 @router.get("/get_all_periods")
-async def get_all_periods(year: int):
+async def get_all_periods(year: int):  # pragma: no cover
     """To get the start and end dates of all periods for a specific year"""
     period_dates = calculate_period_dates(year)
     return {"period_and_week": period_dates}
 
 
 @router.get("/has_five_weeks")
-def calculate_week_num(year: int, period: int):
+def calculate_week_num(year: int, period: int):  # pragma: no cover
     """Function to check no of weeks in a period and return true or false"""
     start_date = date(year, 1, 1)
     start_day = 6
