@@ -49,7 +49,8 @@ def update_solid_rates_records(payload: solidRateMappingPayload,db: Session = De
         for item in data:
             db.query(solid_rate_mapping).filter(solid_rate_mapping.solids_rate_id
                                                 == item.solids_rate_id,
-                                                solid_rate_mapping.period==item.period).update(
+                                                solid_rate_mapping.period==item.period,
+                                                solid_rate_mapping.period_year==item.period_year).update(
                 {solid_rate_mapping.rate: item.rate}, synchronize_session='fetch')
             update_count += 1
         db.commit()

@@ -60,7 +60,8 @@ def update_potato_rates_records(payload: potatoRateMappingPayload, db: Session =
             db.query(potato_rate_mapping
                      ).filter(potato_rate_mapping.potato_rate_id == item.potato_rate_id,
                               potato_rate_mapping.period==item.period,
-                              potato_rate_mapping.week==item.week).update(
+                              potato_rate_mapping.week==item.week,
+                              potato_rate_mapping.p_year==item.p_year).update(
                                   {potato_rate_mapping.rate: item.rate},
                                   synchronize_session='fetch')
             update_count += 1
