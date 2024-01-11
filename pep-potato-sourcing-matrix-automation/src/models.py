@@ -508,6 +508,7 @@ class solid_task_master(Base):
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     updated_by = Column(String, nullable=True)
     updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    order_position = Column(Integer, nullable=True)
 
 
 class solids_task_mapping(Base):
@@ -516,7 +517,6 @@ class solids_task_mapping(Base):
     period = Column(Integer, nullable=True)
     solids_task_id = Column(Integer, nullable=True)
     year = Column(Integer, nullable=True)
-    value = Column(Float, nullable=True)
     value = Column(Float, nullable=True)
 
 

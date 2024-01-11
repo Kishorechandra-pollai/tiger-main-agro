@@ -1,5 +1,4 @@
 """Summary SOlid API's"""
-# from datetime import datetime, timedelta
 from models import solid_task_master, solids_task_mapping, summary_solids
 from schemas import SolidTaskMasterSchema, SolidsTaskMappingSchema, SolidsTaskMappingSchemaPayload
 from sqlalchemy.orm import Session
@@ -45,8 +44,8 @@ def solids_task_mapping_by_year(year: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get('/get_total_price_variance')
-def get_total_price_variance(db: Session = Depends(get_db)):
+@router.get('/get_solid_task_mapping')
+def get_solid_task_mapping(db: Session = Depends(get_db)):
     try:
         records = db.query(solids_task_mapping).all()
         total = {}
@@ -75,14 +74,6 @@ def get_solid_task_master_byId(solids_task_id: int, db: Session = Depends(get_db
                             detail=f"No solids_task_id: {solids_task_id} found")
     return {"status": "success", "details": query}
 
-@router.get('/solid_rate_mappings/')
-def get_solids_task_mapping(db: Session = Depends(get_db)):
-    """Function to get all records from solids_task_mapping."""
-    query = db.query(solids_task_mapping).all()
-    if not query:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="No solids_task_mapping  found")
-    return {"status": "success", "data": query}
 
 @router.get('/solids_task_mapping_by_year/{year}')
 def solids_task_mapping_by_year(year: str, db: Session = Depends(get_db)):
@@ -153,31 +144,6 @@ def update_solid_rate_mapping_records(payload: SolidsTaskMappingSchemaPayload, d
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-@router.get('/summary_solids_view')
-def summary_solids_view(db: Session = Depends(get_db)):
-    """Function to fetch all records from summary_solids_view """
-    try:
-        records = db.query(summary_solids).all()
-        result = [
-            {
-                "period": row.period,
-                "year": row.year,
-                "country_code": row.country_code,
-                "prior": row.PRIOR,
-                "plan": row.PLAN,
-                "forecast": row.FORECAST,
-                "conversion-factor": row.CF,
-                "+/(-) VS PLAN ": row.FORE_PLAN,
-                "YAG_Index": row.YAG_Index,
-                "M$ IMPACT B/(W) ":row.M_dollar_IMPACT,
-                "P*W": f'P{row.period}'
-            }
-            for row in records
-        ]
-        return {"summary_solids_view": result}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-
 @router.get('/summary_solids_view/{year}/{country_code}')
 def summary_solids_view_year_country_code(year:int,country_code:str,db: Session = Depends(get_db)):
     """Function to fetch all records from summary_solids_view based on year and country_Code filter """
@@ -185,22 +151,6 @@ def summary_solids_view_year_country_code(year:int,country_code:str,db: Session 
         records = db.query(summary_solids).filter(
             summary_solids.columns.year == year,
             summary_solids.columns.country_code == country_code).all()
-        result = [
-            {
-                "period": row.period,
-                "year": row.year,
-                "country_code": row.country_code,
-                "prior": row.PRIOR,
-                "plan": row.PLAN,
-                "forecast": row.FORECAST,
-                "conversion-factor": row.CF,
-                "+/(-) VS PLAN ": row.FORE_PLAN,
-                "YAG_Index": row.YAG_Index,
-                "M$ IMPACT B/(W) ":row.M_dollar_IMPACT,
-                "P*W": f'P{row.period}'
-            }
-            for row in records
-        ]
-        return {"summary_solids_view": result}
+        return {"summary_solids_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
