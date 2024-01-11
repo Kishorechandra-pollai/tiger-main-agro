@@ -27,9 +27,9 @@ import MarketFlexMapping
 import period_week_calc
 import p4p_master_info
 import summary_price_variance
-import solid_task_master
 import inflation_deflation
 import dashboard
+import summary_solids
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -71,7 +71,7 @@ app.include_router(p4p_master_info.router, tags=['p4p-master-info'], prefix='/ap
 
 app.include_router(summary_price_variance.router, tags=['summary_price_variance'], prefix='/api/summary_price_variance')
 app.include_router(inflation_deflation.router, tags=['inflation_deflation'], prefix='/api/inflation_deflation')
-app.include_router(solid_task_master.router, tags=['solid-task-master'], prefix='/api/solid-task-master')
+app.include_router(summary_solids.router, tags=['summary_solids'], prefix='/api/summary_solids')
 
 app.add_middleware(
     CORSMiddleware,
