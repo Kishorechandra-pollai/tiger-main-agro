@@ -73,43 +73,41 @@ def update_volume(is_actual_update, item, db: Session = Depends(get_db)):  # pra
         else:
             no_of_week = 5
         while week_value < no_of_week:
-            prefered_growing_area = db.query(models.plantMtrx_template.growing_area_id) \
-                .filter(models.plantMtrx_template.plant_id == plant_id,
-                        models.plantMtrx_template.period == period_value,
-                        models.plantMtrx_template.week_no == week_value).first()
-            if prefered_growing_area is not None:
-                lastYear_actual_list.setdefault(week_value, 0)
-                if week_value == 5:
-                    new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
-                else:
-                    new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
-                db.query(models.pcusage).filter(models.pcusage.plant_id == plant_id,
-                                                models.pcusage.year == current_year,
-                                                models.pcusage.period == period_value,
-                                                models.pcusage.week_no == week_value) \
-                    .update({models.pcusage.forecasted_value: new_forecast_value},
-                            synchronize_session=False)
-                if is_actual_update:
-                    plant_matrix = db.query(models.plantMtrx.plant_matrix_id,
-                                            models.plantMtrx.growing_area_id,
-                                            models.plantMtrx.value) \
-                        .filter(models.plantMtrx.plant_id == plant_id,
-                                models.plantMtrx.year == current_year,
-                                models.plantMtrx.period == period_value,
-                                models.plantMtrx.week == week_value).first()
-                    if plant_matrix is None:
-                        continue
-                    plant_mtrx.value = new_forecast_value
-                    db.commit()
-                    """Update Extension values if present."""
-                    if 6 < period_value < 9:
-                        plant_mtrx.update_extension(plant_matrix.growing_area_id,
-                                                    current_year, period_value,
-                                                    week_value, db)
-                    elif 10 < period_value < 13:
-                        plant_mtrx.update_extension(plant_matrix.growing_area_id,
-                                                    current_year, period_value,
-                                                    week_value, db)
+            lastYear_actual_list.setdefault(week_value, 0)
+            if week_value == 5:
+                new_forecast_value = (lastYear_actual_list[week_value - 1] * new_index) / 100
+            else:
+                new_forecast_value = (lastYear_actual_list[week_value] * new_index) / 100
+            forecast_record = db.query(models.pcusage) \
+                .filter(models.pcusage.plant_id == plant_id,
+                        models.pcusage.year == current_year,
+                        models.pcusage.period == period_value,
+                        models.pcusage.week_no == week_value).first()
+            if forecast_record is None:
+                continue
+            forecast_record.forecasted_value = new_forecast_value
+            db.commit()
+            if is_actual_update:
+                plant_matrix = db.query(models.plantMtrx.plant_matrix_id,
+                                        models.plantMtrx.growing_area_id,
+                                        models.plantMtrx.value) \
+                    .filter(models.plantMtrx.plant_id == plant_id,
+                            models.plantMtrx.year == current_year,
+                            models.plantMtrx.period == period_value,
+                            models.plantMtrx.week == week_value).first()
+                if plant_matrix is None:
+                    continue
+                plant_mtrx.value = new_forecast_value
+                db.commit()
+                """Update Extension values if present."""
+                if 6 < period_value < 9:
+                    plant_mtrx.update_extension(plant_matrix.growing_area_id,
+                                                current_year, period_value,
+                                                week_value, db)
+                elif 10 < period_value < 13:
+                    plant_mtrx.update_extension(plant_matrix.growing_area_id,
+                                                current_year, period_value,
+                                                week_value, db)
             week_value += 1
 
 

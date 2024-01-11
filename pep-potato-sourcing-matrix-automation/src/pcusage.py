@@ -61,7 +61,7 @@ def get_filtered_usage_by_company_name(name: str, year: int, db: Session = Depen
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }
-    if filter_dict[name] == 'Co-Man':
+    if filter_dict[name] == 'Co-Man' and filter_dict[name] == 'FLUS':
         filter_conditions = [View_forecast_pcusage.columns.company_name == filter_dict[name]]
     else:
         filter_conditions = [View_forecast_pcusage.columns.country == filter_dict[name]]
@@ -122,7 +122,7 @@ def getUsage_company_periodWise(name: str, year: int, db: Session = Depends(get_
         'Co-Man': 'Co-Man',
         'Canada-Core': 'Canada'
     }
-    if filter_dict[name] == 'Co-Man':
+    if filter_dict[name] == 'Co-Man' and filter_dict[name] == 'FLUS':
         filter_conditions = [View_forecast_pcusage.columns.company_name == filter_dict[name]]
     else:
         filter_conditions = [View_forecast_pcusage.columns.country == filter_dict[name]]
