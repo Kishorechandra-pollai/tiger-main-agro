@@ -123,23 +123,25 @@ def update_freight_mapping(
     return records_to_update
 
 
-@router.get('/freight_cost_period_view/{year}')
-def freight_cost_period_view_year(year:int, db: Session = Depends(get_db)):
+@router.get('/freight_cost_period_view/{year}/{country}')
+def freight_cost_period_view_year(year:int,country:str, db: Session = Depends(get_db)):
     """Function to fetch all records from freight period view table """
     try:
         records = db.query(freight_cost_period_table).filter(
-            freight_cost_period_table.columns.p_year == year).all()
+            freight_cost_period_table.columns.p_year == year,
+            freight_cost_period_table.columns.country == country).all()
         return {"freight_cost_period_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get('/freight_cost_period_week_view/{year}')
-def freight_cost_period_week_view_year(year: int,db: Session = Depends(get_db)):
+@router.get('/freight_cost_period_week_view/{year}/{country}')
+def freight_cost_period_week_view_year(year: int,country:str,db: Session = Depends(get_db)):
     """Function to fetch all records from freight period week view table """
     try:
         records = db.query(freight_cost_period_week_table).filter(
-            freight_cost_period_week_table.columns.p_year == year).all()
+            freight_cost_period_week_table.columns.p_year == year,
+            freight_cost_period_week_table.columns.country == country).all()
         return {"freight_cost_period_week_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

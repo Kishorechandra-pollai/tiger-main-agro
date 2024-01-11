@@ -11,21 +11,14 @@ from sqlalchemy.orm import Session
 
 router = APIRouter()
 
-@router.get('/getby_growing_areaid/{growing_area_id}')
-def getby_growing_areaid(growing_area_id: int,year:int, db: Session = Depends(get_db)):
-    """Function to get potato_rate_id for a growing_area_id"""
-    try:
-        record = db.query(potato_rates).filter(potato_rates.growing_area_id == growing_area_id,
-                                               potato_rates.year == year).all()
-        result = [
-            {
-                "potato_rate_id": row.potato_rate_id
-            }
-            for row in record
-        ]
-        return {"getbyGrowingAreaId": result}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+@router.get('/')
+def get_potato_rates(db: Session = Depends(get_db)):
+    """Function to get all records from potato_rates."""
+    query = db.query(potato_rates).all()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No potato_rates  found")
+    return {"status": "success", "data": query}
 
 @router.get('/potato_rate_mapping_by_year/{year}')
 def get_potato_rate_mapping_data(year: str, db: Session = Depends(get_db)):
