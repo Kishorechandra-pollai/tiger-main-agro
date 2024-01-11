@@ -84,6 +84,7 @@ def update_volume(is_actual_update, item, db: Session = Depends(get_db)):  # pra
                         models.pcusage.period == period_value,
                         models.pcusage.week_no == week_value).first()
             if forecast_record is None:
+                week_value += 1
                 continue
             forecast_record.forecasted_value = new_forecast_value
             db.commit()
@@ -96,6 +97,7 @@ def update_volume(is_actual_update, item, db: Session = Depends(get_db)):  # pra
                             models.plantMtrx.period == period_value,
                             models.plantMtrx.week == week_value).first()
                 if plant_matrix is None:
+                    week_value += 1
                     continue
                 plant_mtrx.value = new_forecast_value
                 db.commit()
