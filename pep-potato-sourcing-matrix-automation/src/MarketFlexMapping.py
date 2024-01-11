@@ -11,6 +11,7 @@ router = APIRouter()
 
 @router.get('/')
 def filtered_market(db: Session = Depends(get_db)):
+    """Function to get market and flex."""
     filtered_Market = db.query(models.MarketFlexMapping).filter(
         models.MarketFlexMapping.status == "ACTIVE").all()
     if not filtered_Market:
@@ -22,6 +23,7 @@ def filtered_market(db: Session = Depends(get_db)):
 
 @router.get('/year/{year}')
 def filtered_market_year(year: int, db: Session = Depends(get_db)):
+    """Function to get market and flex based on year."""
     filtered_Market = db.query(models.MarketFlexMapping) \
         .join(models.Ownership,
               models.Ownership.ownership_id == models.MarketFlexMapping.ownership_id) \
@@ -36,6 +38,7 @@ def filtered_market_year(year: int, db: Session = Depends(get_db)):
 
 
 def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
+    """To calculate total ship in ownership table."""
     ownership_record = db.query(models.Ownership) \
         .filter(models.Ownership.ownership_id == ownership_id).first()
 
@@ -46,14 +49,15 @@ def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
 @router.post('/market_flex')
 def update_Market_flex(payload: schemas.MarketFlexPayload,
                        db: Session = Depends(get_db)):
-    updatemarketflex = payload.Payload_MarketFlex
+    """update market and flex value."""
+    update_market_flex = payload.Payload_MarketFlex
     update_count = 0
     try:
-        for item in updatemarketflex:
+        for item in update_market_flex:
             record = db.query(models.MarketFlexMapping).filter(
                 models.MarketFlexMapping.row_id == item.row_id,
                 models.MarketFlexMapping.row_id.in_(
-                    [item.row_id for item in updatemarketflex])).first()
+                    [item.row_id for item in update_market_flex])).first()
 
             if record is not None:
                 if item.market_flex_value == 0:
