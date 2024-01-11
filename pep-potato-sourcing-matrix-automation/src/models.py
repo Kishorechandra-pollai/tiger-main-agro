@@ -307,7 +307,7 @@ class potato_rate_mapping(Base):
     potato_rate_id = Column(Integer, nullable=True)
     week = Column(Integer, nullable=True)
     rate = Column(Float, nullable=True)
-
+    p_year = Column(Integer, nullable=True)
 
 class solid_rate_mapping(Base):
     __tablename__ = "solid_rate_mapping"
