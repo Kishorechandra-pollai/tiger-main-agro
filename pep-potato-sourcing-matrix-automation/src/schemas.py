@@ -296,6 +296,7 @@ class potatoRateMappingSchema(BaseModel):
     period: Optional[int] = None
     potato_rate_id: Optional[int] = None
     week: Optional[int] = None
+    p_year: Optional[int] = None
     rate: Optional[float] = None
 
     class Config:
@@ -550,6 +551,7 @@ class SolidsTaskMappingSchema(BaseModel):
     solid_task_id: Optional[int] = None
     year: Optional[int] = None
     value: Optional[float] = None
+    country_code: Optional[str] = None
 
     class Config:
         orm_mode = True
