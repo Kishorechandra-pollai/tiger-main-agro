@@ -29,8 +29,7 @@ def get_plantMtrx_common(filter_conditions, name_or_id, year, db):
                         View_PlantMtrx_table.columns.growing_area_name) \
             .filter(View_PlantMtrx_table.columns.year == year,
                     View_PlantMtrx_table.columns.status == 'active', *filter_conditions) \
-            .order_by(View_PlantMtrx_table.columns.plant_name,
-                      View_PlantMtrx_table.columns.period,
+            .order_by(View_PlantMtrx_table.columns.period,
                       View_PlantMtrx_table.columns.week).all()
         if not data:   # pragma: no cover
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -88,8 +87,7 @@ def get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, d
                       View_PlantMtrx_table.columns.period_with_P,
                       View_PlantMtrx_table.columns.period,
                       View_PlantMtrx_table.columns.week) \
-            .order_by(View_PlantMtrx_table.columns.growing_area_name,
-                      View_PlantMtrx_table.columns.period,
+            .order_by(View_PlantMtrx_table.columns.period,
                       View_PlantMtrx_table.columns.week).all()
         if not data:  # pragma: no cover
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail_message)
