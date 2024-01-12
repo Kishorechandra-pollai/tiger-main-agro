@@ -76,7 +76,9 @@ def potato_rate_period_year(year:int, db: Session = Depends(get_db)):
     """Function to fetch all records from potato_rate table for a particular year """
     try:
         records = db.query(potato_rate_table_period
-                           ).filter(potato_rate_table_period.columns.year == year).all()
+                           ).filter(potato_rate_table_period.columns.year == year
+                                    ).order_by(potato_rate_table_period.columns.growing_area_id,
+                                               potato_rate_table_period.columns.period).all()
         return {"potato_rate_period_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -87,7 +89,11 @@ def potato_rate_period_week_year(year:int, db: Session = Depends(get_db)):
     """Function to fetch all records from potato_rate table for a particular year """
     try:
         records = db.query(potato_rate_table_weekly).filter(potato_rate_table_weekly
-                                                            .columns.p_year == year).all()
+                                                            .columns.p_year == year
+                                                            ).order_by(
+                                                                potato_rate_table_period.columns.growing_area_id,
+                                                                potato_rate_table_weekly.columns.period,
+                                                                potato_rate_table_weekly.columns.week).all()
         return {"potato_rate_period_week_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
