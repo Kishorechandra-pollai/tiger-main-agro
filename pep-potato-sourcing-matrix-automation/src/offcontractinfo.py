@@ -126,7 +126,7 @@ def update_off_contract_records(payload: OffContractTaskMappingPayload, db: Sess
 
 
 @router.post("/create_off_contracts_next_year/year/{year}")
-def create_off_contracts_next_year(year: int, db: Session = Depends(get_db())):  # pragma: no cover
+def create_off_contracts_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     try:
         check_off_contract = db.query(off_contract_task_mapping)\
             .filter(off_contract_task_mapping.year == year).first()
