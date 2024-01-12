@@ -129,7 +129,8 @@ def freight_cost_period_view_year(year:int,country:str, db: Session = Depends(ge
     try:
         records = db.query(freight_cost_period_table).filter(
             freight_cost_period_table.columns.p_year == year,
-            freight_cost_period_table.columns.country == country).all()
+            freight_cost_period_table.columns.country == country
+            ).order_by(freight_cost_period_table.columns.period).all()
         return {"freight_cost_period_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -141,7 +142,9 @@ def freight_cost_period_week_view_year(year: int,country:str,db: Session = Depen
     try:
         records = db.query(freight_cost_period_week_table).filter(
             freight_cost_period_week_table.columns.p_year == year,
-            freight_cost_period_week_table.columns.country == country).all()
+            freight_cost_period_week_table.columns.country == country
+            ).order_by(freight_cost_period_week_table.columns.period,
+                      freight_cost_period_week_table.columns.week).all()
         return {"freight_cost_period_week_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -152,7 +155,8 @@ def get_rate_growing_area_year(year: int, db: Session = Depends(get_db)):
     """Function to get records rate growing area table by year"""
     try:
         records = db.query(rate_growing_area_table).filter(
-            rate_growing_area_table.columns.p_year == year).all()
+            rate_growing_area_table.columns.p_year == year).order_by(rate_growing_area_table.columns.growing_area_id,
+                                                                     rate_growing_area_table.columns.period).all()
         return {"freight_cost_rate_growing_area": records}
     except Exception as e:
         print(f"Exception: {e}")
