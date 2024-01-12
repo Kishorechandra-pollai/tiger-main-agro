@@ -144,7 +144,7 @@ def freight_cost_period_week_view_year(year: int,country:str,db: Session = Depen
             freight_cost_period_week_table.columns.p_year == year,
             freight_cost_period_week_table.columns.country == country
             ).order_by(freight_cost_period_week_table.columns.period,
-                      freight_cost_period_week_table.columns.week).all()
+                      freight_cost_period_week_table.columns.week_no).all()
         return {"freight_cost_period_week_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
