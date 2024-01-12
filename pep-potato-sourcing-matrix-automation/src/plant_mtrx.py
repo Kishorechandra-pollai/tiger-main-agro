@@ -295,26 +295,19 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):  # pragma: 
 
 def update_first_period_data(current_period, current_week, current_year,
                              new_record_count, db: Session = Depends(get_db)):
-    """load first week data in plant_mtrx(special case)."""
+    """Load actual values in Plant Matrix for first period."""
+    records_to_delete = db.query(models.plantMtrx) \
+        .filter(models.plantMtrx.period == current_period,
+                models.plantMtrx.year == current_year).all()
+    for record in records_to_delete:
+        db.delete(record)
+    db.commit()
     if current_week == -1:
         if period_week_calc.calculate_week_num(current_year, current_period):
             total_week = 5
         else:
             total_week = 4
-        records_to_delete = db.query(models.plantMtrx) \
-            .filter(models.plantMtrx.period == current_period,
-                    models.plantMtrx.year == current_year).all()
-        for record in records_to_delete:
-            db.delete(record)
-        db.commit()
     else:
-        records_to_delete = db.query(models.plantMtrx) \
-            .filter(models.plantMtrx.year == current_year,
-                    models.plantMtrx.period == current_period,
-                    models.plantMtrx.week <= current_week).all()
-        for record in records_to_delete:
-            db.delete(record)
-        db.commit()
         total_week = current_week
     week = 1
     while week <= total_week:
@@ -324,7 +317,6 @@ def update_first_period_data(current_period, current_week, current_year,
                     models.View_plant_matrix_actual.columns.p_year == current_year) \
             .all()
         if not actual_data_current_week:
-            week += 1
             continue
         for item in actual_data_current_week:
             new_record_count += 1
@@ -343,7 +335,7 @@ def update_first_period_data(current_period, current_week, current_year,
             plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
             db.add(plantMtrx_record)
             db.commit()
-        week += 1
+            week += 1
     return new_record_count
 
 
