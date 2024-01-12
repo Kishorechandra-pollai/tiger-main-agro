@@ -237,8 +237,8 @@ view_growing_area_mapping_Alice = db.Table('view_growing_area_mapping', metadata
 class solids_rates(Base):
     __tablename__ = "solids_rates"
     solids_rate_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
-    year = Column(Integer, nullable=True)
-    growing_area_id = Column(String, nullable=True)
+    growing_area_id = Column(Integer, nullable=True)
+    growing_area_id_old = Column(Integer, nullable=True)
     currency = Column(String, nullable=True)
     created_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
@@ -250,7 +250,8 @@ class potato_rates(Base):
     __tablename__ = "potato_rates"
     potato_rate_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     year = Column(Integer, nullable=True)
-    growing_area_id = Column(String, nullable=True)
+    growing_area_id = Column(Integer, nullable=True)
+    growing_area_id_old = Column(Integer, nullable=True)
     currency = Column(String, nullable=True)
     created_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
