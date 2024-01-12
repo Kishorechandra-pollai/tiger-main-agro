@@ -91,7 +91,7 @@ def potato_rate_period_week_year(year:int, db: Session = Depends(get_db)):
         records = db.query(potato_rate_table_weekly).filter(potato_rate_table_weekly
                                                             .columns.p_year == year
                                                             ).order_by(
-                                                                potato_rate_table_period.columns.growing_area_id,
+                                                                potato_rate_table_weekly.columns.growing_area_id,
                                                                 potato_rate_table_weekly.columns.period,
                                                                 potato_rate_table_weekly.columns.week).all()
         return {"potato_rate_period_week_year": records}

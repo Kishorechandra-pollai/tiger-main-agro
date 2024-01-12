@@ -64,7 +64,9 @@ def solid_rate_period_year(year:int, db: Session = Depends(get_db)):
     """Function to fetch all records from solids_rate table for a particular year """
     try:
         records = db.query(solids_rate_table_period).filter(
-            solids_rate_table_period.columns.year == year).all()
+            solids_rate_table_period.columns.year == year
+            ).order_by(solids_rate_table_period.columns.growing_area_id,
+                       solids_rate_table_period.columns.period).all()
         return {"solids_rate_period_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
