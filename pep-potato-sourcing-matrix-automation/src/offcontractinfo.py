@@ -82,8 +82,8 @@ def create_freight_task_mappings(payload: OffContractTaskMappingSchema, db: Sess
     return {"status": "success", "row_id": new_record.row_id}
 
 @router.post("/update_off_contract_records/{off_contract_task_id}")
-def update_off_contract(off_contract_task_id: int, payload: OffContractTaskMappingSchema ,
-                   db: Session = Depends(get_db)):
+def update_off_contract(off_contract_task_id: int, payload: OffContractTaskMappingSchema,
+                        db: Session = Depends(get_db)):
     """Function to update already existing records in off_contract_task_mapping table"""
     existing_records= db.query(off_contract_task_mapping).filter(
         off_contract_task_mapping.off_contract_task_id == off_contract_task_id
@@ -121,5 +121,34 @@ def update_off_contract_records(payload: OffContractTaskMappingPayload, db: Sess
         db.commit()
 
         return {"status": "success", "records_updated": update_count}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/create_off_contracts_next_year/year/{year}")
+def create_off_contracts_next_year(year: int, db: Session = Depends(get_db())):  # pragma: no cover
+    try:
+        check_off_contract = db.query(off_contract_task_mapping)\
+            .filter(off_contract_task_mapping.year == year).first()
+        if check_off_contract is None:
+            raise HTTPException(status_code=400, detail="off_contract already present for given year.")
+        all_country_division = db.query(country_division_name.task_desc)\
+            .filter(country_division_name.status == "Active").all()
+        for country_div in all_country_division:
+            all_off_contract_item = db.query(off_contract_info.off_contract_task_id)\
+                .filter(off_contract_info.status == 'ACTIVE').all()
+            for off_contracts_id in all_off_contract_item:
+                period = 1
+                while period <= 13:
+                    payload_off_contract = {"off_contract_task_id":off_contracts_id,
+                                            "period": period,
+                                            "year": year,
+                                            "value": 0,
+                                            "company_name": str(country_div)
+                                            }
+                    new_off_contracts = off_contract_task_mapping(**payload_off_contract)
+                    db.add(new_off_contracts)
+                    period += 1
+            db.commit()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
