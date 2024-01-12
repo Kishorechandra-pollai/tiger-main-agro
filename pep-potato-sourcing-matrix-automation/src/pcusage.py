@@ -37,8 +37,7 @@ def get_filtered_usage_week_common(db, filter_conditions, year, detail_message=N
         result = db.query(View_forecast_pcusage) \
             .filter(View_forecast_pcusage.columns.year == year,
                     *filter_conditions) \
-            .order_by(View_forecast_pcusage.columns.plant_id,
-                      View_forecast_pcusage.columns.period,
+            .order_by(View_forecast_pcusage.columns.period,
                       View_forecast_pcusage.columns.week).all()
 
         total_forecast_volume = total_forcast_volume_func(filter_conditions, year, db)
@@ -99,8 +98,7 @@ def get_filtered_usage_period_common(db, filter_conditions, year, detail_message
                       View_forecast_pcusage.columns.Period_with_P,
                       View_forecast_pcusage.columns.plant_name,
                       View_forecast_pcusage.columns.period, View_forecast_pcusage.columns.plant_id)\
-            .order_by(View_forecast_pcusage.columns.plant_name,
-                      View_forecast_pcusage.columns.period).all()
+            .order_by(View_forecast_pcusage.columns.period).all()
 
         total_forecast_volume = total_forcast_volume_func(filter_conditions, year, db)
 
