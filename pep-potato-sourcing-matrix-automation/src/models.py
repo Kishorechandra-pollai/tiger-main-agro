@@ -189,7 +189,6 @@ class FreightCostMapping(Base):
     year = Column(Integer, index=True, nullable=False)
     period = Column(Integer, nullable=False)
     rate = Column(Float, nullable=False)
-    actual_rate = Column(Float, nullable=False)
 
 
 class Ownership(Base):

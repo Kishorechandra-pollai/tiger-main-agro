@@ -140,11 +140,11 @@ def create_off_contracts_next_year(year: int, db: Session = Depends(get_db)):  #
             for off_contracts_id in all_off_contract_item:
                 period = 1
                 while period <= 13:
-                    payload_off_contract = {"off_contract_task_id":off_contracts_id,
+                    payload_off_contract = {"off_contract_task_id": off_contracts_id[0],
                                             "period": period,
                                             "year": year,
                                             "value": 0,
-                                            "company_name": str(country_div)
+                                            "company_name": str(country_div[0])
                                             }
                     new_off_contracts = off_contract_task_mapping(**payload_off_contract)
                     db.add(new_off_contracts)

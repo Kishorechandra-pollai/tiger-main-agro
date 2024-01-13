@@ -56,20 +56,11 @@ def create_freight_cost(payload: schemas.FreightCostRateSchema, db: Session = De
 def view_freight_mapping_by_year(year:int, db: Session = Depends(get_db)):
     """Function to fetch all records from freight_cost_mapping table """
     try:
-        records = db.query(FreightCostMapping, func.concat("P", FreightCostMapping.period)\
-            .label("period_with_P")).filter(FreightCostMapping.year == year).all()
-        # Extract the results as dictionaries and build the response
-        result = [
-            {
-                "freight_cost_id": row.FreightCostMapping.freight_cost_id,
-                "period": row.FreightCostMapping.period,
-                "year": row.FreightCostMapping.year,
-                "rate": row.FreightCostMapping.rate,
-                "period_with_P": row.period_with_P
-            }
-            for row in records
-        ]
-        return {"status": "success", "freight_cost_mapping": result}
+        records = db.query(FreightCostMapping.freight_cost_id,
+                           FreightCostMapping.period,
+                           func.concat("P", FreightCostMapping.period).label("period_with_P"),
+                           FreightCostMapping.rate).filter(FreightCostMapping.year == year).all()
+        return {"status": "success", "freight_cost_mapping": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
