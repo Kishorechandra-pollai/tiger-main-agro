@@ -548,7 +548,7 @@ class MarketFlexPayload(BaseModel):
 
 class SolidsTaskMappingSchema(BaseModel):
     period: Optional[int] = None
-    solid_task_id: Optional[int] = None
+    solids_task_id: Optional[int] = None
     year: Optional[int] = None
     value: Optional[float] = None
     country_code: Optional[str] = None

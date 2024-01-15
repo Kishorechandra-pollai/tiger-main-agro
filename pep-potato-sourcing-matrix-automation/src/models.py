@@ -518,6 +518,7 @@ class solids_task_mapping(Base):
     solids_task_id = Column(Integer, nullable=True)
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
+    country_code = Column(String, nullable=True)
 
 
 class country_division_name(Base):
