@@ -30,6 +30,7 @@ import summary_price_variance
 import inflation_deflation
 import dashboard
 import summary_solids
+import summary_overall_cost
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -72,6 +73,7 @@ app.include_router(p4p_master_info.router, tags=['p4p-master-info'], prefix='/ap
 app.include_router(summary_price_variance.router, tags=['summary_price_variance'], prefix='/api/summary_price_variance')
 app.include_router(inflation_deflation.router, tags=['inflation_deflation'], prefix='/api/inflation_deflation')
 app.include_router(summary_solids.router, tags=['summary_solids'], prefix='/api/summary_solids')
+app.include_router(summary_overall_cost.router, tags=['summary_overall_cost'], prefix='/api/summary_overall_cost')
 
 app.add_middleware(
     CORSMiddleware,
