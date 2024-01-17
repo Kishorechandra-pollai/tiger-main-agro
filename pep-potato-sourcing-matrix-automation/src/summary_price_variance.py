@@ -1,9 +1,9 @@
-"""Summary Price Variance  API"""
+"""Summary Price Variance API"""
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from models import (country_division_name, price_variance_task,
-                    price_variance_task_mapping)
-from schemas import PriceVarianceMappingSchema,PriceVarianceMappingPayload
+                    price_variance_task_mapping,summary_price_variance)
+from schemas import PriceVarianceMappingPayload
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -110,7 +110,7 @@ async def create_price_variance_task_mapping(year: int, db: Session = Depends(ge
         for period in range(1,14):
             for con in countries:
                 new_record =price_variance_task_mapping(price_variance_task_id = record.price_variance_task_id, 
-                                                              period=period, year=year, value=0.0, company_name=con.division_name)
+                                                              period=period, year=year, value=0.0, company_name=con.task_desc)
                 db.add(new_record)
                 db.commit()
 
@@ -138,7 +138,8 @@ def update_price_variance_mappings_records(payload: PriceVarianceMappingPayload,
                 return {"status": "error", "message":"Please check details"}
             db.query(price_variance_task_mapping).filter(price_variance_task_mapping.price_variance_task_id == item.price_variance_task_id,
                                                          price_variance_task_mapping.year==item.year, 
-                                                         price_variance_task_mapping.period==item.period).update(
+                                                         price_variance_task_mapping.period==item.period,
+                                                         price_variance_task_mapping.company_name == item.company_name).update(
                 {price_variance_task_mapping.value: item.value}, synchronize_session='fetch')
             update_count += 1
         db.commit()
@@ -146,3 +147,14 @@ def update_price_variance_mappings_records(payload: PriceVarianceMappingPayload,
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get('/summary_price_variance_view/{year}/{country_code}')
+def summary_price_variance_year_country_code(year:int,country_code:str,db: Session = Depends(get_db)):
+    """Function to fetch all records from summary_price_variance view based on year and country_Code filter """
+    try:
+        records = db.query(summary_price_variance).filter(
+            summary_price_variance.columns.year == year,
+            summary_price_variance.columns.country_code == country_code).all()
+        return {"summary_solids_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
