@@ -26,7 +26,7 @@ from growers import delete_grower, create_growers
 from category import delete_category, create_category
 from solidrates import (update_solid_rates_records)
 from potatorates import (update_potato_rates_records)
-from offcontractinfo import (update_off_contract_task_mapping, update_off_contract,
+from offcontractinfo import (create_off_contract_task_mapping_for_year, update_off_contract,
                              create_freight_task_info, create_freight_task_mappings,
                              update_off_contract_records)
 from region import delete_region, create_region
@@ -982,11 +982,11 @@ def test_off_contract_task_mapping_by_year():
 
 
 @patch('database.get_db')
-def test_mock_update_off_contract_task_mapping(mock_get_db):
+def test_mock_create_off_contract_task_mapping_for_year(mock_get_db):
     db_mock = MagicMock()
     mock_get_db.return_value = db_mock
     year = 2023
-    result = update_off_contract_task_mapping(year=year, db=db_mock)
+    result = create_off_contract_task_mapping_for_year(year=year, db=db_mock)
     assert result["status"] == "success"
 
 

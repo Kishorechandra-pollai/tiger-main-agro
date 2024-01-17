@@ -481,7 +481,8 @@ dashboard_pc_volume_period_country_yearly = db.Table('View_dashboard_pc_volume_p
                                                      metadata, autoload=True, autoload_with=engine)
 dashboard_pc_volume_yearly_country_combine = db.Table('View_dashboard_pc_volume_yearly_country_combine',
                                                       metadata, autoload=True, autoload_with=engine)
-summary_solids= db.Table('View_solid_summary',metadata, autoload=True, autoload_with=engine)
+summary_solids = db.Table('View_solid_summary',metadata, autoload=True, autoload_with=engine)
+summary_overall_cost = db.Table('View_summary_UNION_VIEW',metadata, autoload=True, autoload_with=engine)
 
 
 class MarketFlexMapping(Base):
