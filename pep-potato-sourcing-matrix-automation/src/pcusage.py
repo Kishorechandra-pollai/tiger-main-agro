@@ -56,11 +56,11 @@ def get_filtered_usage_week_common(db, filter_conditions, year, detail_message=N
 def get_filtered_usage_by_company_name(name: str, year: int, db: Session = Depends(get_db)):
     filter_dict = {
         'US': 'US',
-        'US-Core': 'FLUS',
-        'Co-Man': 'Co-Man',
+        'US-Core': 'US-CORE',
+        'Co-Man': 'CO-MAN',
         'Canada-Core': 'Canada'
     }
-    if filter_dict[name] == 'Co-Man' or filter_dict[name] == 'FLUS':
+    if filter_dict[name] == 'CO-MAN' or filter_dict[name] == 'US-CORE':
         filter_conditions = [View_forecast_pcusage.columns.company_name == filter_dict[name]]
     else:
         filter_conditions = [View_forecast_pcusage.columns.country == filter_dict[name]]
@@ -116,11 +116,11 @@ def get_filtered_usage_period_common(db, filter_conditions, year, detail_message
 def getUsage_company_periodWise(name: str, year: int, db: Session = Depends(get_db)):
     filter_dict = {
         'US': 'US',
-        'US-Core': 'FLUS',
-        'Co-Man': 'Co-Man',
+        'US-Core': 'US-CORE',
+        'Co-Man': 'CO-MAN',
         'Canada-Core': 'Canada'
     }
-    if filter_dict[name] == 'Co-Man' or filter_dict[name] == 'FLUS':
+    if filter_dict[name] == 'CO-MAN' or filter_dict[name] == 'US-CORE':
         filter_conditions = [View_forecast_pcusage.columns.company_name == filter_dict[name]]
     else:
         filter_conditions = [View_forecast_pcusage.columns.country == filter_dict[name]]
