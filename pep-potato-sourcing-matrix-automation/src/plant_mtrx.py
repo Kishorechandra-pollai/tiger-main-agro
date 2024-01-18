@@ -55,8 +55,8 @@ def get_plantMtrx_by_company(name: str, year: int, db: Session = Depends(get_db)
     filter_dict = {
         'US': 'US',
         'Canada': 'Canada',
-        'US-Core': 'FLUS',
-        'Co-Man': 'Co-Man',
+        'US-Core': 'US-CORE',
+        'Co-Man': 'CO-MAN',
         'Canada-Core': 'Canada'
     }
     filter_conditions = [
