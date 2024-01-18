@@ -1,14 +1,14 @@
-from datetime import datetime, timedelta
 from models import general_administrative_task, general_administrative_mappings, country_division_name
-from schemas import GeneralAdministrativeTaskSchema, GeneralAdministrativeMappingsSchema, GeneralAdministrativeMappingsPayload
+from schemas import GeneralAdministrativeTaskSchema, GeneralAdministrativeMappingsPayload
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter, Response
 from database import get_db
 
 router = APIRouter()
 
+
 @router.get('/')
-def get_freight_task_info(db: Session = Depends(get_db)):
+def get_general_administrative_task_info(db: Session = Depends(get_db)):
     """Function to get all records from freight_task_info."""
     query = db.query(general_administrative_task).all()
     if not query:
@@ -16,22 +16,22 @@ def get_freight_task_info(db: Session = Depends(get_db)):
                             detail="No freight_task_info found")
     return {"status": "success", "data": query}
 
-@router.get('/getBygeneral_administrative_id/{general_administrative_id}')
-def getBygeneral_administrative_id(general_administrative_id: int, db: Session = Depends(get_db)):
-    general_administrative = db.query(general_administrative_task).filter(general_administrative_task.general_administrative_id == general_administrative_id).first()
-    if not general_administrative:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"No general_administrative_id: {general_administrative_id} found")
-    return {"status": "success", "general_administrative": general_administrative}
+# @router.get('/getBygeneral_administrative_id/{general_administrative_id}')
+# def getBygeneral_administrative_id(general_administrative_id: int, db: Session = Depends(get_db)):
+#     general_administrative = db.query(general_administrative_task).filter(general_administrative_task.general_administrative_id == general_administrative_id).first()
+#     if not general_administrative:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail=f"No general_administrative_id: {general_administrative_id} found")
+#     return {"status": "success", "general_administrative": general_administrative}
 
-@router.get('/general_administrative_mappings/')
-def get_general_administrative_mappings(db: Session = Depends(get_db)):
-    """Function to get all records from potato_rate_mapping."""
-    query = db.query(general_administrative_mappings).all()
-    if not query:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="No general_administrative_mappings  found")
-    return {"status": "success", "data": query}
+# @router.get('/general_administrative_mappings/')
+# def get_general_administrative_mappings(db: Session = Depends(get_db)):
+#     """Function to get all records from potato_rate_mapping."""
+#     query = db.query(general_administrative_mappings).all()
+#     if not query:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail="No general_administrative_mappings  found")
+#     return {"status": "success", "data": query}
 
 @router.get('/general_administrative_mappings_by_year/{year}/{country}')
 def general_administrative_mappings_by_year(year: str,country:str, db: Session = Depends(get_db)):
@@ -74,13 +74,6 @@ def create_general_administrative_task(payload: GeneralAdministrativeTaskSchema,
     db.refresh(new_record)
     return {"status": "success", "general_administrative_id": new_record.general_administrative_id}
 
-@router.post('/create_general_administrative_mappings', status_code=status.HTTP_201_CREATED)
-def create_general_administrative_mappings(payload: GeneralAdministrativeMappingsSchema, db: Session = Depends(get_db)):
-    new_record = general_administrative_mappings(**payload.dict())
-    db.add(new_record)
-    db.commit()
-    db.refresh(new_record)
-    return {"status": "success", "row_id": new_record.row_id}
 
 @router.post("/update_general_administrative_records/")
 def update_general_administrative_records(payload: GeneralAdministrativeMappingsPayload, db: Session = Depends(get_db)):
@@ -99,3 +92,36 @@ def update_general_administrative_records(payload: GeneralAdministrativeMappings
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/create_general_administrative_mappings_for_next_year/", status_code=status.HTTP_201_CREATED)
+async def create_general_administrative_mappings_for_next_year(year: int, db: Session = Depends(get_db)):
+    """Function to create records with given year for each country and general_administrative_task and add into
+    general_administrative_mappings table."""
+
+    all_records = db.query(general_administrative_task).all()
+    countries = db.query(country_division_name).filter(country_division_name.status == "Active").all()
+    update_count = 0
+    if all_records.count==0:
+        raise HTTPException(status_code=404, detail="No records found in the database")
+    dict_existing_record = []
+    existingRecord = db.query(general_administrative_mappings)\
+                    .filter(general_administrative_mappings.year==year).all()
+    for ex in existingRecord:
+        key = str(ex.p4p_id)+"-"+ex.company_name+"-"+str(ex.period)
+        dict_existing_record.append(key)
+    for record in all_records: # Iterate over all frieight task info
+        for period in range(1,14): # Iterating 1 to 13 periods
+            for con in countries: # Iterate through the countries
+                isKey = str(record.p4p_id)+"-"+con.task_desc+"-"+str(period)
+                if isKey in dict_existing_record:
+                    return {"status": "error", "Records already exists for Year": year}
+                else:
+                    new_record = general_administrative_mappings(general_administrative_id=record.general_administrative_id,
+                                                                 period=period, year=year, value=0.001,
+                                                                 company_name=con.task_desc)
+                    db.add(new_record)
+                    update_count += 1
+
+    db.commit()
+    return {"status": "success", "Records added": update_count, "for Year": year}
