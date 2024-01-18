@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from models import freight_task_info, freight_task_mappings, country_division_name
 from schemas import FreightTaskInfoSchema, FreightTaskMappingsSchema, FreightTaskMappingsPayload
 from sqlalchemy.orm import Session

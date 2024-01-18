@@ -1,7 +1,6 @@
 import sys
 from datetime import date
 from unittest.mock import Mock, patch, MagicMock
-import pytest
 from fastapi.testclient import TestClient
 
 sys.path.append(r"..\src\main.py")
@@ -34,7 +33,7 @@ from p4p_master_info import (create_p4p_task_mappings_info, create_p4p_task_mapp
                              update_p4p_task_mappings_records)
 from generaladministrative import (update_general_administrative_mappings, create_general_administrative_task,
                                    update_general_administrative_records)
-from freighttaskinfo import (update_freight_task_records, update_freight_task_mappings)
+from freighttaskinfo import (update_freight_task_mapping_records)
 
 client = TestClient(app)
 
@@ -1211,11 +1210,11 @@ def test_freight_task_mappings():
 
 
 @patch('database.get_db')
-def test_mock_update_freight_task_mappings(mock_get_db):
+def test_mock_update_freight_task_mapping_records(mock_get_db):
     db_mock = MagicMock()
     mock_get_db.return_value = db_mock
     year = 2023
-    result = update_freight_task_mappings(year=year, db=db_mock)
+    result = update_freight_task_mapping_records(year=year, db=db_mock)
     assert result["forYear"] == year
 
 
@@ -1239,23 +1238,23 @@ def test_mock_create_freight_task_mappings(mock_get_db):
     assert result['status'] == 'success'
 
 
-@patch('database.get_db')
-def test_mock_update_freight_task_records(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    payload = [
-        {
-            "period": 1,
-            "off_contract_task_id": 1,
-            "year": 2023,
-            "value": 2,
-            "company_name": "US-CORE"
-        }
-    ]
-
-    test_payload = schemas.OffContractTaskMappingPayload(data=payload)
-    result = update_freight_task_records(payload=test_payload, db=db_mock)
-    assert result["status"] == "success"
+# @patch('database.get_db')
+# def test_mock_update_freight_task_records(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     payload = [
+#         {
+#             "period": 1,
+#             "off_contract_task_id": 1,
+#             "year": 2023,
+#             "value": 2,
+#             "company_name": "US-CORE"
+#         }
+#     ]
+#
+#     test_payload = schemas.OffContractTaskMappingPayload(data=payload)
+#     result = update_freight_task_records(payload=test_payload, db=db_mock)
+#     assert result["status"] == "success"
 
 
 """________generaladministrative.py_________"""
