@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment                            # Kubernetes Resource Kind
 metadata:
@@ -17,7 +18,7 @@ spec:
         azure.workload.identity/use: "true" 
     spec:
       serviceAccountName: pep-eiap-cgf-psm-dev-sa
-      automountServiceAccountToken: true   
+      automountServiceAccountToken: false   
       containers:
       - name: pep-eiap-cgf-psm-dev-api             # name of the application container
         image: pepeiapnonprodglobalcommonacr.azurecr.io/pep/eip/potato-sourcing-matrix-api-repo:BUILD_NUMBER
