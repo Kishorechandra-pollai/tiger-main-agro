@@ -27,7 +27,7 @@ from category import delete_category, create_category
 from solidrates import (update_solid_rates_records)
 from potatorates import (update_potato_rates_records)
 from offcontractinfo import (create_off_contract_task_mapping_for_year, update_off_contract,
-                             create_freight_task_info, create_freight_task_mappings,
+                             create_off_contract_info, create_off_contract_task_mapping,
                              update_off_contract_records)
 from region import delete_region, create_region
 from p4p_master_info import (create_p4p_task_mappings_info, create_p4p_task_mappings,
@@ -991,7 +991,7 @@ def test_mock_create_off_contract_task_mapping_for_year(mock_get_db):
 
 
 @patch('database.get_db')
-def test_mock_create_freight_task_info(mock_get_db):
+def test_mock_create_off_contract_info(mock_get_db):
     db_mock = MagicMock()
     mock_get_db.return_value = db_mock
     mapping_payload = {
@@ -1004,13 +1004,13 @@ def test_mock_create_freight_task_info(mock_get_db):
         "updated_time": "2023-11-10T13:03:23.790000"
     }
     test_ownership_schema = schemas.OffContractInfoSchema(**mapping_payload)
-    result = create_freight_task_info(payload=test_ownership_schema, db=db_mock)
+    result = create_off_contract_info(payload=test_ownership_schema, db=db_mock)
 
     assert result['status'] == 'success'
 
 
 @patch('database.get_db')
-def test_mock_create_freight_task_mappings(mock_get_db):
+def test_mock_create_off_contract_task_mapping(mock_get_db):
     db_mock = MagicMock()
     mock_get_db.return_value = db_mock
     mapping_payload = {
@@ -1021,7 +1021,7 @@ def test_mock_create_freight_task_mappings(mock_get_db):
         "company_name": "US-CORE"
     }
     test_ownership_schema = schemas.OffContractTaskMappingSchema(**mapping_payload)
-    result = create_freight_task_mappings(payload=test_ownership_schema, db=db_mock)
+    result = create_off_contract_task_mapping(payload=test_ownership_schema, db=db_mock)
     assert result['status'] == 'success'
 
 
@@ -1234,7 +1234,7 @@ def test_mock_create_freight_task_mappings(mock_get_db):
     }
 
     test_schema = schemas.FreightTaskInfoSchema(data=mapping_payload)
-    result = create_freight_task_info(payload=test_schema, db=db_mock)
+    result = create_off_contract_info(payload=test_schema, db=db_mock)
 
     assert result['status'] == 'success'
 
