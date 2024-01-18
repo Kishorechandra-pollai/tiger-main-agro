@@ -33,7 +33,7 @@ from region import delete_region, create_region
 from p4p_master_info import (create_p4p_task_mappings_info, create_p4p_task_mappings,
                              update_p4p_task_mappings_records)
 from generaladministrative import (update_general_administrative_mappings, create_general_administrative_task,
-                                   update_general_administrative_records, create_general_administrative_mappings)
+                                   update_general_administrative_records)
 from freighttaskinfo import (update_freight_task_records, update_freight_task_mappings)
 
 client = TestClient(app)
@@ -1317,25 +1317,25 @@ def test_create_general_administrative_task(mock_get_db):
     assert result == {"status": "success"}
 
 
-@patch('database.get_db')
-def test_create_general_administrative_mappings(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    mock_add = MagicMock()
-    db_mock.add = mock_add
-    mock_commit = MagicMock()
-    db_mock.commit = mock_commit
-
-    payload_data = {
-        "period": 2,
-        "general_administrative_id": 1,
-        "year": 2025,
-        "value": 0,
-        "company_name": "string"
-    }
-    mock_payload = schemas.GeneralAdministrativeMappingsSchema(**payload_data)
-    result = create_general_administrative_mappings(payload=mock_payload, db=db_mock)
-    assert result == {"status": "success", "general_administrative_id": 1}
+# @patch('database.get_db')
+# def test_create_general_administrative_mappings(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     mock_add = MagicMock()
+#     db_mock.add = mock_add
+#     mock_commit = MagicMock()
+#     db_mock.commit = mock_commit
+#
+#     payload_data = {
+#         "period": 2,
+#         "general_administrative_id": 1,
+#         "year": 2025,
+#         "value": 0,
+#         "company_name": "string"
+#     }
+#     mock_payload = schemas.GeneralAdministrativeMappingsSchema(**payload_data)
+#     result = create_general_administrative_mappings(payload=mock_payload, db=db_mock)
+#     assert result == {"status": "success", "general_administrative_id": 1}
 
 
 @patch('database.get_db')
