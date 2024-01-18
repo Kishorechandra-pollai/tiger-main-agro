@@ -150,7 +150,8 @@ def summary_solids_view_year_country_code(year:int,country_code:str,db: Session 
     try:
         records = db.query(summary_solids).filter(
             summary_solids.columns.year == year,
-            summary_solids.columns.country_code == country_code).all()
+            summary_solids.columns.country_code == country_code
+            ).order_by(summary_solids.columns.period).all()
         return {"summary_solids_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
