@@ -156,6 +156,6 @@ def summary_price_variance_year_country_code(year:int,country_code:str,db: Sessi
             summary_price_variance.columns.year == year,
             summary_price_variance.columns.country_code == country_code
             ).order_by(summary_price_variance.columns.period).all()
-        return {"summary_solids_view": records}
+        return {"summary_price_variance": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

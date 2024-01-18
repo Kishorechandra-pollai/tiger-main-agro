@@ -12,7 +12,8 @@ def summary_overall_cost_year_country_code(year: int, company_name: str, db: Ses
     try:
         records = db.query(summary_overall_cost).filter(
             summary_overall_cost.columns.year == year,
-            summary_overall_cost.columns.company_name == company_name).all()
-        return {"summary_solids_view": records}
+            summary_overall_cost.columns.company_name == company_name
+            ).order_by(summary_overall_cost.columns.period).all()
+        return {"summary_overall_cost": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
