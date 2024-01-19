@@ -28,6 +28,6 @@ stages:
     parameters:
       isPython: true
       isUI: false
-      isfortifyScanRequired: false
-      isSonarScanRequired: false
-      isSnykScanRequired: false
+      isfortifyScanRequired: true
+      isSonarScanRequired: true
+      isSnykScanRequired: true
