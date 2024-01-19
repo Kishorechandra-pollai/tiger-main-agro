@@ -45,29 +45,35 @@ def p4p_task_mappings_by_year(year: str, country:str, db: Session = Depends(get_
 
     return {"status": "success", "data": query}
 
-@router.post("/update_p4p_task_mappings/", status_code=status.HTTP_201_CREATED)
-async def update_p4p_task_mappings(year: int, db: Session = Depends(get_db)):
-    """Function to update records in p4p_master_info table."""
-    # Fetch all records from the database
+
+@router.post("/create_p4p_task_mappings_records_for_next_year/", status_code=status.HTTP_201_CREATED)
+async def create_p4p_task_mappings_records_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma : no cover
+    """Function to Create p4p_task_mappings records for next year."""
     all_records = db.query(p4p_master_info).all()
-    countries = db.query(country_division_name).all()
-    # Ensure there are records in the database
+    countries = db.query(country_division_name).filter(country_division_name.status == "Active").all()
+    update_count = 0
     if all_records.count==0:
         raise HTTPException(status_code=404, detail="No records found in the database")
+    dict_existing_record = []
+    existingRecord = db.query(p4p_task_mappings)\
+                    .filter(p4p_task_mappings.year==year).all()
+    for ex in existingRecord:
+        key = str(ex.p4p_id)+"-"+ex.company_name+"-"+str(ex.period)
+        dict_existing_record.append(key)
+    for record in all_records: # Iterate over all frieight task info
+        for period in range(1,14): # Iterating 1 to 13 periods
+            for con in countries: # Iterate through the countries
+                isKey = str(record.p4p_id)+"-"+con.task_desc+"-"+str(period)
+                # print(isKey,dict_existing_record)
+                if isKey in dict_existing_record:
+                    return {"status": "error", "Records already exists for Year": year}
+                else:
+                    new_record = p4p_task_mappings(p4p_id = record.p4p_id, period=period, year=year, value=0.001, company_name=con.task_desc)
+                    db.add(new_record)
+                    update_count += 1
 
-    existingTaskNames = []
-    for record in all_records:
-        existingRecord = db.query(p4p_task_mappings).filter(p4p_task_mappings.year==year,p4p_task_mappings.p4p_id==record.p4p_id ).first()
-        if existingRecord:
-            existingTaskNames.append(record.p4p_name)
-            continue
-        for period in range(1,14):
-            for con in countries:
-                new_record = p4p_task_mappings(p4p_id = record.p4p_id, period=period, year=year, value=0.001, company_name=con.task_desc)
-                db.add(new_record)
-                db.commit()
-
-    return {"status": "success", "Records already exists for ":existingTaskNames, "forYear": year}
+    db.commit()
+    return {"status": "success", "Records added": update_count, "for Year": year}
 
 @router.post('/create_p4p_task_mappings_info', status_code=status.HTTP_201_CREATED)
 def create_p4p_task_mappings_info(payload: p4pMasterInfoSchema, db: Session = Depends(get_db)):

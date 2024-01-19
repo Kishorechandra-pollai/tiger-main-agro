@@ -95,7 +95,7 @@ def update_general_administrative_records(payload: GeneralAdministrativeMappings
 
 
 @router.post("/create_general_administrative_mappings_for_next_year/", status_code=status.HTTP_201_CREATED)
-async def create_general_administrative_mappings_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+async def create_g_and_a_mappings_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to create records with given year for each country and general_administrative_task and add into
     general_administrative_mappings table."""
 
@@ -108,18 +108,17 @@ async def create_general_administrative_mappings_for_next_year(year: int, db: Se
     existingRecord = db.query(general_administrative_mappings)\
                     .filter(general_administrative_mappings.year==year).all()
     for ex in existingRecord:
-        key = str(ex.p4p_id)+"-"+ex.company_name+"-"+str(ex.period)
+        key = str(ex.general_administrative_id)+"-"+ex.company_name+"-"+str(ex.period)
         dict_existing_record.append(key)
     for record in all_records: # Iterate over all frieight task info
         for period in range(1,14): # Iterating 1 to 13 periods
             for con in countries: # Iterate through the countries
-                isKey = str(record.p4p_id)+"-"+con.task_desc+"-"+str(period)
+                isKey = str(record.general_administrative_id)+"-"+con.task_desc+"-"+str(period)
+                # print(isKey,dict_existing_record)
                 if isKey in dict_existing_record:
                     return {"status": "error", "Records already exists for Year": year}
                 else:
-                    new_record = general_administrative_mappings(general_administrative_id=record.general_administrative_id,
-                                                                 period=period, year=year, value=0.001,
-                                                                 company_name=con.task_desc)
+                    new_record = general_administrative_mappings(general_administrative_id = record.general_administrative_id, period=period, year=year, value=0, company_name=con.task_desc)
                     db.add(new_record)
                     update_count += 1
 

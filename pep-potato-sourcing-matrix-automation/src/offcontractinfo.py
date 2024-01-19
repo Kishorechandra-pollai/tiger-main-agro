@@ -43,32 +43,40 @@ def off_contract_task_mapping_by_year_and_country(year: str, country:str, db: Se
     return {"status": "success", "data": query}
 
 
-@router.post("/create_off_contract_task_mapping_for_year/")
-async def create_off_contract_task_mapping_for_year(year: int, db: Session = Depends(get_db)):   # pragma: no cover
-    """Function to create records in potato_rates table for future records."""
+@router.post("/create_off_contract_task_mapping_for_year/", status_code=status.HTTP_201_CREATED)
+async def create_off_contract_task_mapping_for_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to update records in off_contract_task_mapping table."""
     # Fetch all records from the database
     all_records = db.query(off_contract_info).all()
     countries = db.query(country_division_name).filter(country_division_name.status == "Active").all()
-    if all_records.count == 0:
-        raise HTTPException(status_code=404, detail="No off-contract-info found in the database")
-    update_count = 0
-    for record in all_records:
-        is_exists = db.query(off_contract_task_mapping)\
-            .filter(off_contract_task_mapping.year == year,
-                    off_contract_task_mapping.off_contract_task_id == record.off_contract_task_id)\
-            .first()
-        if is_exists:
-            return {"status": "error", "Records already exists for Year": year}
-        for period in range(1, 14):
-            for con in countries:
-                new_record = off_contract_task_mapping(off_contract_task_id=record.off_contract_task_id,
-                                                       period=period, year=year,
-                                                       value=0.001, company_name=con.task_desc)
-                db.add(new_record)
-                update_count += 1
-                db.commit()
+    if all_records.count==0:
+        raise HTTPException(status_code=404, detail="No records found in the database")
 
+    update_count = 0
+    if all_records.count==0:
+        raise HTTPException(status_code=404, detail="No records found in the database")
+    dict_existing_record = []
+    existingRecord = db.query(off_contract_task_mapping)\
+                    .filter(off_contract_task_mapping.year==year).all()
+    for ex in existingRecord:
+        key = str(ex.off_contract_task_id)+"-"+ex.company_name+"-"+str(ex.period)
+        dict_existing_record.append(key)
+    for record in all_records:
+        for period in range(1,14):
+            for con in countries:
+                isKey = str(record.off_contract_task_id)+"-"+con.task_desc+"-"+str(period)
+                # print(isKey,dict_existing_record)
+                if isKey in dict_existing_record:
+                    return {"status": "error", "Records already exists for Year": year}
+                else:
+                    new_record = off_contract_task_mapping(off_contract_task_id = record.off_contract_task_id, period=period, year=year, value=0, company_name=con.task_desc)
+                    db.add(new_record)
+                    update_count += 1
+
+    db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
+
+
 
 @router.post('/create_off_contract_info', status_code=status.HTTP_201_CREATED)
 def create_off_contract_info(payload: OffContractInfoSchema, db: Session = Depends(get_db)):
