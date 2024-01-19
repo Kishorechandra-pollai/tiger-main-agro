@@ -486,6 +486,10 @@ summary_price_variance= db.Table('View_SUMMARY_PRICE_VARAINCE',metadata, autoloa
 summary_overall_cost = db.Table('View_summary_UNION_OVERALL',metadata, autoload=True, autoload_with=engine)
 summary_total_exp_wo_solids = db.Table('view_summary_union_TOTAL_EXP_Without_Solids',metadata, autoload=True, autoload_with=engine)
 summary_total_exp_w_solids = db.Table('view_summary_union_TOTAL_EXP_With_Solids',metadata, autoload=True, autoload_with=engine)
+summary_material_spend = db.Table('view_summary_union.Material_spend',metadata, autoload=True, autoload_with=engine)
+summary_freight_spend = db.Table('view_summary_union.Freight_spend',metadata, autoload=True, autoload_with=engine)
+summary_overall_cost_solids = db.Table('view_summary_union.Solids_Impact$',metadata, autoload=True, autoload_with=engine)
+summary_category_spend = db.Table('view_summary_union.Category_Spend',metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
