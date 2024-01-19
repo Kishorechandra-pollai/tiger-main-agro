@@ -582,6 +582,7 @@ class PlantMtrxTemplateSchema(BaseModel):
 
 class planVolumeUsageSchema(BaseModel):
     __tablename__ = "plan_volume_usage"
+    plan_volume_id: str
     crop_type: Optional[int] = None
     period: Optional[int] = None
     week: Optional[int] = None

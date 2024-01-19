@@ -1,12 +1,11 @@
 # Use an official Python runtime as a parent image
-FROM python:3.10
+FROM python:3.10.13-slim-bullseye
 
 # Set environment variables for MSSQL
 ENV MSSQL_PORT=1433
-ENV MSSQL_USER=psmadmin
-ENV MSSQL_DB="psmsqldb"
-ENV MSSQL_HOST="postgres"
-ENV MSSQL_HOSTNAME="psmsqldb.database.windows.net"
+ENV MSSQL_USER=cgfpsmadevadmin
+ENV MSSQL_DB="cgfpsmadevsqlDB"
+ENV MSSQL_HOSTNAME="cgfpsmadevsql.database.windows.net"
 ENV MSSQL_SCHEMA="dbo"
 ENV MSSQL_DRIVER="{ODBC Driver 18 for SQL Server}"
 
@@ -39,6 +38,11 @@ RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
 # Clean the build, removing cache and unnecessary files
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+COPY requirements.txt /requirements.txt
+
+# Upgrade pip and install Python dependencies
+RUN python -m pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Create a non-root user for the application
 RUN useradd -m -s /bin/bash psm
@@ -52,12 +56,9 @@ USER psm
 # Set working directory
 WORKDIR /usr/src/app
 
+
 # Copy the application to the container
 COPY --chown=psm:psm /pep-potato-sourcing-matrix-automation/src .
-
-# Upgrade pip and install Python dependencies
-RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
 
 # Expose the port the app runs on
 EXPOSE 8000

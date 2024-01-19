@@ -57,7 +57,7 @@ def update_plan_volume_usage(payload: planVolumeUsagePayload, db: Session = Depe
 
 
 @router.post("/create_new_plan_volume_usage/year/{year}")
-def update_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+def create_new_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to next year data from previous year values."""
     new_records = 0
     try:
@@ -73,6 +73,7 @@ def update_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # pragm
                     else:
                         total_week = 4
                     while week <= total_week:
+                        compare_week = week
                         if week == 5:
                             compare_week = week - 1
                         last_year_volume = db.query(pc_plan_volume_usage.volume) \

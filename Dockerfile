@@ -1,6 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.10
-#FROM python:3.13.0a2-slim
+FROM python:3.10.13-slim-bullseye
 
 # Set environment variables for MSSQL
 ENV MSSQL_PORT=1433
@@ -44,6 +43,7 @@ COPY requirements.txt /requirements.txt
 # Upgrade pip and install Python dependencies
 RUN python -m pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
+
 # Create a non-root user for the application
 RUN useradd -m -s /bin/bash psm
 

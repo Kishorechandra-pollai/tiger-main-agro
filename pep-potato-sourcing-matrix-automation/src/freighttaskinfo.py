@@ -6,6 +6,7 @@ from database import get_db
 
 router = APIRouter()
 
+
 @router.get('/')
 def get_freight_task_info(db: Session = Depends(get_db)): # pragma: no cover
     """Function to get all records from freight_task_info."""
@@ -35,26 +36,36 @@ def get_freight_task_mappings_by_year_and_country(year: str, country:str,db: Ses
 
 
 @router.post("/create_freight_task_mappings_for_next_year/", status_code=status.HTTP_201_CREATED)
-async def create_freight_task_mappings_for_next_year(year: int, db: Session = Depends(get_db)):
-    """Function to add new records in freight_task_mappings table."""
-    # Fetch all records from the database
+async def create_freight_task_mappings_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma : no cover
+    """Function to Create freight_task_mappings records for next year."""
     all_records = db.query(freight_task_info).all()
     countries = db.query(country_division_name).filter(country_division_name.status == "Active").all()
     update_count = 0
-    if all_records.count==0:
+    if all_records.count == 0:
         raise HTTPException(status_code=404, detail="No records found in the database")
-    for record in all_records:
-        existingRecord = db.query(freight_task_mappings).filter(freight_task_mappings.year==year,freight_task_mappings.freight_task_id==record.freight_task_id).first()
-        if existingRecord:
-            return {"status": "error", "Records already exists for Year": year}
-        for period in range(1,14):
-            for con in countries:
-                new_record = freight_task_mappings(freight_task_id = record.freight_task_id, period=period, year=year, value=0, company_name=con.task_desc)
-                db.add(new_record)
-                update_count += 1
-                db.commit()
+    dict_existing_record = []
+    existingRecord = db.query(freight_task_mappings)\
+        .filter(freight_task_mappings.year == year).all()
+    for ex in existingRecord:
+        key = str(ex.freight_task_id)+"-"+ex.company_name+"-"+str(ex.period)
+        dict_existing_record.append(key)
+    for record in all_records: # Iterate over all frieight task info
+        for period in range(1,14): # Iterating 1 to 13 periods
+            for con in countries: # Iterate through the countries
+                isKey = str(record.freight_task_id)+"-"+con.task_desc+"-"+str(period)
+                # print(isKey,dict_existing_record)
+                if isKey in dict_existing_record:
+                    return {"status": "error", "Records already exists for Year": year}
+                else:
+                    new_record = freight_task_mappings(freight_task_id=record.freight_task_id,
+                                                       period=period, year=year,
+                                                       value=0, company_name=con.task_desc)
+                    db.add(new_record)
+                    update_count += 1
 
+    db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
+
 
 @router.post('/create_freight_task_info', status_code=status.HTTP_201_CREATED)
 def create_freight_task_info(payload: FreightTaskInfoSchema, db: Session = Depends(get_db)):
