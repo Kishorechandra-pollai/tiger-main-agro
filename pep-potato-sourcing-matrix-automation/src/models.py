@@ -538,7 +538,7 @@ class country_division_name(Base):
 class pc_plan_volume_usage(Base):
     """Class representing plan_volume_usage table"""
     __tablename__ = "plan_volume_usage"
-    plan_volume_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    plan_volume_id = Column(Integer(), nullable=False, primary_key=True)
     crop_type = Column(Integer, nullable=True)
     period = Column(Integer, nullable=True)
     week = Column(Integer, nullable=True)
