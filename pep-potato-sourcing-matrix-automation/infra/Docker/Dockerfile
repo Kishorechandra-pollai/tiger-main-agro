@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.10.13-slim-bullseye
 
 # Set environment variables for MSSQL
 ENV MSSQL_PORT=1433
@@ -13,7 +13,8 @@ ENV MSSQL_DRIVER="{ODBC Driver 18 for SQL Server}"
 ENV ACCEPT_EULA=Y
 
 # Update and install necessary tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     curl \
     gcc \
     g++ \
@@ -27,7 +28,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
 # Update the sources list and install the MS SQL Server ODBC Driver 18
-RUN apt-get update \
+RUN apt-get update && \
     apt-get install -y msodbcsql18 mssql-tools unixodbc-dev
 
 # Add MSSQL tools to the PATH
