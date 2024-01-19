@@ -484,7 +484,8 @@ dashboard_pc_volume_yearly_country_combine = db.Table('View_dashboard_pc_volume_
 summary_solids = db.Table('View_solid_summary',metadata, autoload=True, autoload_with=engine)
 summary_price_variance= db.Table('View_SUMMARY_PRICE_VARAINCE',metadata, autoload=True, autoload_with=engine)
 summary_overall_cost = db.Table('View_summary_UNION_OVERALL',metadata, autoload=True, autoload_with=engine)
-
+summary_total_exp_wo_solids = db.Table('view_summary_union_TOTAL_EXP_Without_Solids',metadata, autoload=True, autoload_with=engine)
+summary_total_exp_w_solids = db.Table('view_summary_union_TOTAL_EXP_With_Solids',metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
