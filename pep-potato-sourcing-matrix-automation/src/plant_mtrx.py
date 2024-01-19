@@ -312,6 +312,8 @@ def update_first_period_data(current_period, current_week, current_year,
             .filter(models.plantMtrx.year == current_year,
                     models.plantMtrx.period == current_period,
                     models.plantMtrx.week <= current_week).all()
+        if not records_to_delete:
+            return new_record_count
         for record in records_to_delete:
             db.delete(record)
         db.commit()
@@ -346,6 +348,7 @@ def update_first_period_data(current_period, current_week, current_year,
         week += 1
     return new_record_count
 
+
 @router.post('/load_actual_value')
 def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
     """Load actual values in Plant Matrix."""
@@ -354,7 +357,7 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
         today_date = date.today()
         res = period_week_calc.calculate_period_and_week(today_date.year, today_date)
         current_period = int(res['Period'])
-        current_week = int(res['week'])
+        current_week = int(res['week']) - 1
         current_year = int(res['year'])
         if current_period == 1:
             new_record_count = update_first_period_data(13, -1,
@@ -366,7 +369,7 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
                                                         db)
         else:
             lower_limit = (current_period - 1) * 5 + 1  # delete all actual value of previous period.
-            max_limit = current_period * 5 + current_week  # current_week value.
+            max_limit = current_period * 5 + current_week  # current_week value - 1 .
             """delete of plant_mtrx_data."""
             records_to_delete = db.query(models.plantMtrx) \
                 .filter((models.plantMtrx.period * 5) + models.plantMtrx.week >= lower_limit,
