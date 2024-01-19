@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.10.13-slim-bullseye
 
 # Set environment variables for MSSQL
 ENV MSSQL_PORT=1433
