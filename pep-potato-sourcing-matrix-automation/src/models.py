@@ -490,6 +490,8 @@ summary_material_spend = db.Table('view_summary_union.Material_spend',metadata, 
 summary_freight_spend = db.Table('view_summary_union.Freight_spend',metadata, autoload=True, autoload_with=engine)
 summary_overall_cost_solids = db.Table('view_summary_union.Solids_Impact$',metadata, autoload=True, autoload_with=engine)
 summary_category_spend = db.Table('view_summary_union.Category_Spend',metadata, autoload=True, autoload_with=engine)
+inflation_deflation_material = db.Table('view_summary_Material',metadata, autoload=True, autoload_with=engine)
+inflation_deflation_freight = db.Table('view_summary_Freight',metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
