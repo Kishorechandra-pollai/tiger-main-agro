@@ -106,7 +106,8 @@ def update_inflation_deflation_task_mappings_records(payload: InflationDeflation
             db.query(inflation_deflation_task_mappings).filter(
                 inflation_deflation_task_mappings.inflation_deflation_task_id== item.inflation_deflation_task_id,
                 inflation_deflation_task_mappings.year==item.year, 
-                inflation_deflation_task_mappings.period==item.period).update(
+                inflation_deflation_task_mappings.period==item.period,
+                inflation_deflation_task_mappings.company_name == item.company_name).update(
                     {inflation_deflation_task_mappings.value: item.value}, synchronize_session='fetch')
             update_count += 1
         db.commit()
