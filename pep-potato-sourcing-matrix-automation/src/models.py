@@ -492,6 +492,9 @@ summary_material_spend = db.Table('view_summary_union.Material_spend',metadata, 
 summary_freight_spend = db.Table('view_summary_union.Freight_spend',metadata, autoload=True, autoload_with=engine)
 summary_overall_cost_solids = db.Table('view_summary_union.Solids_Impact$',metadata, autoload=True, autoload_with=engine)
 summary_category_spend = db.Table('view_summary_union.Category_Spend',metadata, autoload=True, autoload_with=engine)
+summary_freight_total_yag = db.Table('view_summary_Freight_Total_EXP_YAG',metadata, autoload=True, autoload_with=engine)
+summary_total_exp_w_solids_yag = db.Table('view_summary_TOTAL_Exp_With_Solids_YAG',metadata, autoload=True, autoload_with=engine)
+summary_total_exp_wo_solids_yag = db.Table('view_summary_TOTAL_EXP_Without_Solids_YAG',metadata, autoload=True, autoload_with=engine)
 inflation_deflation_material = db.Table('view_summary_Material',metadata, autoload=True, autoload_with=engine)
 inflation_deflation_freight = db.Table('view_summary_Freight',metadata, autoload=True, autoload_with=engine)
 

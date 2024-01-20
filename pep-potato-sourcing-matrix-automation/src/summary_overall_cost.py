@@ -3,7 +3,8 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from models import (summary_overall_cost,summary_total_exp_wo_solids
 ,summary_total_exp_w_solids,summary_material_spend,summary_freight_spend,
-summary_overall_cost_solids,summary_category_spend)
+summary_overall_cost_solids,summary_category_spend,summary_freight_total_yag,
+summary_total_exp_w_solids_yag,summary_total_exp_wo_solids_yag)
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -89,5 +90,41 @@ def summary_category_spend_year_country_code(year: int, company_name: str, db: S
             summary_category_spend.columns.company_name == company_name
             ).order_by(summary_category_spend.columns.period).all()
         return {"summary_category_spend": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.get('summary_freight_total_yag/year/{year}/company_name/{company_name}')
+def summary_freight_total_yag_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from summary_freight_total_yag view based on year and country_Code filter """
+    try:
+        records = db.query(summary_freight_total_yag).filter(
+            summary_freight_total_yag.columns.year == year,
+            summary_freight_total_yag.columns.company_name == company_name
+            ).order_by(summary_freight_total_yag.columns.period).all()
+        return {"summary_freight_total_yag": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.get('summary_total_exp_w_solids_yag/year/{year}/company_name/{company_name}')
+def summary_total_exp_w_solids_yag_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from summary_total_exp_w_solids_yag view based on year and country_Code filter """
+    try:
+        records = db.query(summary_total_exp_w_solids_yag).filter(
+            summary_total_exp_w_solids_yag.columns.year == year,
+            summary_total_exp_w_solids_yag.columns.company_name == company_name
+            ).order_by(summary_total_exp_w_solids_yag.columns.period).all()
+        return {"summary_total_exp_w_solids_yag": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.get('summary_total_exp_wo_solids_yag/year/{year}/company_name/{company_name}')
+def summary_total_exp_wo_solids_yag_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from summary_total_exp_wo_solids_yag view based on year and country_Code filter """
+    try:
+        records = db.query(summary_total_exp_wo_solids_yag).filter(
+            summary_total_exp_wo_solids_yag.columns.year == year,
+            summary_total_exp_wo_solids_yag.columns.company_name == company_name
+            ).order_by(summary_total_exp_wo_solids_yag.columns.period).all()
+        return {"summary_total_exp_wo_solids_yag": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
