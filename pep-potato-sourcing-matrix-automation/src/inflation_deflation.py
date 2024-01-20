@@ -1,8 +1,9 @@
 """Inflation-Deflation API"""
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from models import inflation_deflation_task_mappings,country_division_name,inflation_deflation_task
-from schemas import InflationDeflationMappingSchema,InflationDeflationMappingPayload
+from models import (inflation_deflation_task_mappings,country_division_name,inflation_deflation_task
+                    ,inflation_deflation_material,inflation_deflation_freight)
+from schemas import InflationDeflationMappingPayload
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -85,7 +86,7 @@ async def create_inflation_deflation_task_mappings(year: int, db: Session = Depe
         for period in range(1,14):
             for con in countries:
                 new_record =inflation_deflation_task_mappings(inflation_deflation_task_id = record.inflation_deflation_task_id, 
-                                                              period=period, year=year, value=0.0, company_name=con.division_name)
+                                                              period=period, year=year, value=0.0, company_name=con.task_desc)
                 db.add(new_record)
                 db.commit()
 
@@ -100,7 +101,7 @@ def update_inflation_deflation_task_mappings_records(payload: InflationDeflation
     update_count = 0
     try:
         for item in data:
-            if item.price_variance_task_id<=0 or item.period<=0 or item.year<=0:
+            if item.inflation_deflation_task_id <= 0 or item.period<=0 or item.year<=0:
                 return {"status": "error", "message":"Please check details"}
             db.query(inflation_deflation_task_mappings).filter(
                 inflation_deflation_task_mappings.inflation_deflation_task_id== item.inflation_deflation_task_id,
@@ -113,3 +114,27 @@ def update_inflation_deflation_task_mappings_records(payload: InflationDeflation
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('inflation-deflation-material/year/{year}/company_name/{company_name}')
+def inflation_deflation_material_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from inflation_deflation_material view based on year and country_Code filter """
+    try:
+        records = db.query(inflation_deflation_material).filter(
+            inflation_deflation_material.columns.year == year,
+            inflation_deflation_material.columns.company_name == company_name
+            ).order_by(inflation_deflation_material.columns.period).all()
+        return {"inflation_deflation_material": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('inflation-deflation-freight/year/{year}/company_name/{company_name}')
+def inflation_deflation_freight_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from inflation_deflation_freight view based on year and country_Code filter """
+    try:
+        records = db.query(inflation_deflation_freight).filter(
+            inflation_deflation_freight.columns.year == year,
+            inflation_deflation_freight.columns.company_name == company_name
+            ).order_by(inflation_deflation_freight.columns.period).all()
+        return {"inflation_deflation_freight": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e

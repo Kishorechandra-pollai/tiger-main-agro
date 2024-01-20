@@ -465,6 +465,8 @@ class inflation_deflation_task_mappings(Base):
     company_name = Column(String, nullable=True)
 
 
+
+
 freight_cost_period_table = db.Table('View_freight_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 freight_cost_period_week_table = db.Table('View_freight_cost_week_view_combine', metadata, autoload=True, autoload_with=engine)
 rate_growing_area_table = db.Table('View_freight_plan_actual_combine', metadata, autoload=True, autoload_with=engine)
@@ -490,6 +492,8 @@ summary_material_spend = db.Table('view_summary_union.Material_spend',metadata, 
 summary_freight_spend = db.Table('view_summary_union.Freight_spend',metadata, autoload=True, autoload_with=engine)
 summary_overall_cost_solids = db.Table('view_summary_union.Solids_Impact$',metadata, autoload=True, autoload_with=engine)
 summary_category_spend = db.Table('view_summary_union.Category_Spend',metadata, autoload=True, autoload_with=engine)
+inflation_deflation_material = db.Table('view_summary_Material',metadata, autoload=True, autoload_with=engine)
+inflation_deflation_freight = db.Table('view_summary_Freight',metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
