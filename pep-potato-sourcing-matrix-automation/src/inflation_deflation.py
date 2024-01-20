@@ -101,12 +101,13 @@ def update_inflation_deflation_task_mappings_records(payload: InflationDeflation
     update_count = 0
     try:
         for item in data:
-            if item.price_variance_task_id<=0 or item.period<=0 or item.year<=0:
+            if item.inflation_deflation_task_id <= 0 or item.period<=0 or item.year<=0:
                 return {"status": "error", "message":"Please check details"}
             db.query(inflation_deflation_task_mappings).filter(
                 inflation_deflation_task_mappings.inflation_deflation_task_id== item.inflation_deflation_task_id,
                 inflation_deflation_task_mappings.year==item.year, 
-                inflation_deflation_task_mappings.period==item.period).update(
+                inflation_deflation_task_mappings.period==item.period,
+                inflation_deflation_task_mappings.company_name == item.company_name).update(
                     {inflation_deflation_task_mappings.value: item.value}, synchronize_session='fetch')
             update_count += 1
         db.commit()

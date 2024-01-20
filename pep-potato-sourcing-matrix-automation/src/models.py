@@ -465,6 +465,8 @@ class inflation_deflation_task_mappings(Base):
     company_name = Column(String, nullable=True)
 
 
+
+
 freight_cost_period_table = db.Table('View_freight_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 freight_cost_period_week_table = db.Table('View_freight_cost_week_view_combine', metadata, autoload=True, autoload_with=engine)
 rate_growing_area_table = db.Table('View_freight_plan_actual_combine', metadata, autoload=True, autoload_with=engine)
