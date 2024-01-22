@@ -23,6 +23,7 @@ def dashboard_pc_plan_volume_usage_year(year: int, db: Session = Depends(get_db)
                            func.concat('p', pc_plan_volume_usage.period, "W",
                                        pc_plan_volume_usage.week).label("PxW"),
                            pc_plan_volume_usage.week,
+                           pc_plan_volume_usage.year,
                            pc_plan_volume_usage.volume)\
             .join(models.category, models.category.crop_category == pc_plan_volume_usage.crop_type)\
             .filter(pc_plan_volume_usage.year == year)\
@@ -42,13 +43,10 @@ def update_plan_volume_usage(payload: planVolumeUsagePayload, db: Session = Depe
     try:
         for item in data:
             result = db.query(pc_plan_volume_usage) \
-                .filter(pc_plan_volume_usage.crop_type == item.crop_type,
-                        pc_plan_volume_usage.period == item.period,
-                        pc_plan_volume_usage.week == item.week,
-                        pc_plan_volume_usage.year == item.year) \
-                .update({pc_plan_volume_usage.volume: item.volume}, synchronize_session='fetch')
+                .filter(pc_plan_volume_usage.plan_volume_id == item.plan_volume_id) \
+                .update({pc_plan_volume_usage.volume: item.volume}, synchronize_session=False)
             if result == 0:
-                raise HTTPException(status_code=404, detail=f"No records found: {item}")
+                raise HTTPException(status_code=404, detail=f"No records found: {item.plan_volume_id}")
             update_count += 1
         db.commit()
         return {"status": "success", "records_updated": update_count}
