@@ -1,5 +1,6 @@
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 from fastapi import Depends, HTTPException, status, APIRouter
 from database import get_db
 import schemas
@@ -72,8 +73,11 @@ def delete_post(Growing_area_id: str, Grower_id, year, db: Session = Depends(get
 @router.post("/update_contract_erp/{crop_year}")
 def update_contract_erp(crop_year: str, db: Session = Depends(get_db)):
     try:
+        min_crop_year = db.query(func.min(models.View_growing_area_contract_erp.columns.crop_year))\
+            .filter(models.View_growing_area_contract_erp.columns.STORAGE_period == crop_year).scalar()
         view_data = (db.query(models.View_growing_area_contract_erp)
-                     .filter(models.View_growing_area_contract_erp.columns.STORAGE_period == crop_year)
+                     .filter(models.View_growing_area_contract_erp.columns.STORAGE_period == crop_year,
+                             models.View_growing_area_contract_erp.columns.crop_year == min_crop_year)
                      .all())
         if len(view_data) > 0:
             for data in view_data:
