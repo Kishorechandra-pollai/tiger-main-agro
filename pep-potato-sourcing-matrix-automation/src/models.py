@@ -495,8 +495,7 @@ summary_category_spend = db.Table('view_summary_union.Category_Spend',metadata, 
 summary_freight_total_yag = db.Table('view_summary_Freight_Total_EXP_YAG',metadata, autoload=True, autoload_with=engine)
 summary_total_exp_w_solids_yag = db.Table('view_summary_TOTAL_Exp_With_Solids_YAG',metadata, autoload=True, autoload_with=engine)
 summary_total_exp_wo_solids_yag = db.Table('view_summary_TOTAL_EXP_Without_Solids_YAG',metadata, autoload=True, autoload_with=engine)
-inflation_deflation_material = db.Table('view_summary_Material',metadata, autoload=True, autoload_with=engine)
-inflation_deflation_freight = db.Table('view_summary_Freight',metadata, autoload=True, autoload_with=engine)
+inflation_deflation = db.Table('view_inflation_deflation_summary_main',metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
