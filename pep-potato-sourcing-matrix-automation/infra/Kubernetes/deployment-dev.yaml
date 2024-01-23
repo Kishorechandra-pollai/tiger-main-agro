@@ -36,7 +36,10 @@ spec:
         #   valueFrom:
         #     secretKeyRef:
         #       name: pep-eiap-cgf-psm-dev-api-secret   # Name of the secret
-        #       key: MSSQL_PASSWORD # Key within the secret to use as the value                             
+        #       key: MSSQL_PASSWORD # Key within the secret to use as the value
+        env:
+          - name: AKS_ENV
+            value: "DEV"
         livenessProbe:
           httpGet:
             path: /docs
