@@ -2,7 +2,7 @@
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from models import (inflation_deflation_task_mappings,country_division_name,inflation_deflation_task
-                    ,inflation_deflation_material,inflation_deflation_freight)
+                    ,inflation_deflation)
 from schemas import InflationDeflationMappingPayload
 from sqlalchemy.orm import Session
 
@@ -66,31 +66,31 @@ def inflation_deflation_task_mappings_by_year(year: int,company_name :str, db: S
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-@router.post("/create_inflation_deflation_task_mappings")
-async def create_inflation_deflation_task_mappings(year: int, db: Session = Depends(get_db)):  # pragma: no cover
-    """Function to update records in inflation_deflation_task_mapping table."""
-    # Fetch all records from the database
-    all_records = db.query(inflation_deflation_task).all()
-    countries = db.query(country_division_name).all()
-    # Ensure there are records in the database
-    if all_records.count==0:
-        raise HTTPException(status_code=404, detail="No records found in the database")
+# @router.post("/create_inflation_deflation_task_mappings")
+# async def create_inflation_deflation_task_mappings(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+#     """Function to update records in inflation_deflation_task_mapping table."""
+#     # Fetch all records from the database
+#     all_records = db.query(inflation_deflation_task).all()
+#     countries = db.query(country_division_name).all()
+#     # Ensure there are records in the database
+#     if all_records.count==0:
+#         raise HTTPException(status_code=404, detail="No records found in the database")
 
-    existingTaskNames = []
-    for record in all_records:
-        existingRecord = db.query(inflation_deflation_task_mappings).filter(inflation_deflation_task_mappings.year==year
-                                                                            ,inflation_deflation_task_mappings.inflation_deflation_task_id==record.inflation_deflation_task_id ).first()
-        if existingRecord:
-            existingTaskNames.append(record.task_name)
-            continue
-        for period in range(1,14):
-            for con in countries:
-                new_record =inflation_deflation_task_mappings(inflation_deflation_task_id = record.inflation_deflation_task_id, 
-                                                              period=period, year=year, value=0.0, company_name=con.task_desc)
-                db.add(new_record)
-                db.commit()
+#     existingTaskNames = []
+#     for record in all_records:
+#         existingRecord = db.query(inflation_deflation_task_mappings).filter(inflation_deflation_task_mappings.year==year
+#                                                                             ,inflation_deflation_task_mappings.inflation_deflation_task_id==record.inflation_deflation_task_id ).first()
+#         if existingRecord:
+#             existingTaskNames.append(record.task_name)
+#             continue
+#         for period in range(1,14):
+#             for con in countries:
+#                 new_record =inflation_deflation_task_mappings(inflation_deflation_task_id = record.inflation_deflation_task_id, 
+#                                                               period=period, year=year, value=0.0, company_name=con.task_desc)
+#                 db.add(new_record)
+#                 db.commit()
 
-    return {"status": "success", "Records already exists for ":existingTaskNames, "forYear": year}
+#     return {"status": "success", "Records already exists for ":existingTaskNames, "forYear": year}
 
 
 @router.post("/update_inflation_deflation_task_mappings_records/")
@@ -116,26 +116,14 @@ def update_inflation_deflation_task_mappings_records(payload: InflationDeflation
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-@router.get('inflation-deflation-material/year/{year}/company_name/{company_name}')
-def inflation_deflation_material_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
-    """Function to fetch all records from inflation_deflation_material view based on year and country_Code filter """
+@router.get('inflation_deflation/year/{year}/company_name/{company_name}')
+def inflation_deflation_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from inflation_deflation view based on year and country_Code filter """
     try:
-        records = db.query(inflation_deflation_material).filter(
-            inflation_deflation_material.columns.year == year,
-            inflation_deflation_material.columns.company_name == company_name
-            ).order_by(inflation_deflation_material.columns.period).all()
-        return {"inflation_deflation_material": records}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    
-@router.get('inflation-deflation-freight/year/{year}/company_name/{company_name}')
-def inflation_deflation_freight_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
-    """Function to fetch all records from inflation_deflation_freight view based on year and country_Code filter """
-    try:
-        records = db.query(inflation_deflation_freight).filter(
-            inflation_deflation_freight.columns.year == year,
-            inflation_deflation_freight.columns.company_name == company_name
-            ).order_by(inflation_deflation_freight.columns.period).all()
-        return {"inflation_deflation_freight": records}
+        records = db.query(inflation_deflation).filter(
+            inflation_deflation.columns.year == year,
+            inflation_deflation.columns.company_name == company_name
+            ).order_by(inflation_deflation.columns.period).all()
+        return {"inflation_deflation": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
