@@ -13,21 +13,43 @@ def get_secret(secret_name):
         return os.environ[secret_name]
 
 
-username = get_secret("Username")  # Replace with the actual secret name in key vault
-pwd = get_secret("Password")
+def get_user_pwd():
+    user_name = get_secret("Username")  # Replace with the actual secret name in key vault
+    psd = get_secret("Password")
+    return user_name, psd
+
+
+if 'AKS_ENV' in os.environ:
+    if os.environ['AKS_ENV'] == "DEV":
+        username, pwd = get_user_pwd()
+        host = "cgfpsmadevsql.database.windows.net,1433"
+        db = "cgfpsmadevsqlDB"
+    elif os.environ['AKS_ENV'] == "QA":
+        username, pwd = get_user_pwd()
+        host = "cgfpsmaqasql.database.windows.net,1433"
+        db = "cgfpsmaqasqlDB"
+    elif os.environ['AKS_ENV'] == "PROD":
+        username, pwd = get_user_pwd()
+        host = "cgfpsmaprodsql.database.windows.net,1433"
+        db = "cgfpsmaprodsqlDB"
+else:
+    username, pwd = get_user_pwd()
+    host = "cgfpsmadevsql.database.windows.net,1433"
+    db = "cgfpsmadevsqlDB"
+
+# username = get_secret("Username")
+# pwd = get_secret("Password")
+# host = "cgfpsmadevsql.database.windows.net,1433"
+# # username = settings.MSSQL_USER
+# # pwd = settings.MSSQL_PASSWORD
+# db = "cgfpsmadevsqlDB"
 
 driver = "{ODBC Driver 18 for SQL Server}"
-host = "cgfpsmadevsql.database.windows.net,1433"
-# username = settings.MSSQL_USER
-# pwd = settings.MSSQL_PASSWORD
-db = "cgfpsmadevsqlDB"
 params = urllib.parse.quote_plus("DRIVER=" + driver +
                                  ";SERVER=" + host +
                                  ";DATABASE=" + db +
                                  ";UID=" + username +
                                  ";PWD=" + pwd)
-
-print("---- loading ----")
 
 engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
 
