@@ -75,6 +75,8 @@ app.include_router(inflation_deflation.router, tags=['inflation_deflation'], pre
 app.include_router(summary_solids.router, tags=['summary_solids'], prefix='/api/summary_solids')
 app.include_router(summary_overall_cost.router, tags=['summary_overall_cost'], prefix='/api/summary_overall_cost')
 
+app.include_router(plant_mtrx_templt.router, tags=['plant_mtrx_templt'], prefix='/api/plant_mtrx_templt')
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
