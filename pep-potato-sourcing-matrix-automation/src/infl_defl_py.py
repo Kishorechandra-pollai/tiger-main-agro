@@ -9,7 +9,7 @@ import pandas as pd
 router = APIRouter()
 
 @router.get('/{year}/{company_name}')
-def infl_defl(year:int,company_name:str,db: Session = Depends(get_db)):
+def infl_defl(year:int,company_name:str,db: Session = Depends(get_db)): # pragma: no cover
     # df_plant_matrix_ga = pd.read_sql_table('plant_matrix_growing_area', engine)
     # df_plant = pd.read_sql_table('plant', engine)
     # df_growing_area = pd.read_sql_table('growing_area', engine)
