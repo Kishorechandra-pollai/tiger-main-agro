@@ -31,6 +31,8 @@ import inflation_deflation
 import dashboard
 import summary_solids
 import summary_overall_cost
+import plant_mtrx_templt
+import infl_defl_py
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -74,6 +76,10 @@ app.include_router(summary_price_variance.router, tags=['summary_price_variance'
 app.include_router(inflation_deflation.router, tags=['inflation_deflation'], prefix='/api/inflation_deflation')
 app.include_router(summary_solids.router, tags=['summary_solids'], prefix='/api/summary_solids')
 app.include_router(summary_overall_cost.router, tags=['summary_overall_cost'], prefix='/api/summary_overall_cost')
+
+app.include_router(plant_mtrx_templt.router, tags=['plant_mtrx_templt'], prefix='/api/plant_mtrx_templt')
+
+app.include_router(infl_defl_py.router, tags=['infl_defl_py'], prefix='/api/infl_defl_py')
 
 app.add_middleware(
     CORSMiddleware,

@@ -35,3 +35,4 @@ websockets==10.4
 pyodbc
 coverage
 pytest
+pandas
