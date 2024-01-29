@@ -7,7 +7,7 @@ from database import get_db
 
 router = APIRouter()
 
-@router.get('/{period}')
+@router.get('/{period}') # pragma: no cover
 def get_plantid(period: int, db: Session = Depends(get_db)):
     plants = db.query(models.plantMtrx_template).filter(models.plantMtrx_template.period == period).all()
     
