@@ -1,9 +1,11 @@
 """Summary Price Variance API"""
 from database import get_db
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,status
 from models import (country_division_name, price_variance_task,
-                    price_variance_task_mapping,summary_price_variance)
-from schemas import PriceVarianceMappingPayload
+                    price_variance_task_mapping,summary_price_variance,
+                    pv_standard_rates_mapping,pv_standard_rates_task)
+from schemas import (PriceVarianceMappingPayload,pvStandardRatesSchema,
+                     StandardRatesMappingSchema,StandardRatesMappingPayload)
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -147,6 +149,65 @@ def update_price_variance_mappings_records(payload: PriceVarianceMappingPayload,
         return {"status": "success", "records_updated": update_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get('/price_variance_standard_rates_task')
+def get_standard_rates_task(db: Session = Depends(get_db)):
+    """Function to get all records from standard_rates_task."""
+    query = db.query(pv_standard_rates_task).all()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No standard_rates  found")
+    return {"status": "success", "data": query}
+
+@router.get('/price_variance_standard_rates_task_mapping')
+def get_standard_rates_mapping(db: Session = Depends(get_db)):
+    """Function to get all records from standard_rates_mapping."""
+    query = db.query(pv_standard_rates_mapping).all()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No standard_rates  found")
+    return {"status": "success", "data": query}
+   
+@router.post('/price_variance_standard_rates_task')
+def create_standard_rates_task(payload: pvStandardRatesSchema, db: Session = Depends(get_db)):
+    standard_rates = pv_standard_rates_task(**payload.dict())
+    db.add(standard_rates)
+    db.commit()
+    db.refresh(standard_rates)
+    return {"status": "success", "standard_rates_task": standard_rates.price_variance__standard_task_id}
+
+@router.post('/price_variance_standard_rates_mappings')
+def create_standard_rates_mappings(payload: StandardRatesMappingSchema, db: Session = Depends(get_db)):
+    exisiting_records = db.query(pv_standard_rates_mapping).filter_by(year=payload.year,
+                                                              price_variance__standard_task_id=payload.price_variance__standard_task_id,
+                                                              company_name=payload.company_name).first()
+    if exisiting_records:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Records for year,company_name and price_variance__standard_task_id {payload.year,payload.company_name,payload.price_variance__standard_task_id} already exist.")
+    standard_rates = pv_standard_rates_mapping(**payload.dict())
+    db.add(standard_rates)
+    db.commit()
+    db.refresh(standard_rates)
+    return {"status": "success", "standard_rates_mapping": standard_rates.price_variance__standard_task_id}
+
+@router.post("/update_standard_rates_mapping")
+def update_standard_rates_mapping(payload: StandardRatesMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to update already existing records in standard_rates_mapping table """
+    data = payload.data
+    update_count = 0
+    try:
+        for item in data:
+            result = db.query(pv_standard_rates_mapping) \
+                .filter(pv_standard_rates_mapping.price_variance__standard_task_id == item.price_variance__standard_task_id,
+                        pv_standard_rates_mapping.year == item.year,
+                        pv_standard_rates_mapping.company_name == item.company_name) \
+                .update({pv_standard_rates_mapping.value: item.value}, synchronize_session=False)
+            if result == 0:
+                raise HTTPException(status_code=404, detail=f"No records found: {item.price_variance__standard_task_id,item.year,item.company_name}")
+            update_count += 1
+        db.commit()
+        return {"status": "success", "records_updated": update_count}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 @router.get('/summary_price_variance_view/{year}/{country_code}')
 def summary_price_variance_year_country_code(year:int,country_code:str,db: Session = Depends(get_db)):
