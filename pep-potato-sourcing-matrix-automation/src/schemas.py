@@ -597,3 +597,31 @@ class planVolumeUsageSchema(BaseModel):
 
 class planVolumeUsagePayload(BaseModel):
     data: List[planVolumeUsageSchema]
+
+class pvStandardRatesSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class StandardRatesMappingSchema(BaseModel):
+    price_variance__standard_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class StandardRatesMappingPayload(BaseModel):
+    data: List[StandardRatesMappingSchema]

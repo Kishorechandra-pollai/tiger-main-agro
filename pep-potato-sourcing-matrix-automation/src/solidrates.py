@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get('/')
 def get_solids_rates(db: Session = Depends(get_db)):
-    """Function to get all records from potato_rates."""
+    """Function to get all records from solid_rates."""
     query = db.query(solids_rates).all()
     if not query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

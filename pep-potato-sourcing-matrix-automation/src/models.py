@@ -557,3 +557,22 @@ class pc_plan_volume_usage(Base):
     volume = Column(Integer, nullable=True)
     created_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    
+class pv_standard_rates_task(Base):
+    __tablename__ = "price_variance_standard_task"
+    price_variance__standard_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    
+class pv_standard_rates_mapping(Base):
+    __tablename__ = "price_variance_standard_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    price_variance__standard_task_id = Column(Integer(), nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
