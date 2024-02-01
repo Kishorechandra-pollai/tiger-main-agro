@@ -4,7 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from models import View_PlantMtrx_table
+from models import View_PlantMtrx_table,erp_logs_table
 import schemas
 import extensionMapping
 import period_week_calc
@@ -509,3 +509,24 @@ def prev_year_insert(year: int, db: Session = Depends(get_db)):  # pragma: no co
         return {"status": "success", "record_updated": new_record_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('/getdate')
+def get_plantMtrx_by_region(db: Session = Depends(get_db)):
+    """Get plantMtrx data based on region_id input."""
+    # latest_record = db.query(func.to_char(models.erp_logs_table.date_time, 'MM-DD-YYYY'))\
+    #               .order_by(models.erp_logs_table.date_time.desc())\
+    #               .first()
+    # print(latest_record)
+    # return {"status":"Success","date":latest_record}
+    latest_record = db.query(models.erp_logs_table.date_time)\
+                      .order_by(models.erp_logs_table.date_time.desc())\
+                      .first()
+
+    if latest_record:
+        # Assuming `latest_record[0]` is a datetime object
+        # Format the date in Python
+        formatted_date = latest_record[0].strftime('%m-%d-%Y') if latest_record[0] else None
+        return {"last_refresh_date": formatted_date}
+    else:
+        return {"error": "No data found"}
+    
