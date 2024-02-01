@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 import models
 from database import get_db
 import pandas as pd
+import get_dashboard_plmavol_company
 
 
 
@@ -24,46 +25,8 @@ def infl_defl(year:int,company_name:str,db: Session = Depends(get_db)): # pragma
     df_plant = run_sql("plant")
     df_growing_area = run_sql("growing_area")
     df_region = run_sql("region")
-    df_merged = df_plant_matrix_ga.merge(df_plant, on='plant_id', how='inner')
-    # Perform the joins
-    df_merged = df_plant_matrix_ga.merge(df_plant, on='plant_id', how='inner')
-    df_merged = df_merged.merge(df_growing_area, on='growing_area_id', how='inner', suffixes=('', '_ga'))
-
-    # Join with region for the plant
-    df_merged = df_merged.merge(df_region, left_on='region_id_x', right_on='region_id', how='inner', suffixes=('', '_plant'))
-
-    # Join with region for the growing area
-    # Ensure 'region' column from growing_area is included in the merge
-    df_merged = df_merged.merge(df_region, left_on='region', right_on='region_id', how='inner', suffixes=('', '_ga'))
-
-    # Apply transformations and filter
-    df_merged['period_with_P'] = 'P' + df_merged['period'].astype(str)
-    df_merged['status_plant'] = df_merged['status_plant'].str.strip()
-    df_final = df_merged[df_merged['status_plant'] == 'ACTIVE']  # Adjust the status column as needed
-
-    # Select the required columns as per the SQL view
-    columns = [
-        'plant_matrix_id', 'period', 'period_with_P', 'plant_name', 'plant_id', 
-        'region_id_x', 'region_name', 'company_name', 'country_plant', 'year', 
-        'growing_area_id', 'week', 'growing_area_name', 'growing_area_desc', 
-        'region', 'country_ga', 'value', 'status'
-    ]
-    df_final = df_final[columns]
-    # Ensure the status column is properly formatted
-    df_final['status'] = df_final['status'].str.strip()
-
-    # Filter the DataFrame for 'ACTIVE' status
-    df_active = df_final[df_final['status'] == 'ACTIVE']
-
-    # Group and calculate the sum of 'value' for each 'year', 'period', and 'company_name'
-    grouped_df = df_active.groupby(['year', 'period', 'company_name']).agg(sum_period=pd.NamedAgg(column='value', aggfunc='sum')).reset_index()
-
-    # Sort by 'year' descending and 'period', then assign row numbers
-    grouped_df = grouped_df.sort_values(by=['year', 'period'], ascending=[False, True])
-    grouped_df['Row_ID'] = grouped_df.groupby('year').cumcount() + 1
-
-    # Select and order the columns as per your requirement
-    df_view_dash = grouped_df[['Row_ID', 'period', 'year', 'company_name', 'sum_period']]
+    
+    df_view_dash = get_dashboard_plmavol_company.get_dashboard_plant_vol_company(df_plant_matrix_ga,df_plant,df_growing_area,df_region)
 
     # Display the DataFrame
 

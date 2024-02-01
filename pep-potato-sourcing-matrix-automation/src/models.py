@@ -576,3 +576,10 @@ class pv_standard_rates_mapping(Base):
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
+class erp_logs_table(Base):
+    __tablename__ = "erp_logs"
+    id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    records_deleted = Column(Integer, nullable=True)
+    records_inserted = Column(Integer, nullable=True)
+    date_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    pipeline_status = Column(String, nullable=True)
