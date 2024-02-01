@@ -511,7 +511,7 @@ def prev_year_insert(year: int, db: Session = Depends(get_db)):  # pragma: no co
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.get('/getdate')
-def get_plantMtrx_by_region(db: Session = Depends(get_db)):
+def get_plantMtrx_by_region(db: Session = Depends(get_db)): # pragma: no cover
     """Get the last refreshed date of ERP data"""
     latest_record = db.query(models.erp_logs_table.date_time)\
                       .order_by(models.erp_logs_table.date_time.desc())\

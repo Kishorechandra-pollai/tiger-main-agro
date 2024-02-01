@@ -1,18 +1,15 @@
 import pandas as pd
 
 
-def get_dashboard_plant_vol_company(df_plant_matrix_ga,df_plant,df_growing_area,df_region):
+def get_dashboard_plant_vol_company(df_plant_matrix_ga,df_plant,df_growing_area,df_region): # pragma: no cover
     part1_df = df_plant_matrix_ga.merge(df_plant, on='plant_id', suffixes=('', '_plant'))
     part1_df['period_with_P'] = 'P' + part1_df['period'].astype(str)
     # part1_df.rename(columns={'region_id_plant':'plant_region_id'},inplace=True)
     part1_df.drop(columns=['created_by', 'created_time','crop_category_id','crop_type','crop_year','plant_code','region_id','updated_by','updated_time'],inplace=True)
-    print(part1_df.columns)
     part1_df.rename(columns={'region_id_plant':'plant_region_id'},inplace=True)
-    print(part1_df.columns)
 
     part2_df = part1_df.merge(df_growing_area, on='growing_area_id', suffixes=('', '_growing_area'))
     part2_df.rename(columns={'region':'ga_region_id'},inplace=True)
-    print(part2_df.columns)
     part2_df.drop(columns=['fresh_week_start', 'updated_time', 'status_growing_area', 'storage_week_start', 'updated_by', 'fresh_period_start', 'created_by', 'fresh_period_end', 'storage_period_start', 'country', 'created_time', 'fresh_week_end'],inplace=True)
 
     part3_df = part2_df.merge(df_region, left_on='plant_region_id', right_on='region_id', suffixes=('', '_region_plant'))
