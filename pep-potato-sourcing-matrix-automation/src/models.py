@@ -484,7 +484,7 @@ dashboard_pc_volume_period_country_yearly = db.Table('View_dashboard_pc_volume_p
 dashboard_pc_volume_yearly_country_combine = db.Table('View_dashboard_pc_volume_yearly_country_combine',
                                                       metadata, autoload=True, autoload_with=engine)
 summary_solids = db.Table('View_solid_summary',metadata, autoload=True, autoload_with=engine)
-summary_price_variance= db.Table('View_SUMMARY_PRICE_VARAINCE',metadata, autoload=True, autoload_with=engine)
+summary_price_variance= db.Table('view_summary_price_variance_reports',metadata, autoload=True, autoload_with=engine)
 summary_overall_cost = db.Table('View_summary_UNION_OVERALL',metadata, autoload=True, autoload_with=engine)
 summary_total_exp_wo_solids = db.Table('view_summary_union_TOTAL_EXP_Without_Solids',metadata, autoload=True, autoload_with=engine)
 summary_total_exp_w_solids = db.Table('view_summary_union_TOTAL_EXP_With_Solids',metadata, autoload=True, autoload_with=engine)
@@ -558,24 +558,6 @@ class pc_plan_volume_usage(Base):
     created_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     
-class pv_standard_rates_task(Base):
-    __tablename__ = "price_variance_standard_task"
-    price_variance__standard_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
-    task_name = Column(String, nullable=True)
-    task_desc = Column(String, nullable=True)
-    status = Column(String, nullable=True)
-    created_by = Column(String, nullable=True)
-    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
-    updated_by = Column(String, nullable=True)
-    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
-    
-class pv_standard_rates_mapping(Base):
-    __tablename__ = "price_variance_standard_task_mapping"
-    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
-    price_variance__standard_task_id = Column(Integer(), nullable=True)
-    year = Column(Integer, nullable=True)
-    value = Column(Float, nullable=True)
-    company_name = Column(String, nullable=True)
 class erp_logs_table(Base):
     __tablename__ = "erp_logs"
     id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
