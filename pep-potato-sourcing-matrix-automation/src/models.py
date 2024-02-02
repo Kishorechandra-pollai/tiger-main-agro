@@ -24,6 +24,22 @@ class Plant(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
+class PlantDummy(Base):
+    __tablename__ = 'plant_dummy'
+
+    plant_id = Column(Integer(), primary_key=True, autoincrement=True)
+    plant_code = Column(String, nullable=False)
+    plant_name = Column(String, nullable=False)
+    company_name = Column(String, nullable=True)
+    region_id = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    updated_by = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    crop_category_id = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False),
+                          nullable=False, server_default=func.now())
+    updated_time = Column(TIMESTAMP(timezone=False),
+                          default=None, onupdate=func.now())
 
 
 class growing_area(Base):
@@ -41,6 +57,27 @@ class growing_area(Base):
     fresh_week_start = Column(Integer(), nullable=True)
     fresh_period_end = Column(Integer(), nullable=True)
     fresh_week_end = Column(Integer(), nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False),
+                          nullable=False, server_default=func.now())
+    updated_time = Column(TIMESTAMP(timezone=False),
+                          default=None, onupdate=func.now())
+class growing_area_dummy(Base):
+    __tablename__ = 'growing_area_dummy'
+
+    growing_area_id = Column(Integer(), primary_key=True, autoincrement=True)
+    growing_area_name = Column(String, nullable=False)
+    region = Column(Integer(), nullable=True)
+    country = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    updated_by = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    growing_area_desc = Column(String, nullable=True)
+    fresh_period_start = Column(Integer(), nullable=True)
+    fresh_week_start = Column(Integer(), nullable=True)
+    fresh_period_end = Column(Integer(), nullable=True)
+    fresh_week_end = Column(Integer(), nullable=True)
+    storage_period_start = Column(Integer(), nullable=True)
+    storage_week_start = Column(Integer(), nullable=True)
     created_time = Column(TIMESTAMP(timezone=False),
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
@@ -162,6 +199,17 @@ class PlantSiteGrowingAreaMapping(Base):
     plant_id = Column(Integer(), nullable=False)
     growing_area_id = Column(Integer(), nullable=False)
 
+class PlantSiteGrowingAreaMappingDummy(Base):
+    """Class representing plant_site_growing_area_mapping table"""
+    __tablename__ = 'plant_site_growing_area_mapping_dummy'
+    row_id = Column(Integer(), primary_key=True, autoincrement=True)
+    Vendor_Site_Code = Column(String, nullable=False)
+    growing_area = Column(String, nullable=False)
+    plant_name = Column(String, nullable=False)
+    vendor_site_id = Column(Integer(), nullable=False)
+    plant_id = Column(Integer(), nullable=False)
+    growing_area_id = Column(Integer(), nullable=False)
+
 
 class FreightCostRate(Base):
     """Class representing freight_cost_rate table"""
@@ -216,6 +264,18 @@ class Ownership(Base):
 
 class vendor_site_code(Base):
     __tablename__ = "vendor_site_code"
+
+    VENDOR_SITE_ID = Column(Integer(), primary_key=True, autoincrement=True)
+    VENDOR_SITE_CODE = Column(Integer, nullable=False)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    status = Column(String, nullable=True)
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    region_id = Column(Integer, nullable=False)
+
+class vendor_site_code_dummy(Base):
+    __tablename__ = "vendor_site_code_dummy"
 
     VENDOR_SITE_ID = Column(Integer(), primary_key=True, autoincrement=True)
     VENDOR_SITE_CODE = Column(Integer, nullable=False)
