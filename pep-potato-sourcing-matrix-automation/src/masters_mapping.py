@@ -28,88 +28,88 @@ def get_plantMtrx_by_region(db: Session = Depends(get_db)): # pragma: no cover
 @router.post('/add_plant_mapping', status_code=status.HTTP_201_CREATED)
 def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db)): # pragma: no cover
     """API Endpoint to add a new plant, add the plant with vendor site code mapping"""
-    # try:
-    plant_name = payload.plant.plant_name
-    plant_count = db.query(models.Plant).filter(models.Plant.plant_name == plant_name).count()
-    if plant_count>0:
-        return {"status":"plant already exists"}
-    vendor_site_id = payload.psga_map.vendor_site_id
-    count = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).count()
+    try:
+        plant_name = payload.plant.plant_name
+        plant_count = db.query(models.Plant).filter(models.Plant.plant_name == plant_name).count()
+        if plant_count>0:
+            return {"status":"plant already exists"}
+        vendor_site_id = payload.psga_map.vendor_site_id
+        count = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).count()
 
-    current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]  # Or use the appropriate timezone
+        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]  # Or use the appropriate timezone
 
-    plant_id = db.query(func.max(models.Plant.plant_id)).scalar() or 0
-    plant_id+=1
+        plant_id = db.query(func.max(models.Plant.plant_id)).scalar() or 0
+        plant_id+=1
 
-    new_plant = models.Plant(
-        **payload.plant.dict(),
-        plant_id=plant_id,
-        created_time=current_time,
-        updated_time=current_time,
-        created_by="SYSTEM",
-        updated_by="SYSTEM"
-    )
-    db.add(new_plant)
-    
-    row_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.row_id)).scalar() or 0
-    row_id += 1
-    new_mapping = models.PlantSiteGrowingAreaMapping(
-        **payload.psga_map.dict(),
-        row_id=row_id,
-        plant_id=plant_id
-    )
-    db.add(new_mapping)
-
-    if count>0:
-        pass
-    else:
-        ga_payload = {
-            "growing_area_name": payload.psga_map.growing_area,  # Assuming this is the correct mapping
-            "country": payload.growing_area.country,
-            "created_by": "JP",
-            "created_time": current_time,
-            "updated_by": "JP",
-            "updated_time": current_time,
-            "status": payload.growing_area.ga_status,
-            "region": payload.plant.region_id,  # Assuming you want to use the region_id from the plant part
-            "growing_area_desc": payload.growing_area.ga_desc,
-            "fresh_period_start": payload.growing_area.fp_start,
-            "fresh_period_end": payload.growing_area.fp_end,
-            "fresh_week_start": payload.growing_area.fw_start,
-            "fresh_week_end": payload.growing_area.fw_end,
-            "storage_period_start": payload.growing_area.sp_start,
-            "storage_week_start": payload.growing_area.sw_start,
-            "growing_area_id": payload.psga_map.growing_area_id  # Assuming this is the correct source for growing_area_id
-        }
-
-        # Insert into growing_area table
-        new_growing_area = models.growing_area(**ga_payload)
-        db.add(new_growing_area)
-
-        vsc_payload = {
-            "VENDOR_SITE_ID":payload.psga_map.vendor_site_id,
-            "VENDOR_SITE_CODE":payload.psga_map.Vendor_Site_Code,
-            "created_by":"SYSTEM",
-            "created_time":current_time,
-            "status":payload.vsc.vsc_status,
-            "updated_by":"SYSTEM",
-            "updated_time":current_time,
-            "region_id":payload.plant.region_id}
+        new_plant = models.Plant(
+            **payload.plant.dict(),
+            plant_id=plant_id,
+            created_time=current_time,
+            updated_time=current_time,
+            created_by="SYSTEM",
+            updated_by="SYSTEM"
+        )
+        db.add(new_plant)
         
-        # Insert into Vendor Site Code table
-        new_vendor_site_code = models.vendor_site_code(**vsc_payload)
-        db.add(new_vendor_site_code)
-        ga_vsc=True
+        row_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.row_id)).scalar() or 0
+        row_id += 1
+        new_mapping = models.PlantSiteGrowingAreaMapping(
+            **payload.psga_map.dict(),
+            row_id=row_id,
+            plant_id=plant_id
+        )
+        db.add(new_mapping)
 
-    db.commit()
-    db.refresh(new_plant)
-    db.refresh(new_mapping)
-    if ga_vsc:
-        db.refresh(new_growing_area)
-        db.refresh(new_vendor_site_code)
-    return {"status": "New plant added successfully"}
-    # except Exception as e:
-    #     raise HTTPException(status_code=400, detail=str(e))
+        if count>0:
+            pass
+        else:
+            ga_payload = {
+                "growing_area_name": payload.psga_map.growing_area,  # Assuming this is the correct mapping
+                "country": payload.growing_area.country,
+                "created_by": "JP",
+                "created_time": current_time,
+                "updated_by": "JP",
+                "updated_time": current_time,
+                "status": payload.growing_area.ga_status,
+                "region": payload.plant.region_id,  # Assuming you want to use the region_id from the plant part
+                "growing_area_desc": payload.growing_area.ga_desc,
+                "fresh_period_start": payload.growing_area.fp_start,
+                "fresh_period_end": payload.growing_area.fp_end,
+                "fresh_week_start": payload.growing_area.fw_start,
+                "fresh_week_end": payload.growing_area.fw_end,
+                "storage_period_start": payload.growing_area.sp_start,
+                "storage_week_start": payload.growing_area.sw_start,
+                "growing_area_id": payload.psga_map.growing_area_id  # Assuming this is the correct source for growing_area_id
+            }
+
+            # Insert into growing_area table
+            new_growing_area = models.growing_area(**ga_payload)
+            db.add(new_growing_area)
+
+            vsc_payload = {
+                "VENDOR_SITE_ID":payload.psga_map.vendor_site_id,
+                "VENDOR_SITE_CODE":payload.psga_map.Vendor_Site_Code,
+                "created_by":"SYSTEM",
+                "created_time":current_time,
+                "status":payload.vsc.vsc_status,
+                "updated_by":"SYSTEM",
+                "updated_time":current_time,
+                "region_id":payload.plant.region_id}
+            
+            # Insert into Vendor Site Code table
+            new_vendor_site_code = models.vendor_site_code(**vsc_payload)
+            db.add(new_vendor_site_code)
+            ga_vsc=True
+
+        db.commit()
+        db.refresh(new_plant)
+        db.refresh(new_mapping)
+        if ga_vsc:
+            db.refresh(new_growing_area)
+            db.refresh(new_vendor_site_code)
+        return {"status": "New plant added successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 ## owner,region,country
 ## growing_area_name
