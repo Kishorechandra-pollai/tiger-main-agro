@@ -11,24 +11,39 @@ router = APIRouter()
 @router.get('/region_cropcategory')
 def get_plantMtrx_by_region(db: Session = Depends(get_db)): # pragma: no cover
     """API to retrieve region details, crop category and vendor site codegit """
-    region = db.query(models.region.region_name,models.region.region_id) \
-            .filter(models.region.status == "ACTIVE").all()
-    crop_category = db.query(models.category.category_name,models.category.crop_category) \
-            .filter(models.category.status == "ACTIVE").all()
-    Vendor_site_code = db.query(models.PlantSiteGrowingAreaMappingDummy.Vendor_Site_Code,models.PlantSiteGrowingAreaMappingDummy.vendor_site_id, \
-                                models.PlantSiteGrowingAreaMappingDummy.growing_area,models.PlantSiteGrowingAreaMappingDummy.growing_area_id).distinct().all()
-    
-    return {"region": region, "crop_category":crop_category, "vendor_site_ga":Vendor_site_code}
+    try:
+        region = db.query(models.region.region_name,models.region.region_id) \
+                .filter(models.region.status == "ACTIVE").all()
+        crop_category = db.query(models.category.category_name,models.category.crop_category) \
+                .filter(models.category.status == "ACTIVE").all()
+        Vendor_site_code = db.query(models.PlantSiteGrowingAreaMapping.Vendor_Site_Code,models.PlantSiteGrowingAreaMapping.vendor_site_id, \
+                                    models.PlantSiteGrowingAreaMapping.growing_area,models.PlantSiteGrowingAreaMapping.growing_area_id).distinct().all()
+        company_name = db.query(models.Plant.company_name).distinct().all()
+        
+        return {"region": region, "crop_category":crop_category, "vendor_site_ga":Vendor_site_code,"company_name":company_name}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post('/add_plant_mapping', status_code=status.HTTP_201_CREATED)
 def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db)): # pragma: no cover
     """API Endpoint to add a new plant, add the plant with vendor site code mapping"""
+    # try:
+    plant_name = payload.plant.plant_name
+    plant_count = db.query(models.Plant).filter(models.Plant.plant_name == plant_name).count()
+    if plant_count>0:
+        return {"status":"plant already exists"}
     vendor_site_id = payload.psga_map.vendor_site_id
-    count = db.query(models.vendor_site_code_dummy).filter(models.vendor_site_code_dummy.VENDOR_SITE_ID == vendor_site_id).count()
+    count = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).count()
 
     current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]  # Or use the appropriate timezone
-    new_plant = models.PlantDummy(
+
+    plant_id = db.query(func.max(models.Plant.plant_id)).scalar() or 0
+    plant_id+=1
+
+    new_plant = models.Plant(
         **payload.plant.dict(),
+        plant_id=plant_id,
         created_time=current_time,
         updated_time=current_time,
         created_by="SYSTEM",
@@ -36,11 +51,12 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
     )
     db.add(new_plant)
     
-    row_id = db.query(func.max(models.PlantSiteGrowingAreaMappingDummy.row_id)).scalar() or 0
+    row_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.row_id)).scalar() or 0
     row_id += 1
-    new_mapping = models.PlantSiteGrowingAreaMappingDummy(
+    new_mapping = models.PlantSiteGrowingAreaMapping(
         **payload.psga_map.dict(),
-        row_id=row_id
+        row_id=row_id,
+        plant_id=plant_id
     )
     db.add(new_mapping)
 
@@ -48,7 +64,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
         pass
     else:
         ga_payload = {
-            "growing_area_name": payload.growing_area.ga_desc,  # Assuming this is the correct mapping
+            "growing_area_name": payload.psga_map.growing_area,  # Assuming this is the correct mapping
             "country": payload.growing_area.country,
             "created_by": "JP",
             "created_time": current_time,
@@ -67,7 +83,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
         }
 
         # Insert into growing_area table
-        new_growing_area = models.growing_area_dummy(**ga_payload)
+        new_growing_area = models.growing_area(**ga_payload)
         db.add(new_growing_area)
 
         vsc_payload = {
@@ -81,12 +97,78 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
             "region_id":payload.plant.region_id}
         
         # Insert into Vendor Site Code table
-        new_vendor_site_code = models.vendor_site_code_dummy(**vsc_payload)
+        new_vendor_site_code = models.vendor_site_code(**vsc_payload)
         db.add(new_vendor_site_code)
+        ga_vsc=True
 
     db.commit()
     db.refresh(new_plant)
     db.refresh(new_mapping)
-    db.refresh(new_growing_area)
-    db.refresh(new_vendor_site_code)
-    return {"status": "success"}
+    if ga_vsc:
+        db.refresh(new_growing_area)
+        db.refresh(new_vendor_site_code)
+    return {"status": "New plant added successfully"}
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail=str(e))
+
+## owner,region,country
+## growing_area_name
+@router.get('/growingarea_region')
+def get_plantMtrx_by_region(db: Session = Depends(get_db)): # pragma: no cover
+    """API to retrieve region details, crop category and vendor site codegit """
+    try:
+        region = db.query(models.region.region_name,models.region.region_id) \
+                .filter(models.region.status == "ACTIVE").all()
+        owner = db.query(models.growers.owner).distinct().all()
+        country = db.query(models.growers.country).distinct().all()
+        return {"region":region,"owner":owner,"country":country}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+
+@router.post('/add_grower_mapping', status_code=status.HTTP_201_CREATED)
+def create_plant(payload: schemas.MastersMappingGrowers, db: Session = Depends(get_db)): # pragma: no cover
+    """Api to add grower in master table and the grower - growing area mapping table"""
+    try:
+        grower_name = payload.growers.grower_name
+        grower_count = db.query(models.growers).filter(models.growers.grower_name == grower_name).count()
+        if grower_count>0:
+            return {"status":"grower already exists"}
+        grower_id = db.query(func.max(models.growers.grower_id)).scalar() or 0
+        grower_id+=1
+        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        new_grower = models.growers(
+            **payload.growers.dict(),
+            grower_id=grower_id,
+            created_time=current_time,
+            updated_time=current_time,
+            created_by="SYSTEM",
+            updated_by="JP"
+        )
+        db.add(new_grower)
+
+        growing_area_name = payload.gr_area_map.growing_area_name
+        count = db.query(models.preferred_grower).filter(models.preferred_grower.growing_area_name == growing_area_name).count()
+        if count>0:
+            growing_area_id = db.query(models.preferred_grower.growing_area_id).filter(models.preferred_grower.growing_area_name == growing_area_name).first()[0]
+        else:
+            growing_area_id = db.query(func.max(models.preferred_grower.growing_area_id)).scalar() or 0
+            growing_area_id += 1
+        
+        row_id = db.query(func.max(models.preferred_grower.row_id)).scalar() or 0
+        row_id += 1
+        new_gr_mapping = models.preferred_grower(
+            **payload.gr_area_map.dict(),
+            row_id=row_id,
+            grower_id=grower_id,
+            growing_area_id=growing_area_id,
+            grower_name=payload.growers.grower_name
+        )
+        db.add(new_gr_mapping)
+        db.commit()
+        db.refresh(new_grower)
+        db.refresh(new_gr_mapping)
+        return {"status": "New grower added successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
