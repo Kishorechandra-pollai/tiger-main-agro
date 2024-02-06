@@ -3,38 +3,75 @@ from sqlalchemy.orm import Session
 import models
 from database import get_db
 import pandas as pd
-import get_dashboard_plmavol_company
-
-
+from views_to_pandas import get_dashboard_plant_vol_company,solids_impact,material_forecast_summary, \
+    view_summary_Total_freight_forecast,get_view_summary_sum_p4p_task_mappings, \
+    view_summary_sum_off_contract_task_mapping, summary_sum_general_administrative,get_vbase_info
 
 router = APIRouter()
 
-@router.get('/{year}/{company_name}')
+@router.get('/material/{year}/{company_name}')
 def infl_defl(year:int,company_name:str,db: Session = Depends(get_db)): # pragma: no cover
-    # df_plant_matrix_ga = pd.read_sql_table('plant_matrix_growing_area', engine)
-    # df_plant = pd.read_sql_table('plant', engine)
-    # df_growing_area = pd.read_sql_table('growing_area', engine)
-    # df_region = pd.read_sql_table('region', engine)
-    def run_sql(table_name):
-        query = f"SELECT * FROM {table_name}"
+    def run_sql(table_name,columns):
+        query = f"SELECT {columns} FROM {table_name}"
         result = db.execute(query)
         df = pd.DataFrame(result.fetchall())
         df.columns = result.keys()
         return df
-    df_plant_matrix_ga = run_sql("plant_matrix_growing_area")
-    df_plant = run_sql("plant")
-    df_growing_area = run_sql("growing_area")
-    df_region = run_sql("region")
     
-    df_view_dash = get_dashboard_plmavol_company.get_dashboard_plant_vol_company(df_plant_matrix_ga,df_plant,df_growing_area,df_region)
+    ## Loading the tables
+    df_plant_matrix_ga = run_sql("plant_matrix_growing_area","*")
+    df_plant = run_sql("plant","*")
+    df_growing_area = run_sql("growing_area","*")
+    df_region = run_sql("region","*")
+    df_solids_task_mapp = run_sql("solids_task_mapping","solids_task_id, period, year, value, country_code")
+    df_solid_task_master = run_sql("solid_task_master","solids_task_id, task_name")
+    df_potato_rate_mapping = run_sql("potato_rate_mapping","p_year,rate, period, week, country_code,potato_rate_id")
+    df_potato_rates = run_sql("potato_rates","growing_area_id,potato_rate_id")
+    df_plant_matrix_growing_area = run_sql("plant_matrix_growing_area","period, year,growing_area_id, week, plant_id, value")
+    freight_task_mappings = run_sql("freight_task_mappings","*")
+    p4p_master_info = run_sql("p4p_master_info","*")
+    p4p_task_mappings = run_sql("p4p_task_mappings","*")
+    View_freight_cp_cat_country_frght_frcst= run_sql("View_freight_cost_period_CATEGORY_COUNTRY_FREIGHT_FORECAST","*")
+    df_off_contract_task_mapping = run_sql("off_contract_task_mapping","*")
+    ga_mapping = run_sql("general_administrative_mappings","*")
 
-    # Display the DataFrame
+    ## Selecting required columns for material
+    df_plant_matl = df_plant[["plant_name", "plant_id", "region_id", "company_name"]]
+    df_growing_area_matl = df_growing_area[["growing_area_name", "growing_area_desc", "growing_area_id"]]
+    df_region_matl = df_region[["region_id", "country"]]
 
-    print(df_plant_matrix_ga.head())
 
-    df_vbase = run_sql("v_base_info")
+    df_view_dash = get_dashboard_plant_vol_company(df_plant_matrix_ga,df_plant,df_growing_area,df_region)
 
-    p4p_mappings = run_sql("p4p_task_mappings_sum_p4p_task_mappings")
+    df_solids_impact = solids_impact(df_view_dash,df_solids_task_mapp,df_solid_task_master)
+    print("solids impact -> ",df_solids_impact.columns)
+
+    df_View_summary_MATERIAL_FORECAST_pandas = material_forecast_summary(df_potato_rate_mapping, \
+                                                                         df_potato_rates,df_plant_matrix_growing_area, \
+                                                                            df_plant_matl,df_growing_area_matl,df_region_matl)
+    print("summary material forecast -> ",df_View_summary_MATERIAL_FORECAST_pandas.columns)
+
+    df_summary_Total_freight_forecast = view_summary_Total_freight_forecast(freight_task_mappings, View_freight_cp_cat_country_frght_frcst,df_view_dash)
+    print("Total_freight_forecast -> ",df_summary_Total_freight_forecast.columns)
+
+    df_summary_sum_p4p_task_mappings, df_p4p_task_mappings_sum_p4p_task_mappings = get_view_summary_sum_p4p_task_mappings(p4p_master_info, p4p_task_mappings,df_view_dash)
+    print("summary_sum_p4p_task_mappings -> ",df_summary_sum_p4p_task_mappings.columns)
+    print("p4p_task_mappings_sum_p4p_task_mappings -> ",df_p4p_task_mappings_sum_p4p_task_mappings.columns)
+
+
+    df_summary_sum_off_contract_task_mapping = view_summary_sum_off_contract_task_mapping (df_off_contract_task_mapping,df_view_dash)
+    print("summary_sum_off_contract_task_mapping -> ",df_summary_sum_off_contract_task_mapping.columns)
+
+    df_summary_genadm_sum = summary_sum_general_administrative(ga_mapping,df_view_dash)
+    print("df_summary_genadm_sum -> ",df_summary_genadm_sum.columns)
+
+    df_vbase = get_vbase_info(df_summary_genadm_sum,df_summary_sum_off_contract_task_mapping,df_summary_sum_p4p_task_mappings, \
+                   df_summary_Total_freight_forecast,df_View_summary_MATERIAL_FORECAST_pandas,df_solids_impact)
+
+    # df_vbase = run_sql("v_base_info")
+
+    # p4p_mappings = run_sql("p4p_task_mappings_sum_p4p_task_mappings")
+    p4p_mappings = df_p4p_task_mappings_sum_p4p_task_mappings.copy()
 
     agg_p4p_mappings = p4p_mappings.groupby(['period', 'year', 'company_name'])['sum_period'].sum().reset_index()
 
