@@ -105,7 +105,7 @@ def update_general_administrative_records(payload: GeneralAdministrativeMappings
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/create_general_administrative_mappings_for_next_year/", status_code=status.HTTP_201_CREATED)
+@router.post("/create_general_administrative_mappings_for_next_year/{year}")
 async def create_g_and_a_mappings_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to create records with given year for each country and general_administrative_task and add into
     general_administrative_mappings table."""

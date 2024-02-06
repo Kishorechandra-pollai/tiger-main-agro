@@ -76,8 +76,7 @@ def solid_rate_period_year(year:int, db: Session = Depends(get_db)):
 @router.post("/create_solid_rates_mappings_for_next_year/{year}")
 async def create_solid_rates_mappings_for_next_year(year: int, db: Session = Depends(get_db)): # pragma: no cover
     """Function to Create solid_rate_mapping records for next year."""
-    all_records = db.query(solids_rates)\
-        .filter(solids_rates.year == (year-1)).limit(2).all()
+    all_records = db.query(solids_rates).all()
     query_view = db.query(solids_rate_table_period)\
         .filter(solids_rate_table_period.columns.year == (year-1)).all()
     # view which contains actual value by growing_area_id
@@ -90,7 +89,7 @@ async def create_solid_rates_mappings_for_next_year(year: int, db: Session = Dep
         # key = str(ex.solids_rate_id)+"-"+ex.year+"-"+str(ex.period)
         # dict_existing_record.append(key)
         db.delete(ex)
-        db.commit()
+    db.commit()
     for record in all_records:  # Iterate over all solids_rates
         for ele in query_view:  # Iterate through the view
             for period in range(1, 14):  # Iterating 1 to 13 periods
