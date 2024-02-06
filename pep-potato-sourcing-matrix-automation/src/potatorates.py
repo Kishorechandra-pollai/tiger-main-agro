@@ -97,3 +97,44 @@ def potato_rate_period_week_year(year:int, db: Session = Depends(get_db)):
         return {"potato_rate_period_week_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post("/create_potato_rate_mapping_for_next_year/{year}")
+async def create_potato_rate_mapping_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to Create potato_rate_mapping records for next year."""
+    all_records = db.query(potato_rates).filter(potato_rates.year == (year-1)).all()
+    query_view = db.query(potato_rate_table_weekly)\
+        .filter(potato_rate_table_weekly.columns.p_year == (year-1)).all()
+    # View which contains actual value by growing_area_id
+    update_count = 0
+    country = ''
+    # dict_existing_record = []
+    existingRecord = db.query(potato_rate_mapping)\
+        .filter(potato_rate_mapping.p_year == year).all()
+    for ex in existingRecord:
+        # key = str(ex.potato_rate_id)+"-"+ex.year+"-"+str(ex.period)
+        # dict_existing_record.append(key)
+        db.delete(ex)
+        db.commit()
+    for record in all_records:
+        for ele in query_view:
+            for period in range(1, 14):  # Iterating 1 to 13 periods
+                if ele.potato_rate_id == record.potato_rate_id:
+                    # isKey = str(record.potato_rate_id)+"-"+year+"-"+str(period)
+                    if record.currency == 'USD':
+                        country = 'US'
+                    elif record.currency == 'CAD':
+                        country = 'Canada'
+                    # if isKey in dict_existing_record:
+                    #     return {"status": "error", "Records already exists for Year": year}
+                    # else:
+                    new_record = potato_rate_mapping(potato_rate_id=record.potato_rate_id,
+                                                     period=period, week=ele.week,
+                                                     p_year=year, rate=ele.actual_rate,
+                                                     country_code=country)
+                    db.add(new_record)
+                    update_count += 1
+                    print(ele.actual_rate,',', year,',', period,',', record.potato_rate_id,',', ele.growing_area_id)
+
+    db.commit()
+    return {"status": "success", "Records added": update_count, "for Year": year}

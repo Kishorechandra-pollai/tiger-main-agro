@@ -152,3 +152,36 @@ def get_rate_growing_area_year(year: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Exception: {e}")
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
+def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to create records for freight_cost_mapping table """
+    distinct_freight_ids = db.query(FreightCostRate.freight_cost_id).distinct().all()
+    update_count = 0
+    if distinct_freight_ids.count == 0:
+        raise HTTPException(status_code=404, detail="No records found in the database")
+    dict_existing_record = []
+    existingRecord = db.query(FreightCostMapping)\
+        .filter(FreightCostMapping.year == year).all()
+    for ex in existingRecord:
+        # key = str(ex.freight_cost_id)+"-"+ex.company_name+"-"+str(ex.period)
+        # dict_existing_record.append(key)
+        db.delete(ex)
+        db.commit()
+    for freight_cost_id_tuple in distinct_freight_ids:
+        freight_cost_id = freight_cost_id_tuple[0]
+        for period in range(1, 14):
+            old_rates = db.query(FreightCostMapping).filter(FreightCostMapping.year == (year-1), FreightCostMapping.freight_cost_id == freight_cost_id, period==period).first()
+            # isKey = str(freight_cost_id)+"-"+old_rates.company_name+"-"+str(period)
+            # if isKey in dict_existing_record:
+            #     return {"status": "error", "Records already exists for Year": year}
+            # else:
+            new_record = FreightCostMapping(freight_cost_id=freight_cost_id,
+                                            period=period, year=year,
+                                            rate=old_rates.rate,
+                                            company_name=old_rates.company_name)
+            db.add(new_record)
+            update_count += 1
+    db.commit()
+    return {"status": "success", "Records added": update_count, "for Year": year}
