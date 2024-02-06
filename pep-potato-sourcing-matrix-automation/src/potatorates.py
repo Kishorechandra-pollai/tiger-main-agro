@@ -102,7 +102,7 @@ def potato_rate_period_week_year(year:int, db: Session = Depends(get_db)):
 @router.post("/create_potato_rate_mapping_for_next_year/{year}")
 async def create_potato_rate_mapping_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to Create potato_rate_mapping records for next year."""
-    all_records = db.query(potato_rates).filter(potato_rates.year == (year-1)).all()
+    all_records = db.query(potato_rates).all()
     query_view = db.query(potato_rate_table_weekly)\
         .filter(potato_rate_table_weekly.columns.p_year == (year-1)).all()
     # View which contains actual value by growing_area_id
@@ -115,7 +115,7 @@ async def create_potato_rate_mapping_for_next_year(year: int, db: Session = Depe
         # key = str(ex.potato_rate_id)+"-"+ex.year+"-"+str(ex.period)
         # dict_existing_record.append(key)
         db.delete(ex)
-        db.commit()
+    db.commit()
     for record in all_records:
         for ele in query_view:
             for period in range(1, 14):  # Iterating 1 to 13 periods

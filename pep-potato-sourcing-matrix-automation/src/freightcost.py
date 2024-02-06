@@ -168,7 +168,7 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
         # key = str(ex.freight_cost_id)+"-"+ex.company_name+"-"+str(ex.period)
         # dict_existing_record.append(key)
         db.delete(ex)
-        db.commit()
+    db.commit()
     for freight_cost_id_tuple in distinct_freight_ids:
         freight_cost_id = freight_cost_id_tuple[0]
         for period in range(1, 14):
