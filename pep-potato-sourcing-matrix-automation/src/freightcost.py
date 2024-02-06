@@ -172,7 +172,10 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
     for freight_cost_id_tuple in distinct_freight_ids:
         freight_cost_id = freight_cost_id_tuple[0]
         for period in range(1, 14):
-            old_rates = db.query(FreightCostMapping).filter(FreightCostMapping.year == (year-1), FreightCostMapping.freight_cost_id == freight_cost_id, period==period).first()
+            old_rates = db.query(FreightCostMapping)\
+                .filter(FreightCostMapping.year == (year-1),
+                        FreightCostMapping.freight_cost_id == freight_cost_id,
+                        FreightCostMapping.period == period).first()
             # isKey = str(freight_cost_id)+"-"+old_rates.company_name+"-"+str(period)
             # if isKey in dict_existing_record:
             #     return {"status": "error", "Records already exists for Year": year}
