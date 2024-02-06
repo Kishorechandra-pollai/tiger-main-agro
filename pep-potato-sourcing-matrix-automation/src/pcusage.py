@@ -97,7 +97,7 @@ def get_filtered_usage_period_common(db, filter_conditions, year, detail_message
             .group_by(View_forecast_pcusage.columns.year,
                       View_forecast_pcusage.columns.Period_with_P,
                       View_forecast_pcusage.columns.plant_name,
-                      View_forecast_pcusage.columns.period, View_forecast_pcusage.columns.plant_id)\
+                      View_forecast_pcusage.columns.period, View_forecast_pcusage.columns.plant_id) \
             .order_by(View_forecast_pcusage.columns.period).all()
 
         total_forecast_volume = total_forcast_volume_func(filter_conditions, year, db)
@@ -195,3 +195,11 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
         return {"status": "success", "message": "New forecast records are generated"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# @router.post('/update_forecast_actual/{year}')
+# def update_forecast_actual(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+#     crop_categories = db.query(models.category.category_name) \
+#         .filter(models.category.status == 'Active').all()
+#     for crop_category in crop_categories:
+#         index_values = db.query(models.allocation).filter()
