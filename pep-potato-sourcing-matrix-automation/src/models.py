@@ -192,6 +192,7 @@ class FreightCostMapping(Base):
     year = Column(Integer, index=True, nullable=False)
     period = Column(Integer, nullable=False)
     rate = Column(Float, nullable=False)
+    company_name = Column(String, nullable=True)
 
 
 class Ownership(Base):
@@ -319,6 +320,7 @@ class solid_rate_mapping(Base):
     solids_rate_id = Column(Integer, nullable=True)
     rate = Column(Float, nullable=True)
     period_year = Column(Integer, nullable=True)
+    country_code = Column(String, nullable=True)
 
 
 class off_contract_info(Base):
