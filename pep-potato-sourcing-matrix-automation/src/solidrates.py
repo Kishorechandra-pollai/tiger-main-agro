@@ -59,6 +59,7 @@ def update_solid_rates_records(payload: solidRateMappingPayload,db: Session = De
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+
 @router.get('/solid_rate_period_year/{year}')
 def solid_rate_period_year(year:int, db: Session = Depends(get_db)):
     """Function to fetch all records from solids_rate table for a particular year """
@@ -70,3 +71,43 @@ def solid_rate_period_year(year:int, db: Session = Depends(get_db)):
         return {"solids_rate_period_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post("/create_solid_rates_mappings_for_next_year/{year}")
+async def create_solid_rates_mappings_for_next_year(year: int, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to Create solid_rate_mapping records for next year."""
+    all_records = db.query(solids_rates).all()
+    query_view = db.query(solids_rate_table_period)\
+        .filter(solids_rate_table_period.columns.year == (year-1)).all()
+    # view which contains actual value by growing_area_id
+    update_count = 0
+    country = ''
+    # dict_existing_record = []
+    existingRecord = db.query(solid_rate_mapping)\
+        .filter(solid_rate_mapping.period_year == year).all()
+    for ex in existingRecord:
+        # key = str(ex.solids_rate_id)+"-"+ex.year+"-"+str(ex.period)
+        # dict_existing_record.append(key)
+        db.delete(ex)
+    db.commit()
+    for record in all_records:  # Iterate over all solids_rates
+        for ele in query_view:  # Iterate through the view
+            for period in range(1, 14):  # Iterating 1 to 13 periods
+                if ele.growing_area_id == record.growing_area_id:
+                    # isKey = str(record.solids_rate_id)+"-"+year+"-"+str(period)
+                    if record.currency == 'USD':
+                        country = 'US'
+                    elif record.currency =='CAD':
+                        country = 'Canada'
+                    # if isKey in dict_existing_record:
+                        # return {"status": "error", "Records already exists for Year": year}
+                    # else:
+                    new_record = solid_rate_mapping(solids_rate_id=record.solids_rate_id,
+                                                    period=period, period_year=year,
+                                                    rate=ele.actual_rate,country_code=country)
+                    db.add(new_record)
+                    update_count += 1
+                    print(ele.actual_rate,',', year,',', period,',', record.solids_rate_id,',', ele.growing_area_id)
+
+    db.commit()
+    return {"status": "success", "Records added": update_count, "for Year": year}

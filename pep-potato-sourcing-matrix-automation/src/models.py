@@ -41,6 +41,8 @@ class growing_area(Base):
     fresh_week_start = Column(Integer(), nullable=True)
     fresh_period_end = Column(Integer(), nullable=True)
     fresh_week_end = Column(Integer(), nullable=True)
+    storage_period_start = Column(Integer(), nullable=True)
+    storage_week_start = Column(Integer(), nullable=True)
     created_time = Column(TIMESTAMP(timezone=False),
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
@@ -64,7 +66,7 @@ class growers(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
-
+    grower_abbreviation_code = Column(String, nullable=True)
 
 class preferred_grower(Base):
     __tablename__ = 'grower_growing_area_mapping'
@@ -73,6 +75,7 @@ class preferred_grower(Base):
     grower_name = Column(String, nullable=True)
     grower_id = Column(Integer, nullable=True)
     growing_area_id = Column(Integer, nullable=True)
+    growing_area_name = Column(String, nullable=True)
 
 
 class region(Base):
@@ -155,8 +158,8 @@ class PlantSiteGrowingAreaMapping(Base):
     """Class representing plant_site_growing_area_mapping table"""
     __tablename__ = 'plant_site_growing_area_mapping'
     row_id = Column(Integer(), primary_key=True, autoincrement=True)
-    vendor_site_code = Column(String, nullable=False)
-    growing_area_code = Column(String, nullable=False)
+    Vendor_Site_Code = Column(String, nullable=False)
+    growing_area = Column(String, nullable=False)
     plant_name = Column(String, nullable=False)
     vendor_site_id = Column(Integer(), nullable=False)
     plant_id = Column(Integer(), nullable=False)
@@ -189,6 +192,7 @@ class FreightCostMapping(Base):
     year = Column(Integer, index=True, nullable=False)
     period = Column(Integer, nullable=False)
     rate = Column(Float, nullable=False)
+    company_name = Column(String, nullable=True)
 
 
 class Ownership(Base):
@@ -316,6 +320,7 @@ class solid_rate_mapping(Base):
     solids_rate_id = Column(Integer, nullable=True)
     rate = Column(Float, nullable=True)
     period_year = Column(Integer, nullable=True)
+    country_code = Column(String, nullable=True)
 
 
 class off_contract_info(Base):

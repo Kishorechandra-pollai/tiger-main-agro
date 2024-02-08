@@ -51,7 +51,7 @@ params = urllib.parse.quote_plus("DRIVER=" + driver +
                                  ";UID=" + username +
                                  ";PWD=" + pwd)
 
-engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
+engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(params),pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

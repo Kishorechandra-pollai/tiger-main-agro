@@ -16,11 +16,51 @@ class PlantSchema(BaseModel):
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
 
+class PlantSchemaDummy(BaseModel):
+    # plant_id: int
+    plant_code: str
+    plant_name: str
+    company_name: Optional[str] = None
+    region_id: int
+    status: str
+    crop_category_id: Optional[int] = None
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+class PlantSiteGrowingAreaMappingDummy(BaseModel):
+    plant_name: str
+    growing_area: str
+    Vendor_Site_Code: str
+    # plant_id: int
+    vendor_site_id: int
+    growing_area_id: int
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class GrowingAreaDummy(BaseModel):
+    ga_status: Optional[str] = "ACTIVE"
+    country: str
+    ga_desc: str
+    fp_start: int
+    fp_end: int
+    fw_start: int
+    fw_end: int
+    sp_start: int
+    sw_start: int
+
+class VendorSiteCodeDummy(BaseModel):
+    vsc_status: Optional[str] = "ACTIVE"
+
+class MastersMapping(BaseModel):
+    plant: PlantSchemaDummy
+    psga_map: PlantSiteGrowingAreaMappingDummy
+    growing_area: GrowingAreaDummy
+    vsc: VendorSiteCodeDummy
 
 class GrowingAreaSchema(BaseModel):
     growing_area_id: int
@@ -42,6 +82,23 @@ class GrowingAreaSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
+
+class GrowersDummy(BaseModel):
+    grower_name: str
+    owner: str
+    region: int
+    country: str
+    status: str
+    volume: int
+    grower_abbreviation_code: str
+
+class GrAreaMapDummy(BaseModel):
+    growing_area_name: str
+
+class MastersMappingGrowers(BaseModel):
+    growers: GrowersDummy
+    gr_area_map: GrAreaMapDummy
 
 
 class GrowerSchema(BaseModel):

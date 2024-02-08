@@ -367,7 +367,7 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
             new_record_count = update_first_period_data(1, current_week,
                                                         current_year, new_record_count,
                                                         db)
-        else:
+        else:  # (6, 10) 6,7,8,9
             lower_limit = (current_period - 1) * 5 + 1  # delete all actual value of previous period.
             max_limit = current_period * 5 + current_week  # current_week value - 1 .
             """delete of plant_mtrx_data."""
@@ -381,14 +381,15 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
             """Insert new actual volumes in Plant Matrix."""
             period_value = current_period - 1
             while period_value <= current_period:
-                week_value = 1
+                week_value = 1  # 6,7,8,9 ,, 10
                 while period_value * 5 + week_value <= current_period * 5 + current_week:
                     actual_data_current_week = db.query(models.View_plant_matrix_actual) \
-                        .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
-                                models.View_plant_matrix_actual.columns.week_num == week_value,
-                                models.View_plant_matrix_actual.columns.p_year == today_date.year) \
+                        .filter(models.View_plant_matrix_actual.columns.p_year == today_date.year,
+                                models.View_plant_matrix_actual.columns.period_num == period_value,
+                                models.View_plant_matrix_actual.columns.week_num == week_value) \
                         .all()
                     if not actual_data_current_week:
+                        week_value += 1
                         continue
                     for item in actual_data_current_week:
                         new_record_count += 1
