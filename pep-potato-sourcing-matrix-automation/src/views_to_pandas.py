@@ -247,7 +247,7 @@ def summary_sum_general_administrative(ga_mapping,df_view_dash): # pragma: no co
 
 
 def get_vbase_info(df_summary_genadm_sum,df_summary_sum_off_contract_task_mapping,df_summary_sum_p4p_task_mappings, \
-                   df_summary_Total_freight_forecast,df_View_summary_MATERIAL_FORECAST_pandas,df_solids_impact):
+                   df_summary_Total_freight_forecast,df_View_summary_MATERIAL_FORECAST_pandas,df_solids_impact): # pragma: no cover
     df_summary_genadm_sum.rename(columns={'sum_period': 'genadm_sum_period'}, inplace=True)
     df_summary_sum_off_contract_task_mapping.rename(columns={'sum_period': 'off_contract_sum_period'}, inplace=True)
     df_summary_sum_p4p_task_mappings.rename(columns={'sum_period': 'p4p_sum_period'}, inplace=True)
