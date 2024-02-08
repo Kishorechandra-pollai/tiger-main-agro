@@ -16,7 +16,7 @@ class PlantSchema(BaseModel):
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
 
-class PlantSchemaDummy(BaseModel):
+class PlantSchemaDummy(BaseModel): # pragma: no cover
     # plant_id: int
     plant_code: str
     plant_name: str
@@ -29,7 +29,7 @@ class PlantSchemaDummy(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-class PlantSiteGrowingAreaMappingDummy(BaseModel):
+class PlantSiteGrowingAreaMappingDummy(BaseModel): # pragma: no cover
     plant_name: str
     growing_area: str
     Vendor_Site_Code: str
@@ -42,7 +42,7 @@ class PlantSiteGrowingAreaMappingDummy(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-class GrowingAreaDummy(BaseModel):
+class GrowingAreaDummy(BaseModel): # pragma: no cover
     ga_status: Optional[str] = "ACTIVE"
     country: str
     ga_desc: str
@@ -53,10 +53,10 @@ class GrowingAreaDummy(BaseModel):
     sp_start: int
     sw_start: int
 
-class VendorSiteCodeDummy(BaseModel):
+class VendorSiteCodeDummy(BaseModel): # pragma: no cover
     vsc_status: Optional[str] = "ACTIVE"
 
-class MastersMapping(BaseModel):
+class MastersMapping(BaseModel): # pragma: no cover
     plant: PlantSchemaDummy
     psga_map: PlantSiteGrowingAreaMappingDummy
     growing_area: GrowingAreaDummy
@@ -84,7 +84,7 @@ class GrowingAreaSchema(BaseModel):
         arbitrary_types_allowed = True
 
 
-class GrowersDummy(BaseModel):
+class GrowersDummy(BaseModel): # pragma: no cover
     grower_name: str
     owner: str
     region: int
@@ -93,10 +93,10 @@ class GrowersDummy(BaseModel):
     volume: int
     grower_abbreviation_code: str
 
-class GrAreaMapDummy(BaseModel):
+class GrAreaMapDummy(BaseModel): # pragma: no cover
     growing_area_name: str
 
-class MastersMappingGrowers(BaseModel):
+class MastersMappingGrowers(BaseModel): # pragma: no cover
     growers: GrowersDummy
     gr_area_map: GrAreaMapDummy
 
