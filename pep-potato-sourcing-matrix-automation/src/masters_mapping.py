@@ -33,6 +33,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
         plant_count = db.query(models.Plant).filter(models.Plant.plant_name == plant_name).count()
         if plant_count>0:
             return {"status":"plant already exists"}
+        ga_vsc = False
         vendor_site_id = payload.psga_map.vendor_site_id
         count = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).count()
 
