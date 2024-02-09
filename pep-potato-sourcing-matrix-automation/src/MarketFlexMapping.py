@@ -16,8 +16,8 @@ def filtered_market(db: Session = Depends(get_db)):
         models.MarketFlexMapping.status == "ACTIVE").all()
     if not filtered_Market:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No mapping found based on the specified conditions")
+            status_code=status.HTTP_200_OK,
+            detail="No market flex value is present for this year.")
     return {"status": "success", "MarketFlexMapping": filtered_Market}
 
 
@@ -32,8 +32,8 @@ def filtered_market_year(year: int, db: Session = Depends(get_db)):
         .all()
     if not filtered_Market:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No mapping found based on the specified conditions")
+            status_code=status.HTTP_200_OK,
+            detail=f"No market flex value is present for this year.")
     return {"status": "success", "MarketFlexMapping": filtered_Market}
 
 
