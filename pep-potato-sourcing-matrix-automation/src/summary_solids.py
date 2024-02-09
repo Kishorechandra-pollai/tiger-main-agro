@@ -13,14 +13,7 @@ def get_solid_task_master(db: Session = Depends(get_db)):
     """Function to get all records from solid_task_master."""
     try:
         records = db.query(solid_task_master).all()
-        result = [
-            {
-                "solid_task_id": row.solids_task_id,
-                "task_name": row.task_name,
-            }
-            for row in records
-        ]
-        return {"details": result}
+        return {"details": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -30,17 +23,7 @@ def solids_task_mapping_by_year(year: str, db: Session = Depends(get_db)):
     try:
         records = db.query(solids_task_mapping
                            ).filter(solids_task_mapping.year==year).all()
-        result = [
-            {
-                "solid_task_id": row.solids_task_id,
-                "period": row.period,
-                "period_with_P": f'P{row.period}',
-                "year": row.year,
-                "value":row.value,
-            }
-            for row in records
-        ]
-        return {"details": result}
+        return {"details": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -155,3 +138,46 @@ def summary_solids_view_year_country_code(year:int,country_code:str,db: Session 
         return {"summary_solids_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.post("/create_summary_solids_for_next_year/", status_code=status.HTTP_201_CREATED)
+async def create_summary_solids_for_next_year(year: int , db: Session = Depends(get_db)): # pragma: no cover
+    """Function to Create solids_task_mapping records for next year."""
+    all_records = db.query(solid_task_master).all()
+    query_view = db.query(summary_solids).filter(summary_solids.columns.year==(year-1)).all() #view which contains actual value by growing_area_id
+    update_count = 0
+    existingRecord = db.query(solids_task_mapping)\
+                    .filter(solids_task_mapping.year==year).all()
+    for ex in existingRecord:
+        db.delete(ex)
+    db.commit()
+
+    solidTaskNameMap = {}
+    for record in all_records: # Iterate over all solids_rates
+        solidTaskNameMap[record.task_name] = record.solids_task_id
+
+    for ele in query_view:  # Iterate through the view
+        # PLAN - Plan current year = Plan for next year
+        new_record = solids_task_mapping(solids_task_id = solidTaskNameMap.get("PLAN") , period=ele.period, year=year, value=ele.Plan, country_code=ele.country_code)
+        db.add(new_record)
+
+        # PRIOR - Forecast of current year = Prior for next year
+        forecastValue = ele.forecast
+        query= db.query(solids_task_mapping).filter(solids_task_mapping.solids_task_id==solidTaskNameMap.get("PRIOR"), solids_task_mapping.period==ele.period, solids_task_mapping.country_code==ele.country_code, solids_task_mapping.year==year).first()
+        if query and query.value >0:
+            new_record = solids_task_mapping(solids_task_id = solidTaskNameMap.get("PRIOR"), period=ele.period, year=year, value=query.value, country_code=ele.country_code)
+        else:
+            new_record = solids_task_mapping(solids_task_id = solidTaskNameMap.get("PRIOR"), period=ele.period, year=year, value=forecastValue, country_code=ele.country_code)
+        db.add(new_record)
+
+        # FORECAST - Forecast precalculated by formulae =  0 for next year
+        new_record = solids_task_mapping(solids_task_id = solidTaskNameMap.get("FORECAST"), period=ele.period, year=year, value=0, country_code=ele.country_code)
+        db.add(new_record)
+
+        # CF
+        new_record = solids_task_mapping(solids_task_id = solidTaskNameMap.get("Conversion Factor"), period=ele.period, year=year, value=ele.Conversion_Factor, country_code=ele.country_code)
+        db.add(new_record)
+
+        update_count += 4
+    db.commit()
+
+    return {"status": "success", "Records added": update_count, "for Year": year}
