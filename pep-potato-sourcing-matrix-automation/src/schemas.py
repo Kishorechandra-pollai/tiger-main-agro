@@ -34,8 +34,8 @@ class PlantSiteGrowingAreaMappingDummy(BaseModel): # pragma: no cover
     growing_area: str
     Vendor_Site_Code: str
     # plant_id: int
-    vendor_site_id: int
-    growing_area_id: int
+    # vendor_site_id: int
+    # growing_area_id: int
 
     class Config:
         orm_mode = True

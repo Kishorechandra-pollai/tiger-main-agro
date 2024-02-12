@@ -15,8 +15,8 @@ def get_extension(db: Session = Depends(get_db)):
         .filter(models.ExtensionOwnershipMapping.status == "ACTIVE").all()
     if not filtered_ext:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No mapping found based on the specified conditions")
+            status_code=status.HTTP_200_OK,
+            detail="No extension for this year.")
     return {"status": "success", "extensionMapping": filtered_ext}
 
 
@@ -29,8 +29,8 @@ def filtered_extension(year: int, db: Session = Depends(get_db)):
                 models.ExtensionOwnershipMapping.crop_year.contains(compare_year)).all()
     if not filtered_ext:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No mapping found based on the specified conditions")
+            status_code=status.HTTP_200_OK,
+            detail="No extension is present for this year.")
     return {"status": "success", "extensionMapping": filtered_ext}
 
 

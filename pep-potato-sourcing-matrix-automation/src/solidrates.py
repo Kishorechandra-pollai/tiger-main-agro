@@ -5,7 +5,8 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import (growing_area, solid_rate_mapping, solids_rate_table_period,
                     solids_rates)
-from schemas import solidRateMappingPayload
+from schemas import solidRateMappingPayload,SolidRatesSchema
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -104,3 +105,22 @@ async def create_solid_rates_mappings_for_next_year(year: int, db: Session = Dep
 
     db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
+
+
+def create_solid_rate_in_db(payload: SolidRatesSchema, db: Session):
+    if isinstance(payload, BaseModel):
+        # Convert Pydantic model to dictionary
+        payload_dict = payload.dict()
+    else:
+        # Assume payload is already a dictionary
+        payload_dict = payload
+    new_record = solids_rates(**payload_dict)
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    return new_record
+
+@router.post('/create_solids_rates', status_code=status.HTTP_201_CREATED)
+def create_potato_rates(payload: SolidRatesSchema, db: Session = Depends(get_db)):
+    new_record = create_solid_rate_in_db(payload, db)
+    return {"status": "success", "solids_rate_id": new_record.solids_rate_id}
