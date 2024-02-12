@@ -68,7 +68,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
             # Fetch the growing area ID directly
             growing_area_id = db.query(models.PlantSiteGrowingAreaMapping.growing_area_id).filter(
                 models.PlantSiteGrowingAreaMapping.Vendor_Site_Code == vendor_site_code,
-                models.growing_area.growing_area_name == growing_area_name
+                models.PlantSiteGrowingAreaMapping.growing_area == growing_area_name
             ).first()[0]
 
 
@@ -97,14 +97,14 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
             db.add(new_mapping)
 
             ga_payload = {
-                "growing_area_name": payload.psga_map.growing_area,  # Assuming this is the correct mapping
+                "growing_area_name": payload.psga_map.growing_area, 
                 "country": payload.growing_area.country,
                 "created_by": "JP",
                 "created_time": current_time,
                 "updated_by": "JP",
                 "updated_time": current_time,
                 "status": payload.growing_area.ga_status,
-                "region": payload.plant.region_id,  # Assuming you want to use the region_id from the plant part
+                "region": payload.plant.region_id, 
                 "growing_area_desc": payload.growing_area.ga_desc,
                 "fresh_period_start": payload.growing_area.fp_start,
                 "fresh_period_end": payload.growing_area.fp_end,
@@ -112,7 +112,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
                 "fresh_week_end": payload.growing_area.fw_end,
                 "storage_period_start": payload.growing_area.sp_start,
                 "storage_week_start": payload.growing_area.sw_start,
-                "growing_area_id": growing_area_id  # Assuming this is the correct source for growing_area_id
+                "growing_area_id": growing_area_id
             }
 
             # Insert into growing_area table
