@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from models import (growing_area, potato_rate_mapping,
                     potato_rate_table_period, potato_rate_table_weekly,
                     potato_rates)
-from schemas import potatoRateMappingPayload
+from schemas import potatoRateMappingPayload,PotatoRatesSchema
+from pydantic import BaseModel
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -130,3 +131,23 @@ async def create_potato_rate_mapping_for_next_year(year: int , db: Session = Dep
 
     db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
+
+def create_potato_rate_in_db(payload: PotatoRatesSchema, db: Session):
+    if isinstance(payload, BaseModel):
+        # Convert Pydantic model to dictionary
+        payload_dict = payload.dict()
+    else:
+        # Assume payload is already a dictionary
+        payload_dict = payload
+    new_record = potato_rates(**payload_dict)
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    return new_record
+
+
+
+@router.post('/create_potato_rates', status_code=status.HTTP_201_CREATED)
+def create_potato_rates(payload: PotatoRatesSchema, db: Session = Depends(get_db)):
+    new_record = create_potato_rate_in_db(payload, db)
+    return {"status": "success", "potato_rate_id": new_record.potato_rate_id}
