@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 import schemas
+from potatorates import create_potato_rate_in_db
+from solidrates import create_solid_rate_in_db
 
 router = APIRouter()
 
@@ -34,8 +36,8 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
         if plant_count>0:
             return {"status":"plant already exists"}
         ga_vsc = False
-        vendor_site_id = payload.psga_map.vendor_site_id
-        count = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).count()
+        vendor_site_code = payload.psga_map.Vendor_Site_Code
+        count = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_CODE == vendor_site_code).count()
 
         current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]  # Or use the appropriate timezone
 
@@ -54,16 +56,46 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
         
         row_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.row_id)).scalar() or 0
         row_id += 1
-        new_mapping = models.PlantSiteGrowingAreaMapping(
-            **payload.psga_map.dict(),
-            row_id=row_id,
-            plant_id=plant_id
-        )
-        db.add(new_mapping)
 
         if count>0:
-            pass
+            growing_area_name = payload.psga_map.growing_area
+            # Fetching the vendor site ID
+            # Fetch the vendor site ID directly
+            vendor_site_id = db.query(models.vendor_site_code.VENDOR_SITE_ID).filter(
+                models.vendor_site_code.VENDOR_SITE_CODE == vendor_site_code
+            ).first()[0]
+
+            # Fetch the growing area ID directly
+            growing_area_id = db.query(models.PlantSiteGrowingAreaMapping.growing_area_id).filter(
+                models.PlantSiteGrowingAreaMapping.Vendor_Site_Code == vendor_site_code,
+                models.growing_area.growing_area_name == growing_area_name
+            ).first()[0]
+
+
+            ## remove vendor_site_id and growing_area_id from payload
+            new_mapping = models.PlantSiteGrowingAreaMapping(
+                **payload.psga_map.dict(),
+                row_id=row_id,
+                plant_id=plant_id,
+                vendor_site_id=vendor_site_id,
+                growing_area_id=growing_area_id
+            )
+            db.add(new_mapping)
         else:
+            growing_area_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.growing_area_id)).scalar() or 0
+            growing_area_id += 1
+            vendor_site_id = db.query(func.max(models.vendor_site_code.VENDOR_SITE_ID)).scalar() or 0
+            vendor_site_id += 1
+
+            new_mapping = models.PlantSiteGrowingAreaMapping(
+                **payload.psga_map.dict(),
+                row_id=row_id,
+                plant_id=plant_id,
+                vendor_site_id=vendor_site_id,
+                growing_area_id=growing_area_id
+            )
+            db.add(new_mapping)
+
             ga_payload = {
                 "growing_area_name": payload.psga_map.growing_area,  # Assuming this is the correct mapping
                 "country": payload.growing_area.country,
@@ -80,7 +112,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
                 "fresh_week_end": payload.growing_area.fw_end,
                 "storage_period_start": payload.growing_area.sp_start,
                 "storage_week_start": payload.growing_area.sw_start,
-                "growing_area_id": payload.psga_map.growing_area_id  # Assuming this is the correct source for growing_area_id
+                "growing_area_id": growing_area_id  # Assuming this is the correct source for growing_area_id
             }
 
             # Insert into growing_area table
@@ -88,7 +120,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
             db.add(new_growing_area)
 
             vsc_payload = {
-                "VENDOR_SITE_ID":payload.psga_map.vendor_site_id,
+                "VENDOR_SITE_ID":vendor_site_id,
                 "VENDOR_SITE_CODE":payload.psga_map.Vendor_Site_Code,
                 "created_by":"SYSTEM",
                 "created_time":current_time,
@@ -101,6 +133,35 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
             new_vendor_site_code = models.vendor_site_code(**vsc_payload)
             db.add(new_vendor_site_code)
             ga_vsc=True
+
+
+            # Potato Rates
+            potato_rate_id = db.query(func.max(models.potato_rates.potato_rate_id)).scalar() or 0
+            potato_rate_id += 1
+            potato_rate_payload = {"potato_rate_id":potato_rate_id,
+                                    "year":datetime.utcnow().year,
+                                    "growing_area_id_old":999,
+                                    "created_time":current_time,
+                                    "created_by":"System",
+                                    "updated_time":current_time,
+                                    "updated_by":"SYSTEM",
+                                    "currency":"USD",
+                                    "growing_area_id":growing_area_id}
+            create_potato_rate_in_db(potato_rate_payload, db)
+
+            ## Solids Ratese
+            solids_rate_id = db.query(func.max(models.solids_rates.solids_rate_id)).scalar() or 0
+            solids_rate_id += 1
+            solids_rate_payload = {"solids_rate_id":solids_rate_id,
+                                    "growing_area_id_old":999,
+                                    "created_time":current_time,
+                                    "created_by":"System",
+                                    "updated_time":current_time,
+                                    "updated_by":"SYSTEM",
+                                    "currency":"USD",
+                                    "growing_area_id":growing_area_id}
+            create_solid_rate_in_db(solids_rate_payload, db)
+            
 
         db.commit()
         db.refresh(new_plant)
