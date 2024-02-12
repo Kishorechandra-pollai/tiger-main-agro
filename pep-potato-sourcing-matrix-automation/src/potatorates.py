@@ -151,3 +151,21 @@ def create_potato_rate_in_db(payload: PotatoRatesSchema, db: Session):
 def create_potato_rates(payload: PotatoRatesSchema, db: Session = Depends(get_db)):
     new_record = create_potato_rate_in_db(payload, db)
     return {"status": "success", "potato_rate_id": new_record.potato_rate_id}
+
+@router.post("/update_potato_rates_with_default_value/{potato_rate_id}/{year}")
+async def update_potato_rates_with_default_value(potato_rate_id:int, year:int, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to update records in potato_rates table."""
+    # Fetch all records from the database
+    all_records = db.query(potato_rates).filter(potato_rates.potato_rate_id ==
+                                               potato_rate_id).first()
+    # Ensure there are records in the database
+    if not all_records:
+        raise HTTPException(status_code=404, detail="No records found in the database")
+
+    for period in range(1,14):
+        for week in range(1,5):
+            new_record = potato_rate_mapping(potato_rate_id = all_records.potato_rate_id,
+                                                period=period, week=week, p_year = year, rate=0)
+            db.add(new_record)
+            db.commit()
+        return {"status": "success"}
