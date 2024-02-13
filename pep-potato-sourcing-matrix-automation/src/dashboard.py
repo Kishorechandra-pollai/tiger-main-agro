@@ -24,9 +24,9 @@ def dashboard_pc_plan_volume_usage_year(year: int, db: Session = Depends(get_db)
                                        pc_plan_volume_usage.week).label("PxW"),
                            pc_plan_volume_usage.week,
                            pc_plan_volume_usage.year,
-                           pc_plan_volume_usage.volume)\
-            .join(models.category, models.category.crop_category == pc_plan_volume_usage.crop_type)\
-            .filter(pc_plan_volume_usage.year == year)\
+                           pc_plan_volume_usage.volume) \
+            .join(models.category, models.category.crop_category == pc_plan_volume_usage.crop_type) \
+            .filter(pc_plan_volume_usage.year == year) \
             .order_by(pc_plan_volume_usage.crop_type,
                       pc_plan_volume_usage.period,
                       pc_plan_volume_usage.week).all()
@@ -61,10 +61,17 @@ def create_new_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # p
     try:
         check_pre_data = db.query(pc_plan_volume_usage).filter(pc_plan_volume_usage.year == year).first()
         if check_pre_data is None:
-            category_table = db.query(models.category.crop_category, models.category.country).all()
+            category_table = db.query(models.category.crop_category,
+                                      models.category.country,
+                                      models.category.category_name).all()
             for crop_category in category_table:
                 period = 1
                 while period <= 13:  # No. of period
+                    index = db.query(models.allocation.value) \
+                        .filter(models.allocation.category_name == crop_category.category_name,
+                                models.allocation.year == year, models.allocation.period == period) \
+                        .first()
+                    # getting index for current year active_allocation table.
                     week = 1
                     if period_week_calc.calculate_week_num(year, int(period)):
                         total_week = 5
@@ -79,11 +86,15 @@ def create_new_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # p
                                     pc_plan_volume_usage.crop_type == crop_category[0],
                                     pc_plan_volume_usage.period == period,
                                     pc_plan_volume_usage.week == compare_week).first()
+                        # Creating next year indexed plan volume
+                        new_volume = (last_year_volume[0] * index.value) / 100
+
                         plan_volume_id = str(crop_category[0]) + "#" + str(period) + "#" + str(week) \
                                          + "#" + str(year)
                         payload = {"plan_volume_id": plan_volume_id, "year": year,
-                                   "crop_type": crop_category[0], "period": period, "week": week,
-                                   "volume": last_year_volume[0]}
+                                   "crop_type": crop_category[0],
+                                   "period": period, "week": week,
+                                   "volume": new_volume}
                         new_pc_volume = pc_plan_volume_usage(**payload)
                         db.add(new_pc_volume)
                         new_records += 1
@@ -93,4 +104,3 @@ def create_new_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # p
         return {"status": "success", "new_records_created": new_records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-
