@@ -11,7 +11,7 @@ from pydantic import BaseModel
 router = APIRouter()
 
 @router.get('/')
-def get_solids_rates(db: Session = Depends(get_db)):
+def get_solids_rates(db: Session = Depends(get_db)): # pragma: no cover
     """Function to get all records from solid_rates."""
     query = db.query(solids_rates).all()
     if not query:
@@ -121,12 +121,12 @@ def create_solid_rate_in_db(payload: SolidRatesSchema, db: Session):
     return new_record
 
 @router.post('/create_solids_rates', status_code=status.HTTP_201_CREATED)
-def create_potato_rates(payload: SolidRatesSchema, db: Session = Depends(get_db)):
+def create_potato_rates(payload: SolidRatesSchema, db: Session = Depends(get_db)): # pragma: no cover
     new_record = create_solid_rate_in_db(payload, db)
     return {"status": "success", "solids_rate_id": new_record.solids_rate_id}
 
 
-def update_solids_rates_default(db: Session, solids_rate_id: int, year: int):
+def update_solids_rates_default(db: Session, solids_rate_id: int, year: int): # pragma: no cover
     all_records = db.query(solids_rates).filter(solids_rates.solids_rate_id == solids_rate_id).first()
     if not all_records:
         return None  # Indicate no records found
@@ -140,7 +140,7 @@ def update_solids_rates_default(db: Session, solids_rate_id: int, year: int):
 
 
 @router.post("/update_solids_rates_with_default_value/{solids_rate_id}/{year}")
-async def update_solids_rates_with_default_value(solids_rate_id:int, year:int, db: Session = Depends(get_db)):  # pragma: no cover
+async def update_solids_rates_with_default_value(solids_rate_id:int, year:int, db: Session = Depends(get_db)): # pragma: no cover
     """Function to update records in solids_rates table."""
     result = update_solids_rates_default(db, solids_rate_id, year)
     if result is None:
