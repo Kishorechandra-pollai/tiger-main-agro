@@ -142,11 +142,17 @@ def get_week_usage_all_data(year: int, db: Session = Depends(get_db)):
                                             "Plant Mtrx data not found")
 
 
-@router.post('/createNextYear/{year}')
+@router.post('/create_next_year_or_update/{year}')
 def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+    """creating next year plan data or updating the plan data based on latest data."""
     try:
-        previous_year = year - 1
+        existing_records = db.query(models.pcusage).filter(models.pcusage.year == year).all()
+        if existing_records is not None:
+            for record in existing_records:
+                db.delete(record)
+            db.commit()
 
+        previous_year = year - 1
         plants = db.query(Plant.plant_id, Plant.region_id,
                           Plant.crop_category_id) \
             .filter(Plant.status == "ACTIVE").all()
@@ -197,9 +203,4 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# @router.post('/update_forecast_actual/{year}')
-# def update_forecast_actual(year: int, db: Session = Depends(get_db)):  # pragma: no cover
-#     crop_categories = db.query(models.category.category_name) \
-#         .filter(models.category.status == 'Active').all()
-#     for crop_category in crop_categories:
-#         index_values = db.query(models.allocation).filter()
+
