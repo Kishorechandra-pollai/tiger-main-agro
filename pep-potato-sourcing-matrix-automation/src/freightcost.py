@@ -2,11 +2,12 @@
 import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from models import (FreightCostMapping, FreightCostRate,
+from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table)
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -152,6 +153,19 @@ def get_rate_growing_area_year(year: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Exception: {e}")
         raise HTTPException(status_code=400, detail=str(e)) from e
+    
+def create_freight_rates_in_db(payload: schemas.FreightCostRatesSchema, db: Session):
+    if isinstance(payload, BaseModel):
+        # Convert Pydantic model to dictionary
+        payload_dict = payload.dict()
+    else:
+        # Assume payload is already a dictionary
+        payload_dict = payload
+    new_record = FreightCostRate(**payload_dict)
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    return new_record
 
 
 @router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
@@ -188,3 +202,40 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
             update_count += 1
     db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
+
+@router.post("/update_freight_rates_with_default_value/{freight_cost_id}/{year}")
+async def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db: Session = Depends(get_db)):
+    # Fetching growing_area_id and country from GrowingArea table based on the provided freight_cost_id
+    country_records = db.query(growing_area.growing_area_id, growing_area.country).join(
+        FreightCostRate, growing_area.growing_area_id == FreightCostRate.growing_area_id
+    ).filter(
+        FreightCostRate.freight_cost_id == freight_cost_id
+    ).first()
+
+    # Ensure country_records is not None
+    if not country_records:
+        raise HTTPException(status_code=404, detail=f"No growing area found for freight_cost_id: {freight_cost_id}")
+
+    # Extracting growing_area_id and country from the result
+    growing_area_id, country = country_records
+
+    # Adjusting country value if needed
+    if country == 'USA':
+        country = 'US'
+
+    # Creating new records in FreightCostMapping table
+    for period in range(1, 14):
+        new_record = FreightCostMapping(
+            freight_cost_id=freight_cost_id,
+            period=period,
+            year=year,
+            rate=0,
+            company_name=country
+        )
+        db.add(new_record)
+
+    db.commit()
+
+    return {"status": "success"}
+
+
