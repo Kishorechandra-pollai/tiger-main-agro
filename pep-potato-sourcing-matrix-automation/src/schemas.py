@@ -253,7 +253,22 @@ class FreightCostMappingSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+class FreightCostRatesSchema(BaseModel):
+    """Class representing schema for freight_cost_rates table"""
+    plant_id:Optional[int] = None
+    growing_area_id: Optional[int] = None
+    vendor_site_id: Optional[int] = None
+    currency: Optional[str] = None
+    comment: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
 class OwnershipSchema(BaseModel):
     """Class representing schema for ownership table"""
     ownership_id: str
