@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 import schemas
-from potatorates import create_potato_rate_in_db
-from solidrates import create_solid_rate_in_db
+from potatorates import create_potato_rate_in_db, update_potato_rates_default
+from solidrates import create_solid_rate_in_db, update_solids_rates_default
 
 router = APIRouter()
 
@@ -161,6 +161,12 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
                                     "currency":"USD",
                                     "growing_area_id":growing_area_id}
             create_solid_rate_in_db(solids_rate_payload, db)
+
+            ## Potato mappings
+            update_potato_rates_default(db,potato_rate_id,datetime.utcnow().year)
+
+            ## Solids mappings
+            update_solids_rates_default(db, solids_rate_id, datetime.utcnow().year)
             
 
         db.commit()

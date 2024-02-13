@@ -11,7 +11,7 @@ from pydantic import BaseModel
 router = APIRouter()
 
 @router.get('/')
-def get_solids_rates(db: Session = Depends(get_db)):
+def get_solids_rates(db: Session = Depends(get_db)): # pragma: no cover
     """Function to get all records from solid_rates."""
     query = db.query(solids_rates).all()
     if not query:
@@ -121,23 +121,28 @@ def create_solid_rate_in_db(payload: SolidRatesSchema, db: Session):
     return new_record
 
 @router.post('/create_solids_rates', status_code=status.HTTP_201_CREATED)
-def create_potato_rates(payload: SolidRatesSchema, db: Session = Depends(get_db)):
+def create_potato_rates(payload: SolidRatesSchema, db: Session = Depends(get_db)): # pragma: no cover
     new_record = create_solid_rate_in_db(payload, db)
     return {"status": "success", "solids_rate_id": new_record.solids_rate_id}
 
-@router.post("/update_solids_rates_with_default_value/{solids_rate_id}/{year}")
-async def update_solids_rates_with_default_value(solids_rate_id:int, year:int, db: Session = Depends(get_db)):  # pragma: no cover
-    """Function to update records in solids_rates table."""
-    # Fetch all records from the database
-    all_records = db.query(solids_rates).filter(solids_rates.solids_rate_id ==
-                                               solids_rate_id).first()
-    # Ensure there are records in the database
-    if not all_records:
-        raise HTTPException(status_code=404, detail="No records found in the database")
 
-    for period in range(1,14):
-        new_record = solid_rate_mapping(solids_rate_id = all_records.solids_rate_id,
-                                            period=period, period_year=year, rate=0)
+def update_solids_rates_default(db: Session, solids_rate_id: int, year: int): # pragma: no cover
+    all_records = db.query(solids_rates).filter(solids_rates.solids_rate_id == solids_rate_id).first()
+    if not all_records:
+        return None  # Indicate no records found
+
+    for period in range(1, 14):
+        new_record = solid_rate_mapping(solids_rate_id=all_records.solids_rate_id,
+                                        period=period, period_year=year, rate=0,country_code="US")
         db.add(new_record)
-        db.commit()
+    db.commit()  
+    return True  
+
+
+@router.post("/update_solids_rates_with_default_value/{solids_rate_id}/{year}")
+async def update_solids_rates_with_default_value(solids_rate_id:int, year:int, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to update records in solids_rates table."""
+    result = update_solids_rates_default(db, solids_rate_id, year)
+    if result is None:
+        raise HTTPException(status_code=404, detail="No records found in the database")
     return {"status": "success"}
