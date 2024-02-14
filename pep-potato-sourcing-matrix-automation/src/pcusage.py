@@ -147,7 +147,7 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
     """creating next year plan data or updating the plan data based on latest data."""
     try:
         existing_records = db.query(models.pcusage).filter(models.pcusage.year == year).all()
-        if existing_records is not None:
+        if len(existing_records) != 0:
             for record in existing_records:
                 db.delete(record)
             db.commit()
