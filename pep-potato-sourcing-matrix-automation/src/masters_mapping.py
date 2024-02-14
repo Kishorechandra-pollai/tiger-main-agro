@@ -7,6 +7,7 @@ import models
 import schemas
 from potatorates import create_potato_rate_in_db, update_potato_rates_default
 from solidrates import create_solid_rate_in_db, update_solids_rates_default
+from freightcost import create_freight_rates_in_db,update_freight_cost_mapping_with_default_value
 
 router = APIRouter()
 
@@ -167,7 +168,23 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
 
             ## Solids mappings
             update_solids_rates_default(db, solids_rate_id, datetime.utcnow().year)
-            
+        
+        freight_cost_id = db.query(func.max(models.FreightCostRate.freight_cost_id)).scalar() or 0
+        freight_cost_id += 1
+        freight_cost_rate_payload = {"freight_cost_id":freight_cost_id,
+                                    "plant_id":plant_id,
+                                    "vendor_site_id":vendor_site_id,
+                                    "comment": "comment",
+                                    "created_time":current_time,
+                                    "created_by":"System",
+                                    "updated_time":current_time,
+                                    "updated_by":"SYSTEM",
+                                    "currency":"USD",
+                                    "growing_area_id":growing_area_id}
+        create_freight_rates_in_db(freight_cost_rate_payload, db)
+
+        ## Freight Cost mappings
+        update_freight_cost_mapping_with_default_value(freight_cost_id,datetime.utcnow().year,db)   
 
         db.commit()
         db.refresh(new_plant)
