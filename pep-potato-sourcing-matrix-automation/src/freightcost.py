@@ -1,7 +1,7 @@
 """Freight Cost Management API"""
 import schemas
 from database import get_db
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table)
@@ -167,6 +167,11 @@ def create_freight_rates_in_db(payload: schemas.FreightCostRatesSchema, db: Sess
     db.refresh(new_record)
     return new_record
 
+@router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
+def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)):
+    new_record = create_freight_rates_in_db(payload, db)
+    return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
+
 
 @router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
 def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
@@ -203,27 +208,18 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
     db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
 
-@router.post("/update_freight_rates_with_default_value/{freight_cost_id}/{year}")
-async def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db: Session = Depends(get_db)):
-    # Fetching growing_area_id and country from GrowingArea table based on the provided freight_cost_id
+def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db: Session = Depends(get_db)):
     country_records = db.query(growing_area.growing_area_id, growing_area.country).join(
         FreightCostRate, growing_area.growing_area_id == FreightCostRate.growing_area_id
     ).filter(
         FreightCostRate.freight_cost_id == freight_cost_id
     ).first()
-
-    # Ensure country_records is not None
     if not country_records:
         raise HTTPException(status_code=404, detail=f"No growing area found for freight_cost_id: {freight_cost_id}")
-
-    # Extracting growing_area_id and country from the result
     growing_area_id, country = country_records
 
-    # Adjusting country value if needed
     if country == 'USA':
         country = 'US'
-
-    # Creating new records in FreightCostMapping table
     for period in range(1, 14):
         new_record = FreightCostMapping(
             freight_cost_id=freight_cost_id,
@@ -236,6 +232,14 @@ async def update_freight_rates_with_default_value(freight_cost_id: int, year: in
 
     db.commit()
 
+    return {"status": "success"}
+
+@router.post("/update_freight_rates_with_default_value/{freight_cost_id}/{year}")
+async def update_freight_cost_mapping_with_default_value(freight_cost_id:int, year:int, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to update records in freight_cost_mapping table."""
+    result = update_freight_rates_with_default_value(freight_cost_id, year,db)
+    if result is None:
+        raise HTTPException(status_code=404, detail="No records found in the database")
     return {"status": "success"}
 
 
