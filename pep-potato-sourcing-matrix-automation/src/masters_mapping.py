@@ -128,7 +128,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
             else:
                 # if new growing area
                 new_growing_area,ga_status = new_ga_potato_solids(db,payload,current_time)
-                growing_area_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.growing_area_id)).scalar() or 0
+                growing_area_id = db.query(func.max(models.growing_area.growing_area_id)).scalar() or 0
                 growing_area_id += 1
 
             # Fetch the vendor site ID directly
@@ -143,7 +143,7 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
                 models.growing_area.growing_area_name == growing_area_name).first()[0]
             else: # if new growing area
                 new_growing_area,ga_status = new_ga_potato_solids(db,payload,current_time)
-                growing_area_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.growing_area_id)).scalar() or 0
+                growing_area_id = db.query(func.max(models.growing_area.growing_area_id)).scalar() or 0
                 growing_area_id += 1
                 
             vendor_site_id = db.query(func.max(models.vendor_site_code.VENDOR_SITE_ID)).scalar() or 0
