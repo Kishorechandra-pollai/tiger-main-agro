@@ -264,3 +264,184 @@ def create_plant(payload: schemas.MastersMappingGrowers, db: Session = Depends(g
         return {"status": "New grower added successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+def psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id,db,current_time):
+    plant_name = payload.plant.plant_name
+    existingRecord = db.query(models.PlantSiteGrowingAreaMapping)\
+                    .filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
+    for ex in existingRecord:
+        db.delete(ex)
+    ## Add in PSGA mapping table
+    new_mapping = models.PlantSiteGrowingAreaMapping(
+        **payload.psga_map.dict(),
+        row_id=row_id,
+        plant_id=plant_id,
+        vendor_site_id=vendor_site_id,
+        growing_area_id=growing_area_id)
+    db.add(new_mapping)
+
+    freight_cost_id = db.query(func.max(models.FreightCostRate.freight_cost_id)).scalar() or 0
+    freight_cost_id += 1
+    freight_cost_rate_payload = {"freight_cost_id":freight_cost_id,
+                                "plant_id":plant_id,
+                                "vendor_site_id":vendor_site_id,
+                                "comment": "comment",
+                                "created_time":current_time,
+                                "created_by":"System",
+                                "updated_time":current_time,
+                                "updated_by":"SYSTEM",
+                                "currency":"USD",
+                                "growing_area_id":growing_area_id}
+    create_freight_rates_in_db(freight_cost_rate_payload, db)
+
+    ## Freight Cost mappings
+    update_freight_rates_with_default_value(freight_cost_id,datetime.utcnow().year,db)
+
+    return new_mapping
+
+@router.get('/get_plant/{plant_name}')
+def get_ownershipMapping(plant_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    plant_details = db.query(models.Plant).filter(models.Plant.plant_name == plant_name,models.Plant.status=="ACTIVE").all()
+    return {"plant_details":plant_details}
+
+@router.post('/edit_ex_plant', status_code=status.HTTP_201_CREATED)
+def create_plant(payload: schemas.MastersMappingExPlant, db: Session = Depends(get_db)): # pragma: no cover
+    ## vendor site code or ga exists? if 
+    ga_status = False
+    ga_vsc = False
+    vendor_site_code = payload.psga_map.Vendor_Site_Code
+    growing_area_name = payload.psga_map.growing_area
+    plant_name = payload.psga_map.plant_name
+
+    plant_id = (
+                db.query(models.Plant.plant_id)
+                .filter(models.Plant.plant_name == plant_name)
+                .first()[0]
+            )
+
+    count_vsc = (db.query(models.vendor_site_code)
+                 .filter(models.vendor_site_code.VENDOR_SITE_CODE == vendor_site_code).count())
+    
+    count_ga = (db.query(models.growing_area)
+               .filter(models.growing_area.growing_area_name == growing_area_name)
+               .count())
+     
+    if count_vsc > 0 and count_ga > 0:
+        count_ex_records = (db.query(models.PlantSiteGrowingAreaMapping).filter(models.PlantSiteGrowingAreaMapping.plant_name == plant_name,
+                                    models.PlantSiteGrowingAreaMapping.Vendor_Site_Code == vendor_site_code,
+                                    models.PlantSiteGrowingAreaMapping.growing_area == growing_area_name).count())
+        if count_ex_records<1:
+            existingRecord = db.query(models.PlantSiteGrowingAreaMapping)\
+                            .filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
+            for ex in existingRecord:
+                db.delete(ex)
+            row_id = (
+                db.query(models.PlantSiteGrowingAreaMapping.row_id)
+                .filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).first()[0]
+            )
+            growing_area_id = (
+                db.query(models.growing_area.growing_area_id)
+                .filter(models.growing_area.growing_area_name == growing_area_name)
+                .first()[0]
+            )
+            vendor_site_id = (
+                db.query(models.vendor_site_code.VENDOR_SITE_ID)
+                .filter(models.vendor_site_code.VENDOR_SITE_CODE == vendor_site_code)
+                .first()[0]
+            )
+            new_mapping = models.PlantSiteGrowingAreaMapping(
+                **payload.psga_map.dict(),
+                row_id=row_id,
+                plant_id=plant_id,
+                vendor_site_id=vendor_site_id,
+                growing_area_id=growing_area_id)
+            db.add(new_mapping)
+            print("added existing plant with new combination to PSGA map")
+        else:
+            return {"status":"Plant with same Growing Area and Vendor Site Already exists"}
+    else:
+        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        row_id = db.query(func.max(models.PlantSiteGrowingAreaMapping.row_id)).scalar() or 0
+        row_id += 1
+        ## existing vendor and new ga
+        if count_vsc>0 and count_ga==0: # Existing vendor site
+            new_growing_area,ga_status = new_ga_potato_solids(db,payload,current_time)
+            growing_area_id = db.query(func.max(models.growing_area.growing_area_id)).scalar() or 0
+
+            # Fetch the vendor site ID directly
+            vendor_site_id = db.query(models.vendor_site_code.VENDOR_SITE_ID).filter(
+                models.vendor_site_code.VENDOR_SITE_CODE == vendor_site_code
+            ).first()[0]
+            new_mapping = psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id, \
+                                              db,current_time)
+            ga_status = True
+
+        #New vsc and existing ga
+        elif count_vsc==0 and count_ga>0:
+            ## existing growing area ; only need to add in psga
+            growing_area_id = db.query(models.growing_area.growing_area_id).filter(
+            models.growing_area.growing_area_name == growing_area_name).first()[0]
+            vendor_site_id = db.query(func.max(models.vendor_site_code.VENDOR_SITE_ID)).scalar() or 0
+            vendor_site_id += 1
+            new_mapping = psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id, \
+                                              db,current_time)
+            vsc_payload = {
+                "VENDOR_SITE_ID":vendor_site_id,
+                "VENDOR_SITE_CODE":payload.psga_map.Vendor_Site_Code,
+                "created_by":"SYSTEM",
+                "created_time":current_time,
+                "status":payload.vsc.vsc_status,
+                "updated_by":"SYSTEM",
+                "updated_time":current_time,
+                "region_id":payload.plant.region_id}
+            
+            # Insert into Vendor Site Code table
+            new_vendor_site_code = models.vendor_site_code(**vsc_payload)
+            db.add(new_vendor_site_code)
+            ga_vsc=True
+
+        # New VSC and GA
+        else:
+            new_growing_area,ga_status = new_ga_potato_solids(db,payload,current_time)
+            growing_area_id = db.query(func.max(models.growing_area.growing_area_id)).scalar() or 0
+            # growing_area_id += 1
+            
+            vendor_site_id = db.query(func.max(models.vendor_site_code.VENDOR_SITE_ID)).scalar() or 0
+            vendor_site_id += 1
+
+            vsc_payload = {
+                "VENDOR_SITE_ID":vendor_site_id,
+                "VENDOR_SITE_CODE":payload.psga_map.Vendor_Site_Code,
+                "created_by":"SYSTEM",
+                "created_time":current_time,
+                "status":payload.vsc.vsc_status,
+                "updated_by":"SYSTEM",
+                "updated_time":current_time,
+                "region_id":payload.plant.region_id}
+            
+            # Insert into Vendor Site Code table
+            new_vendor_site_code = models.vendor_site_code(**vsc_payload)
+            db.add(new_vendor_site_code)
+            new_mapping = psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id, \
+                                              db,current_time)
+            ga_vsc=True
+            ga_status = True
+
+    db.commit()
+    if not ga_vsc and not ga_status:
+        db.refresh(new_mapping)
+        return {"status":"Successfully updated the existing plant with modified Growing Area and Vendor Site"}
+    elif ga_vsc==True and ga_status==False:
+        db.refresh(new_mapping)
+        db.refresh(new_vendor_site_code)
+        return {"status":"Successfully updated the existing plant with new Vendor Site"}
+    elif ga_vsc==False and ga_status==True:
+        db.refresh(new_mapping)
+        db.refresh(new_growing_area)
+        return {"status":"Successfully updated the existing plant with new Growing Area"}
+    else:
+        db.refresh(new_mapping)
+        db.refresh(new_growing_area)
+        db.refresh(new_vendor_site_code)
+        return {"status":"Successfully updated the existing plant with new Vendor Site and Growing Area"}
+    
