@@ -244,7 +244,7 @@ def Create_new_Ownership(year: int, db: Session = Depends(get_db)):
 def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db)):
     try:
         min_crop_year = db.query(func.min(models.View_total_sum_growing_area.columns.crop_year)) \
-            .filter(models.View_total_sum_growing_area.STORAGE_period == crop_year).scalar()
+            .filter(models.View_total_sum_growing_area.columns.STORAGE_period == crop_year).scalar()
         view_data = db.query(models.View_total_sum_growing_area)\
             .filter(models.View_total_sum_growing_area.columns.STORAGE_period == crop_year,
                     models.View_total_sum_growing_area.columns.crop_year == min_crop_year)\
