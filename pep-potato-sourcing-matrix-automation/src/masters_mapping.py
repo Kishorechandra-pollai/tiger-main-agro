@@ -301,8 +301,14 @@ def psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id,d
 
 @router.get('/get_plant/{plant_name}')
 def get_ownershipMapping(plant_name: str, db: Session = Depends(get_db)): # pragma: no cover
-    plant_details = db.query(models.Plant).filter(models.Plant.plant_name == plant_name,models.Plant.status=="ACTIVE").all()
-    return {"plant_details":plant_details}
+    plant_details = db.query(models.Plant).filter(models.Plant.plant_name == plant_name,models.Plant.status=="ACTIVE").first()
+    vsc_ga = db.query(models.PlantSiteGrowingAreaMapping.growing_area,models.PlantSiteGrowingAreaMapping.Vendor_Site_Code,
+                      models.PlantSiteGrowingAreaMapping.growing_area_id,
+                      models.PlantSiteGrowingAreaMapping.vendor_site_id).filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).first()
+    combined_result = {
+            "plant_detail": plant_details if plant_details else "No plant detail found",
+            "vsc_ga": vsc_ga if vsc_ga else "No VSC and GA mapping found"}
+    return {"plant_details":combined_result}
 
 @router.post('/edit_ex_plant', status_code=status.HTTP_201_CREATED)
 def create_plant(payload: schemas.MastersMappingExPlant, db: Session = Depends(get_db)): # pragma: no cover
