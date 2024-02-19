@@ -262,6 +262,8 @@ def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db))
                     ).update({models.Ownership.contract_erp_value: data.totalsum})
 
                 db.commit()
-        return {"message": f"Total Contract ERP updated for {crop_year} in Ownership table"}
+            return {"message": f"Total Contract ERP updated for {crop_year} in Ownership table"}
+        else:
+            return {"message": f"Total Contract ERP is not available for {crop_year} in erp table."}
     except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
