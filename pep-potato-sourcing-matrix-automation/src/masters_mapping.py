@@ -1,6 +1,6 @@
 from datetime import date,datetime
 from fastapi import Depends, HTTPException, status, APIRouter
-from sqlalchemy import func,exists
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
 import models
@@ -30,9 +30,6 @@ def get_plantMtrx_by_region(db: Session = Depends(get_db)): # pragma: no cover
 def new_ga_potato_solids(db,payload,current_time):
     growing_area_id = db.query(func.max(models.growing_area.growing_area_id)).scalar() or 0
     growing_area_id += 1
-    # region = payload.psga_map.region
-    # region_id = db.query(models.region.region_id) \
-    #             .filter(models.region.status == "ACTIVE",models.region.region_name==region).first()[0]
     ga_payload = {
         "growing_area_name": payload.psga_map.growing_area, 
         "country": payload.growing_area.country,
@@ -301,12 +298,6 @@ def psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id,d
     update_freight_rates_with_default_value(freight_cost_id,datetime.utcnow().year,db)
 
     return new_mapping
-    
-
-
-## Existing plant
-    # 1. create an endpoint which accepts plant_name and returns the current growing area and VSC
-    # 2. a) if new ga and 
 
 @router.get('/get_plant/{plant_name}')
 def get_ownershipMapping(plant_name: str, db: Session = Depends(get_db)): # pragma: no cover
@@ -336,24 +327,9 @@ def create_plant(payload: schemas.MastersMappingExPlant, db: Session = Depends(g
                .count())
      
     if count_vsc > 0 and count_ga > 0:
-        ## check if the combination exists in pgamap
-        # exists_query = db.query(models.PlantSiteGrowingAreaMapping).filter(
-        #     models.PlantSiteGrowingAreaMapping.plant_name == plant_name,
-        #     models.PlantSiteGrowingAreaMapping.Vendor_Site_Code == vendor_site_code,
-        #     models.PlantSiteGrowingAreaMapping.growing_area == growing_area_name
-        # ).exists()
-        # exists_clause = exists().where(models.PlantSiteGrowingAreaMapping.plant_name == plant_name,
-        #                             models.PlantSiteGrowingAreaMapping.Vendor_Site_Code == vendor_site_code,
-        #                             models.PlantSiteGrowingAreaMapping.growing_area == growing_area_name)
         count_ex_records = (db.query(models.PlantSiteGrowingAreaMapping).filter(models.PlantSiteGrowingAreaMapping.plant_name == plant_name,
                                     models.PlantSiteGrowingAreaMapping.Vendor_Site_Code == vendor_site_code,
                                     models.PlantSiteGrowingAreaMapping.growing_area == growing_area_name).count())
-        # print(exists_clause)
-
-        # Execute the query
-        # record_exists = db.query(exists_clause).scalar()
-        # print(record_exists)
-        # if not record_exists:
         if count_ex_records<1:
             existingRecord = db.query(models.PlantSiteGrowingAreaMapping)\
                             .filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
