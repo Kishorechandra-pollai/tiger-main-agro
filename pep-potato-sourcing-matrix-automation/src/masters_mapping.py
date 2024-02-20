@@ -265,6 +265,56 @@ def create_plant(payload: schemas.MastersMappingGrowers, db: Session = Depends(g
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
+@router.get('/get_plants')
+def get_plants(db: Session = Depends(get_db)):
+    all_plants = db.query(models.Plant).all()
+    return {"plants":all_plants}
+
+@router.get('/get_growers')
+def get_growers(db: Session = Depends(get_db)):
+    all_growers = db.query(models.growers).all()
+    return {"growers":all_growers}
+    
+@router.post('/update_grower_mapping', status_code=status.HTTP_201_CREATED)
+def update_grower_mapping(payload: schemas.MastersMappingExGrowers, db: Session = Depends(get_db)): # pragma: no cover
+    grower_name = payload.growers_gr_area.grower_name
+    growing_area_name = payload.growers_gr_area.growing_area_name
+    count_gr_area = (db.query(models.preferred_grower).
+                    filter(models.preferred_grower.growing_area_name==growing_area_name,
+                           models.preferred_grower.grower_name==grower_name).count())
+    if count_gr_area>0:
+        return {"status":"Grower - growing area mapping already exists"}
+    existingRecord = db.query(models.preferred_grower)\
+                            .filter(models.preferred_grower.grower_name==grower_name).all()
+    for ex in existingRecord:
+        db.delete(ex)
+    row_id = (db.query(models.preferred_grower.row_id)
+                .filter(models.preferred_grower.grower_name==grower_name).first()[0])
+    grower_id = (db.query(models.preferred_grower.grower_id)
+                .filter(models.preferred_grower.grower_name==grower_name).first()[0])
+    growing_area_id = (db.query(models.growing_area.growing_area_id).
+                       filter(models.growing_area.growing_area_name==growing_area_name))
+    new_gr_mapping = models.preferred_grower(
+            **payload.gr_area_map.dict(),
+            row_id=row_id,
+            grower_id=grower_id,
+            growing_area_id=growing_area_id,
+            grower_name=payload.growers.grower_name
+        )
+    db.add(new_gr_mapping)
+    db.commit()
+    db.refresh(new_gr_mapping)
+    return {"status":"Changed the growing area of the grower successfully"}
+    
+@router.get('/get_grower/{grower_name}')
+def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    grower_details = db.query(models.growers).filter(models.growers.grower_name == grower_name,models.growers.status=="ACTIVE").first()
+    grower_growing_area = db.query(models.preferred_grower).filter(models.preferred_grower.grower_name==grower_name).first()
+    combined_result = {
+            "grower_detail": grower_details if grower_details else "No plant detail found",
+            "grower_growing_area": grower_growing_area if grower_growing_area else "No VSC and GA mapping found"}
+    return {"details":combined_result}
+    
 def psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id,db,current_time):
     plant_name = payload.plant.plant_name
     existingRecord = db.query(models.PlantSiteGrowingAreaMapping)\
@@ -300,7 +350,7 @@ def psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id,d
     return new_mapping
 
 @router.get('/get_plant/{plant_name}')
-def get_ownershipMapping(plant_name: str, db: Session = Depends(get_db)): # pragma: no cover
+def get_plant(plant_name: str, db: Session = Depends(get_db)): # pragma: no cover
     plant_details = db.query(models.Plant).filter(models.Plant.plant_name == plant_name,models.Plant.status=="ACTIVE").first()
     vsc_ga = db.query(models.PlantSiteGrowingAreaMapping.growing_area,models.PlantSiteGrowingAreaMapping.Vendor_Site_Code,
                       models.PlantSiteGrowingAreaMapping.growing_area_id,
@@ -308,10 +358,10 @@ def get_ownershipMapping(plant_name: str, db: Session = Depends(get_db)): # prag
     combined_result = {
             "plant_detail": plant_details if plant_details else "No plant detail found",
             "vsc_ga": vsc_ga if vsc_ga else "No VSC and GA mapping found"}
-    return {"plant_details":combined_result}
+    return {"details":combined_result}
 
 @router.post('/edit_ex_plant', status_code=status.HTTP_201_CREATED)
-def create_plant(payload: schemas.MastersMappingExPlant, db: Session = Depends(get_db)): # pragma: no cover
+def edit_ex_plant(payload: schemas.MastersMappingExPlant, db: Session = Depends(get_db)): # pragma: no cover
     ## vendor site code or ga exists? if 
     ga_status = False
     ga_vsc = False
