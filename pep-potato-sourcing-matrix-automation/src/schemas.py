@@ -110,6 +110,13 @@ class MastersMappingGrowers(BaseModel): # pragma: no cover
     growers: GrowersDummy
     gr_area_map: GrAreaMapDummy
 
+class ExGrowersDummy(BaseModel): # pragma: no cover
+    grower_name: str
+    growing_area_name: str
+
+class MastersMappingExGrowers(BaseModel): # pragma: no cover
+    growers_gr_area: ExGrowersDummy
+
 
 class GrowerSchema(BaseModel):
     grower_name: str
