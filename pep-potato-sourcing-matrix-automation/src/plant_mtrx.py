@@ -381,12 +381,13 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
             """Insert new actual volumes in Plant Matrix."""
             period_value = current_period - 1
             while period_value <= current_period:
-                week_value = 1  # 6,7,8,9 ,, 10
+                week_value = 1
                 while period_value * 5 + week_value <= current_period * 5 + current_week:
                     actual_data_current_week = db.query(models.View_plant_matrix_actual) \
                         .filter(models.View_plant_matrix_actual.columns.p_year == today_date.year,
                                 models.View_plant_matrix_actual.columns.period_num == period_value,
-                                models.View_plant_matrix_actual.columns.week_num == week_value) \
+                                models.View_plant_matrix_actual.columns.week_num == week_value,
+                                models.View_plant_matrix_actual.columns.region_id != 14) \
                         .all()
                     if not actual_data_current_week:
                         week_value += 1
@@ -439,7 +440,8 @@ def temp_insert_week_wise(period: int, week: int, year: int,
         actual_data_current_week = db.query(models.View_plant_matrix_actual) \
             .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
                     models.View_plant_matrix_actual.columns.week_num == current_week,
-                    models.View_plant_matrix_actual.columns.p_year == year).all()
+                    models.View_plant_matrix_actual.columns.p_year == year,
+                    models.View_plant_matrix_actual.columns.region_id != 14).all()
         for item in actual_data_current_week:
             new_record_count += 1
             crop_type, crop_year = func_getcrop_type(period_value, current_week, year,
@@ -489,7 +491,8 @@ def prev_year_insert(year: int, db: Session = Depends(get_db)):  # pragma: no co
                 actual_data_current_week = db.query(models.View_plant_matrix_actual) \
                     .filter(models.View_plant_matrix_actual.columns.period_num == period_value,
                             models.View_plant_matrix_actual.columns.week_num == current_week,
-                            models.View_plant_matrix_actual.columns.p_year == year).all()
+                            models.View_plant_matrix_actual.columns.p_year == year,
+                            models.View_plant_matrix_actual.columns.region_id != 14).all()
                 for item in actual_data_current_week:
                     new_record_count += 1
                     crop_type, crop_year = func_getcrop_type(period_value, current_week, year,
