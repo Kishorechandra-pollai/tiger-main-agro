@@ -285,25 +285,14 @@ def update_grower_mapping(payload: schemas.MastersMappingExGrowers, db: Session 
     count_gr_area = (db.query(models.preferred_grower).
                     filter(models.preferred_grower.growing_area_name==new_growing_area_name,
                            models.preferred_grower.grower_name==grower_name).count())
-    print("gr area count",count_gr_area)
     if count_gr_area>0:
         return {"status":"Grower - growing area mapping already exists"}
     existingRecord = db.query(models.preferred_grower)\
                             .filter(models.preferred_grower.grower_name==grower_name,
                                     models.preferred_grower.growing_area_name==ex_growing_area_name).all()
-    print("ex records -> ",existingRecord)
-    # row_id = (db.query(models.preferred_grower.row_id)
-    #             .filter(models.preferred_grower.grower_name==grower_name,
-    #                     models.preferred_grower.growing_area_name==ex_growing_area_name).first()[0])
-    # grower_id = (db.query(models.growers.grower_id)
-    #             .filter(models.growers.grower_name==grower_name).first()[0])
-    # growing_area_id = (db.query(models.growing_area.growing_area_id).
-    #                    filter(models.growing_area.growing_area_name==new_growing_area_name).first()[0])
     if not existingRecord:
         raise HTTPException(status_code=404, detail="Existing record not found")
-    print("before delete")
     for ex in existingRecord:
-        print(ex)
         db.delete(ex)
     row_id = (db.query(models.preferred_grower.row_id)
                 .filter(models.preferred_grower.grower_name==grower_name).first()[0])
@@ -318,14 +307,10 @@ def update_grower_mapping(payload: schemas.MastersMappingExGrowers, db: Session 
             "row_id": row_id,
             "growing_area_id": growing_area_id
         }
-    print("after delete and generated payload")
     new_gr_mapping = models.preferred_grower(**final_payload)
     db.add(new_gr_mapping)
-    print("after add")
     db.commit()
-    print("after commit")
     db.refresh(new_gr_mapping)
-    print("after refresh")
     return {"status":"Changed the growing area of the grower successfully"}
     
 @router.get('/get_grower/{grower_name}/{growing_area_name}')
