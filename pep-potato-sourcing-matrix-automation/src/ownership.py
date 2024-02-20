@@ -244,7 +244,7 @@ def Create_new_Ownership(year: int, db: Session = Depends(get_db)):
 def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db)):
     try:
         min_crop_year = db.query(func.min(models.View_total_sum_growing_area.columns.crop_year)) \
-            .filter(models.View_total_sum_growing_area.STORAGE_period == crop_year).scalar()
+            .filter(models.View_total_sum_growing_area.columns.STORAGE_period == crop_year).scalar()
         view_data = db.query(models.View_total_sum_growing_area)\
             .filter(models.View_total_sum_growing_area.columns.STORAGE_period == crop_year,
                     models.View_total_sum_growing_area.columns.crop_year == min_crop_year)\
@@ -262,6 +262,8 @@ def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db))
                     ).update({models.Ownership.contract_erp_value: data.totalsum})
 
                 db.commit()
-        return {"message": f"Total Contract ERP updated for {crop_year} in Ownership table"}
+            return {"message": f"Total Contract ERP updated for {crop_year} in Ownership table"}
+        else:
+            return {"message": f"Total Contract ERP is not available for {crop_year} in erp table."}
     except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
