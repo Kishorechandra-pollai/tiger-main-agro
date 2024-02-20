@@ -270,50 +270,89 @@ def get_plants(db: Session = Depends(get_db)):
     all_plants = db.query(models.Plant).all()
     return {"plants":all_plants}
 
-@router.get('/get_growers')
+@router.get('/get_grower_growing_area')
 def get_growers(db: Session = Depends(get_db)):
-    all_growers = db.query(models.growers).all()
-    return {"growers":all_growers}
+    all_grower_growing_area = (db.query(models.preferred_grower.grower_name,
+                                        models.preferred_grower.growing_area_name).
+                                        distinct().all())
+    return {"growers":all_grower_growing_area}
     
 @router.post('/update_grower_mapping', status_code=status.HTTP_201_CREATED)
 def update_grower_mapping(payload: schemas.MastersMappingExGrowers, db: Session = Depends(get_db)): # pragma: no cover
     grower_name = payload.growers_gr_area.grower_name
-    growing_area_name = payload.growers_gr_area.growing_area_name
+    ex_growing_area_name = payload.growers_gr_area.ex_growing_area_name
+    new_growing_area_name = payload.growers_gr_area.new_growing_area_name
     count_gr_area = (db.query(models.preferred_grower).
-                    filter(models.preferred_grower.growing_area_name==growing_area_name,
+                    filter(models.preferred_grower.growing_area_name==new_growing_area_name,
                            models.preferred_grower.grower_name==grower_name).count())
+    print("gr area count",count_gr_area)
     if count_gr_area>0:
         return {"status":"Grower - growing area mapping already exists"}
     existingRecord = db.query(models.preferred_grower)\
-                            .filter(models.preferred_grower.grower_name==grower_name).all()
+                            .filter(models.preferred_grower.grower_name==grower_name,
+                                    models.preferred_grower.growing_area_name==ex_growing_area_name).all()
+    print("ex records -> ",existingRecord)
+    # row_id = (db.query(models.preferred_grower.row_id)
+    #             .filter(models.preferred_grower.grower_name==grower_name,
+    #                     models.preferred_grower.growing_area_name==ex_growing_area_name).first()[0])
+    # grower_id = (db.query(models.growers.grower_id)
+    #             .filter(models.growers.grower_name==grower_name).first()[0])
+    # growing_area_id = (db.query(models.growing_area.growing_area_id).
+    #                    filter(models.growing_area.growing_area_name==new_growing_area_name).first()[0])
+    if not existingRecord:
+        raise HTTPException(status_code=404, detail="Existing record not found")
+    print("before delete")
     for ex in existingRecord:
+        print(ex)
         db.delete(ex)
     row_id = (db.query(models.preferred_grower.row_id)
                 .filter(models.preferred_grower.grower_name==grower_name).first()[0])
     grower_id = (db.query(models.preferred_grower.grower_id)
                 .filter(models.preferred_grower.grower_name==grower_name).first()[0])
     growing_area_id = (db.query(models.growing_area.growing_area_id).
-                       filter(models.growing_area.growing_area_name==growing_area_name))
-    new_gr_mapping = models.preferred_grower(
-            **payload.gr_area_map.dict(),
-            row_id=row_id,
-            grower_id=grower_id,
-            growing_area_id=growing_area_id,
-            grower_name=payload.growers.grower_name
-        )
+                       filter(models.growing_area.growing_area_name==new_growing_area_name).first()[0])
+    final_payload = {
+            "grower_name": grower_name,
+            "growing_area_name": new_growing_area_name,
+            "grower_id": grower_id,
+            "row_id": row_id,
+            "growing_area_id": growing_area_id
+        }
+    print("after delete and generated payload")
+    new_gr_mapping = models.preferred_grower(**final_payload)
     db.add(new_gr_mapping)
+    print("after add")
     db.commit()
+    print("after commit")
     db.refresh(new_gr_mapping)
+    print("after refresh")
     return {"status":"Changed the growing area of the grower successfully"}
     
-@router.get('/get_grower/{grower_name}')
-def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cover
-    grower_details = db.query(models.growers).filter(models.growers.grower_name == grower_name,models.growers.status=="ACTIVE").first()
-    grower_growing_area = db.query(models.preferred_grower).filter(models.preferred_grower.grower_name==grower_name).first()
+@router.get('/get_grower/{grower_name}/{growing_area_name}')
+def get_plant(grower_name: str,growing_area_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    # grower_details = db.query(models.growers).filter(models.growers.grower_name == grower_name,models.growers.status=="ACTIVE").first()
+    # grower_growing_area = (db.query(models.preferred_grower).filter(models.preferred_grower.grower_name==grower_name,
+    #                                                                models.preferred_grower.growing_area_name==growing_area_name).first())
+    # combined_result = {
+    #         "grower_detail": grower_details if grower_details else "No plant detail found",
+    #         "grower_growing_area": grower_growing_area if grower_growing_area else "No VSC and GA mapping found"}
+    # return {"details":combined_result}
+    grower_details = db.query(models.growers).filter(
+        models.growers.grower_name == grower_name,
+        models.growers.status == "ACTIVE"
+    ).first()
+
+    grower_growing_area = db.query(models.preferred_grower).filter(
+        models.preferred_grower.grower_name == grower_name,
+        models.preferred_grower.growing_area_name == growing_area_name
+    ).first()
+
     combined_result = {
-            "grower_detail": grower_details if grower_details else "No plant detail found",
-            "grower_growing_area": grower_growing_area if grower_growing_area else "No VSC and GA mapping found"}
-    return {"details":combined_result}
+        "grower_detail": grower_details if grower_details else "No grower detail found",
+        "grower_growing_area": grower_growing_area if grower_growing_area else "No grower growing area mapping found"
+    }
+
+    return {"details": combined_result}
     
 def psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id,db,current_time):
     plant_name = payload.plant.plant_name
