@@ -104,7 +104,7 @@ class GrowersDummy(BaseModel): # pragma: no cover
     grower_abbreviation_code: str
 
 class GrAreaMapDummy(BaseModel): # pragma: no cover
-    growing_area_name: str
+    growing_area_name: List[str]
 
 class MastersMappingGrowers(BaseModel): # pragma: no cover
     growers: GrowersDummy
