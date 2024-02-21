@@ -240,24 +240,21 @@ def create_plant(payload: schemas.MastersMappingGrowers, db: Session = Depends(g
         )
         db.add(new_grower)
 
-        growing_area_name = payload.gr_area_map.growing_area_name
-        count = db.query(models.preferred_grower).filter(models.preferred_grower.growing_area_name == growing_area_name).count()
-        if count>0:
-            growing_area_id = db.query(models.preferred_grower.growing_area_id).filter(models.preferred_grower.growing_area_name == growing_area_name).first()[0]
-        else:
-            growing_area_id = db.query(func.max(models.preferred_grower.growing_area_id)).scalar() or 0
-            growing_area_id += 1
-        
-        row_id = db.query(func.max(models.preferred_grower.row_id)).scalar() or 0
-        row_id += 1
-        new_gr_mapping = models.preferred_grower(
-            **payload.gr_area_map.dict(),
-            row_id=row_id,
-            grower_id=grower_id,
-            growing_area_id=growing_area_id,
-            grower_name=payload.growers.grower_name
-        )
-        db.add(new_gr_mapping)
+        for growing_area_name in payload.gr_area_map.growing_area_name:
+            count = db.query(models.preferred_grower).filter(models.preferred_grower.growing_area_name == growing_area_name).count()
+            if count>0:
+                growing_area_id = db.query(models.growing_area.growing_area_id).filter(models.growing_area.growing_area_name == growing_area_name).first()[0]
+            else:
+                growing_area_id = db.query(func.max(models.growing_area.growing_area_id)).scalar() or 0
+                growing_area_id += 1
+            new_gr_mapping = models.preferred_grower(
+                grower_id=grower_id,
+                grower_name=grower_name,
+                growing_area_name=growing_area_name,
+                growing_area_id=growing_area_id
+                # Additional fields as required
+            )
+            db.add(new_gr_mapping)
         db.commit()
         db.refresh(new_grower)
         db.refresh(new_gr_mapping)
