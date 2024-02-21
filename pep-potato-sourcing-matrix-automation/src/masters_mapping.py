@@ -291,8 +291,8 @@ def update_grower_mapping(payload: schemas.MastersMappingExGrowers, db: Session 
         raise HTTPException(status_code=404, detail="Existing record not found")
     for ex in existingRecord:
         db.delete(ex)
-    row_id = (db.query(models.preferred_grower.row_id)
-                .filter(models.preferred_grower.grower_name==grower_name).first()[0])
+    # row_id = (db.query(models.preferred_grower.row_id)
+    #             .filter(models.preferred_grower.grower_name==grower_name).first()[0])
     grower_id = (db.query(models.preferred_grower.grower_id)
                 .filter(models.preferred_grower.grower_name==grower_name).first()[0])
     growing_area_id = (db.query(models.growing_area.growing_area_id).
@@ -301,7 +301,7 @@ def update_grower_mapping(payload: schemas.MastersMappingExGrowers, db: Session 
             "grower_name": grower_name,
             "growing_area_name": new_growing_area_name,
             "grower_id": grower_id,
-            "row_id": row_id,
+            # "row_id": row_id,
             "growing_area_id": growing_area_id
         }
     new_gr_mapping = models.preferred_grower(**final_payload)
