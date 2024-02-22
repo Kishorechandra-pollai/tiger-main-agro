@@ -16,6 +16,10 @@ class PlantSchema(BaseModel):
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
 
+class ExPlantSchemaDummy(BaseModel): # pragma: no cover
+    plant_name: str
+    region_id: int
+
 class PlantSchemaDummy(BaseModel): # pragma: no cover
     # plant_id: int
     plant_code: str
@@ -62,6 +66,12 @@ class MastersMapping(BaseModel): # pragma: no cover
     growing_area: GrowingAreaDummy
     vsc: VendorSiteCodeDummy
 
+class MastersMappingExPlant(BaseModel):
+    plant: ExPlantSchemaDummy
+    psga_map: PlantSiteGrowingAreaMappingDummy
+    growing_area: GrowingAreaDummy
+    vsc: VendorSiteCodeDummy
+
 class GrowingAreaSchema(BaseModel):
     growing_area_id: int
     growing_area_name: str
@@ -94,11 +104,19 @@ class GrowersDummy(BaseModel): # pragma: no cover
     grower_abbreviation_code: str
 
 class GrAreaMapDummy(BaseModel): # pragma: no cover
-    growing_area_name: str
+    growing_area_name: List[str]
 
 class MastersMappingGrowers(BaseModel): # pragma: no cover
     growers: GrowersDummy
     gr_area_map: GrAreaMapDummy
+
+class ExGrowersDummy(BaseModel): # pragma: no cover
+    grower_name: str
+    ex_growing_area_name: str
+    new_growing_area_name: str
+
+class MastersMappingExGrowers(BaseModel): # pragma: no cover
+    growers_gr_area: ExGrowersDummy
 
 
 class GrowerSchema(BaseModel):

@@ -111,6 +111,8 @@ def update_contract_erp(crop_year: str, db: Session = Depends(get_db)):
                     new_record = models.OwnershipGrowerGrowing(**payload)
                     db.add(new_record)
                 db.commit()
-        return {"message": f"Contract ERP updated for {crop_year}"}
+            return {"message": f"Contract ERP updated for {crop_year}"}
+        else:
+            return {"message": f"Contract grower level ERP is not available for {crop_year}."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
