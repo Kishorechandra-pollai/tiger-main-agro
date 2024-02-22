@@ -35,10 +35,10 @@ def get_solid_rate_mapping(year: str, db: Session = Depends(get_db)):
     query = db.query(solid_rate_mapping).join(solids_rates,
                                         solids_rates.solids_rate_id ==
                                         solid_rate_mapping.solids_rate_id
-                                        ).filter(solids_rates.year==year).all()
+                                        ).filter(solid_rate_mapping.period_year==year).all()
     if not query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="No potato_rate_mapping  found")
+                            detail="No solid_rate_mapping  found")
     return {"status": "success", "data": query}
 
 @router.post("/update_solid_rates_records/")
