@@ -2,10 +2,11 @@
 import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table)
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -115,6 +116,7 @@ def update_freight_mapping(
     return records_to_update
 
 
+
 @router.get('/freight_cost_period_view/{year}/{country}')
 def freight_cost_period_view_year(year:int,country:str, db: Session = Depends(get_db)):
     """Function to fetch all records from freight period view table """
@@ -166,6 +168,11 @@ def create_freight_rates_in_db(payload: schemas.FreightCostRatesSchema, db: Sess
     db.commit()
     db.refresh(new_record)
     return new_record
+
+@router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
+def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)):
+    new_record = create_freight_rates_in_db(payload, db)
+    return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
 
 @router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
 def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)):
@@ -243,3 +250,84 @@ async def update_freight_cost_mapping_with_default_value(freight_cost_id:int, ye
     return {"status": "success"}
 
 
+@router.get("/fetch_freight_records/{year}")
+async def fetch_records(
+    year: int,
+    db: Session = Depends(get_db)
+):
+    try:
+        records = (
+            db.query(
+                FreightCostMapping.freight_cost_id,
+                FreightCostMapping.year,
+                FreightCostMapping.period,
+                func.concat("P", FreightCostMapping.period).label("period_with_P"),
+                FreightCostMapping.rate,
+                FreightCostMapping.company_name,
+                PlantSiteGrowingAreaMapping.growing_area_id,
+                PlantSiteGrowingAreaMapping.vendor_site_id,
+                PlantSiteGrowingAreaMapping.plant_id,
+                PlantSiteGrowingAreaMapping.plant_name,
+                PlantSiteGrowingAreaMapping.growing_area,
+                PlantSiteGrowingAreaMapping.Vendor_Site_Code,
+            )
+            .select_from(FreightCostMapping)
+            .join(
+                FreightCostRate,
+                and_(
+                    FreightCostRate.freight_cost_id == FreightCostMapping.freight_cost_id,
+                )
+            )
+            .join(
+                PlantSiteGrowingAreaMapping,
+                and_(
+                    FreightCostRate.growing_area_id == PlantSiteGrowingAreaMapping.growing_area_id,
+                    FreightCostRate.plant_id == PlantSiteGrowingAreaMapping.plant_id,
+                    FreightCostRate.vendor_site_id == PlantSiteGrowingAreaMapping.vendor_site_id,
+                )
+            )
+            .filter(FreightCostMapping.year == year)
+            .all()
+        )
+
+        if not records:
+            return {"status": "success", "data": []}
+
+        consolidated_data = []
+        for record in records:
+            (
+                freight_cost_id,
+                record_year,
+                record_period,
+                period_with_P,
+                rate,
+                company_name,
+                growing_area_id,
+                vendor_site_id,
+                plant_id,
+                plant_name,
+                growing_area,
+                Vendor_Site_Code,
+            ) = record
+
+            consolidated_data.append(
+                {
+                    "freight_cost_id": freight_cost_id,
+                    "year": record_year,
+                    "period": record_period,
+                    "period_with_P":period_with_P,
+                    "rate": rate,
+                    "company_name": company_name,
+                    "growing_area_id": growing_area_id,
+                    "vendor_site_id": vendor_site_id,
+                    "plant_id": plant_id,
+                    "plant_name": plant_name,
+                    "growing_area": growing_area,
+                    "Vendor_Site_Code": Vendor_Site_Code,
+                }
+            )
+
+        return {"status": "success", "data": consolidated_data}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
