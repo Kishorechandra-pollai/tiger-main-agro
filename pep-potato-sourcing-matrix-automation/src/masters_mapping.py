@@ -264,8 +264,13 @@ def create_plant(payload: schemas.MastersMappingGrowers, db: Session = Depends(g
     
 @router.get('/get_plants')
 def get_plants(db: Session = Depends(get_db)):
-    all_plants = db.query(models.Plant).all()
+    all_plants = db.query(models.Plant).filter(models.Plant.status=="ACTIVE").distinct().all()
     return {"plants":all_plants}
+
+@router.get('/get_growers')
+def get_growers(db: Session = Depends(get_db)):
+    all_growers = db.query(models.growers).filter(models.growers.status=="ACTIVE").distinct().all()
+    return {"growers":all_growers}
 
 @router.get('/get_grower_growing_area')
 def get_growers(db: Session = Depends(get_db)):
