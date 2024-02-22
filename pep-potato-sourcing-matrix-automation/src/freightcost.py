@@ -2,6 +2,7 @@
 import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table)
@@ -167,6 +168,11 @@ def create_freight_rates_in_db(payload: schemas.FreightCostRatesSchema, db: Sess
     db.commit()
     db.refresh(new_record)
     return new_record
+
+@router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
+def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)):
+    new_record = create_freight_rates_in_db(payload, db)
+    return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
 
 @router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
 def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)):
