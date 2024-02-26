@@ -26,7 +26,7 @@ class PlantSchemaDummy(BaseModel): # pragma: no cover
     plant_name: str
     company_name: Optional[str] = None
     region_id: int
-    status: str
+    # status: str
     crop_category_id: Optional[int] = None
     class Config:
         orm_mode = True
@@ -71,6 +71,24 @@ class MastersMappingExPlant(BaseModel):
     psga_map: PlantSiteGrowingAreaMappingDummy
     growing_area: GrowingAreaDummy
     vsc: VendorSiteCodeDummy
+
+class GrowingAreaSchemaMasters(BaseModel):
+    # growing_area_id: int
+    growing_area_name: str
+    region: int
+    country: str
+    # status: str
+    growing_area_desc: Optional[str] = None
+    fresh_period_start: Optional[int] = None
+    fresh_week_start: Optional[int] = None
+    fresh_period_end: Optional[int] = None
+    fresh_week_end: Optional[int] = None
+    storage_period_start: Optional[int] = None
+    storage_week_start: Optional[int] = None
+    # created_time: Optional[datetime] = None
+    # updated_time: Optional[datetime] = None
+    # created_by: Optional[str] = None
+    # updated_by: Optional[str] = None
 
 class GrowingAreaSchema(BaseModel):
     growing_area_id: int
@@ -344,6 +362,15 @@ class plantMtrx_template(BaseModel):
     week_no: int
     growing_area_id: int
     percentage_value: float
+
+class VendorSiteCodeSchemaMasters(BaseModel):
+    VENDOR_SITE_CODE: Optional[str] = None
+    # created_by: Optional[str] = None
+    # created_time: Optional[datetime] = None
+    # status: Optional[str] = None
+    # updated_by: Optional[str] = None
+    # updated_time: Optional[datetime] = None
+    region_id: Optional[int] = None
 
 
 class VendorSiteCodeSchema(BaseModel):
