@@ -111,6 +111,11 @@ class GrowingAreaSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+class edit_gr_grarea_masters(BaseModel):
+    grower_name: str
+    grower_id: int
+    growing_area_name: List[str]
+    growing_area_id: List[int]
 
 class GrowersDummy(BaseModel): # pragma: no cover
     grower_name: str
@@ -256,6 +261,14 @@ class PlantSiteGrowingAreaMappingSchema(BaseModel):
     vendor_site_id: int
     plant_id: int
     growing_area_id: int
+
+class EditPSGAMastersSchema(BaseModel):
+    plant_name: str
+    plant_id: int
+    growing_area: List[str]
+    vsc: List[str]
+    ga_id: List[int]
+    vs_id: List[int]
 
     class Config:
         orm_mode = True
