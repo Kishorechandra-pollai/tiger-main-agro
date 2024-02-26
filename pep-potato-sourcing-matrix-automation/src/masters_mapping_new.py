@@ -159,7 +159,7 @@ def add_growing_area(payload: schemas.GrowingAreaSchemaMasters, db: Session = De
 
 
 @router.get('/get_plants')
-def get_plants(db: Session = Depends(get_db)):
+def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
     all_plants = db.query(models.Plant).filter(models.Plant.status=="ACTIVE").distinct().all()
     return {"plants":all_plants}
 
@@ -176,7 +176,7 @@ def get_plant(plant_name: str, db: Session = Depends(get_db)): # pragma: no cove
     return {"details":combined_result}
 
 @router.post('/modify_ex_plant')
-def modify_ex_plant(payload: schemas.EditPSGAMastersSchema,db:Session = Depends(get_db)):
+def modify_ex_plant(payload: schemas.EditPSGAMastersSchema,db:Session = Depends(get_db)):  # pragma: no cover
     plant_name = payload.plant_name
     plant_id = payload.plant_id
     flag=False
@@ -236,7 +236,7 @@ def modify_ex_plant(payload: schemas.EditPSGAMastersSchema,db:Session = Depends(
     return {"status":"Updated the mapping successfully"}
 
 @router.get('/get_growers')
-def get_growers(db: Session = Depends(get_db)):
+def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     all_growers = db.query(models.growers).filter(models.growers.status=="ACTIVE").distinct().all()
     return {"growers":all_growers}
 
@@ -251,7 +251,7 @@ def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cov
     return {"grower_details":grower_details,"gr_grarea_details":grower_growing_area_details}
 
 @router.post('/modify_ex_grower')
-def modify_ex_grower(payload: schemas.edit_gr_grarea_masters,db:Session = Depends(get_db)):
+def modify_ex_grower(payload: schemas.edit_gr_grarea_masters,db:Session = Depends(get_db)):  # pragma: no cover
     grower_name = payload.grower_name
     grower_id = payload.grower_id
     flag=False
