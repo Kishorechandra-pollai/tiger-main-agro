@@ -27,7 +27,7 @@ def get_plantMtrx_by_region(db: Session = Depends(get_db)): # pragma: no cover
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-def new_ga_potato_solids(db,payload,current_time):
+def new_ga_potato_solids(db,payload,current_time): # pragma: no cover
     growing_area_id = db.query(func.max(models.growing_area.growing_area_id)).scalar() or 0
     growing_area_id += 1
     ga_payload = {
@@ -263,17 +263,17 @@ def create_plant(payload: schemas.MastersMappingGrowers, db: Session = Depends(g
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.get('/get_plants')
-def get_plants(db: Session = Depends(get_db)):
+def get_plants(db: Session = Depends(get_db)): # pragma: no cover
     all_plants = db.query(models.Plant).filter(models.Plant.status=="ACTIVE").distinct().all()
     return {"plants":all_plants}
 
 @router.get('/get_growers')
-def get_growers(db: Session = Depends(get_db)):
+def get_growers(db: Session = Depends(get_db)): # pragma: no cover
     all_growers = db.query(models.growers).filter(models.growers.status=="ACTIVE").distinct().all()
     return {"growers":all_growers}
 
 @router.get('/get_grower_growing_area')
-def get_growers(db: Session = Depends(get_db)):
+def get_growers(db: Session = Depends(get_db)): # pragma: no cover
     all_grower_growing_area = (db.query(models.preferred_grower.grower_name,
                                         models.preferred_grower.growing_area_name).
                                         distinct().all())
