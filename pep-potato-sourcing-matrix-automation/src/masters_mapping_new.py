@@ -25,17 +25,12 @@ def get_mapping(db: Session = Depends(get_db)): # pragma: no cover
     growing_area = db.query(models.growing_area.growing_area_name,models.growing_area.growing_area_id) \
             .filter(models.growing_area.status=="ACTIVE").distinct().all()
 
-    # growing_area = (db.query(
-    #                 func.concat(models.growing_area.growing_area_name, ' | ', \
-    #                 models.growing_area.growing_area_desc).label('growing_area'), \
-    #                 models.growing_area.growing_area_id) \
-    #                 .filter(models.growing_area.status=="ACTIVE").distinct().all())
-    growing_area = db.query(func.concat(models.growing_area.growing_area_name, ' | ', \
+    growing_area_desc = db.query(func.concat(models.growing_area.growing_area_name, ' | ', \
                                             models.growing_area.growing_area_desc).label('growing_area'), \
                                             models.growing_area.growing_area_id) \
                                             .filter(models.growing_area.status=="ACTIVE").distinct().all()
 
-    return {"region": region, "crop_category":crop_category, "company_name":company_name, "vendor_site":vendor_site_code,"growing_area":growing_area}
+    return {"region": region, "crop_category":crop_category, "company_name":company_name, "vendor_site":vendor_site_code,"growing_area":growing_area,"gr_area_desc":growing_area_desc}
 
 @router.post('/add_plant', status_code=status.HTTP_201_CREATED)
 def add_new_plant(payload: schemas.PlantSchemaDummy, db: Session = Depends(get_db)): # pragma: no cover
@@ -73,7 +68,6 @@ def add_new_plant(payload: schemas.GrowersDummy, db: Session = Depends(get_db)):
     current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     print(payload.dict())
     new_grower = models.growers(
-        # **payload.growers.dict(),
         **payload.dict(),
         # grower_id=grower_id,
         created_time=current_time,
@@ -131,5 +125,157 @@ def add_growing_area(payload: schemas.GrowingAreaSchemaMasters, db: Session = De
     db.add(new_ga)
     db.commit()
     db.refresh(new_ga)
+    growing_area_id = new_ga.growing_area_id
+    potato_rate_payload = {# "potato_rate_id":potato_rate_id,
+                            "year":datetime.utcnow().year,
+                            "growing_area_id_old":999,
+                            "created_time":current_time,
+                            "created_by":"System",
+                            "updated_time":current_time,
+                            "updated_by":"SYSTEM",
+                            "currency":"USD",
+                            "growing_area_id":growing_area_id}
+    potato_rates_record = create_potato_rate_in_db(potato_rate_payload, db)
+    potato_rate_id = potato_rates_record.potato_rate_id
+
+    ## Solids Rates
+    solids_rate_payload = {# "solids_rate_id":solids_rate_id,
+                            "growing_area_id_old":999,
+                            "created_time":current_time,
+                            "created_by":"System",
+                            "updated_time":current_time,
+                            "updated_by":"SYSTEM",
+                            "currency":"USD",
+                            "growing_area_id":growing_area_id}
+    solid_rate_record = create_solid_rate_in_db(solids_rate_payload, db)
+    solids_rate_id = solid_rate_record.solids_rate_id
+    ## Potato mappings
+    update_potato_rates_default(db,potato_rate_id,datetime.utcnow().year)
+
+    ## Solids mappings
+    update_solids_rates_default(db, solids_rate_id, datetime.utcnow().year)
+    db.commit()
     return {"status":"New growing area added successfully"}
 
+
+@router.get('/get_plants')
+def get_plants(db: Session = Depends(get_db)):
+    all_plants = db.query(models.Plant).filter(models.Plant.status=="ACTIVE").distinct().all()
+    return {"plants":all_plants}
+
+
+@router.get('/get_plant/{plant_name}')
+def get_plant(plant_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    plant_details = db.query(models.Plant).filter(models.Plant.plant_name == plant_name,models.Plant.status=="ACTIVE").first()
+    vsc_ga = db.query(models.PlantSiteGrowingAreaMapping.growing_area,models.PlantSiteGrowingAreaMapping.Vendor_Site_Code,
+                      models.PlantSiteGrowingAreaMapping.growing_area_id,
+                      models.PlantSiteGrowingAreaMapping.vendor_site_id).filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
+    combined_result = {
+            "plant_detail": plant_details if plant_details else "No plant detail found",
+            "vsc_ga": vsc_ga if vsc_ga else "No VSC and GA mapping found"}
+    return {"details":combined_result}
+
+@router.post('/modify_ex_plant')
+def modify_ex_plant(payload: schemas.EditPSGAMastersSchema,db:Session = Depends(get_db)):
+    plant_name = payload.plant_name
+    plant_id = payload.plant_id
+    flag=False
+    existingRecord = db.query(models.PlantSiteGrowingAreaMapping)\
+                            .filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
+    current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    seen_combinations = set()
+    for ex in existingRecord:
+        db.delete(ex)
+
+    for ga, vsc, ga_id, vs_id in zip(payload.growing_area, payload.vsc, payload.ga_id, payload.vs_id):
+        unique_combination = (payload.plant_name, vsc, ga)
+        if unique_combination in seen_combinations:
+            continue
+
+        seen_combinations.add(unique_combination)
+        new_mapping = models.PlantSiteGrowingAreaMapping(
+            plant_name=payload.plant_name,
+            growing_area=ga,
+            Vendor_Site_Code=vsc,
+            growing_area_id=ga_id,
+            vendor_site_id=vs_id,
+            plant_id=plant_id
+        )
+        db.add(new_mapping)
+        flag=True
+
+        freight_cost_exists = db.query(models.FreightCostRate).filter(
+            models.FreightCostRate.plant_id == plant_id,
+            models.FreightCostRate.growing_area_id == ga_id,
+            models.FreightCostRate.vendor_site_id == vs_id
+        ).first()
+        
+        if not freight_cost_exists:
+            freight_cost_id = db.query(func.max(models.FreightCostRate.freight_cost_id)).scalar() or 0
+            freight_cost_id += 1
+            freight_cost_rate_payload = {"freight_cost_id":freight_cost_id,
+                                        "plant_id":plant_id,
+                                        "vendor_site_id":vs_id,
+                                        "comment": "comment",
+                                        "created_time":current_time,
+                                        "created_by":"System",
+                                        "updated_time":current_time,
+                                        "updated_by":"SYSTEM",
+                                        "currency":"USD",
+                                        "growing_area_id":ga_id}
+            create_freight_rates_in_db(freight_cost_rate_payload, db)
+
+            ## Freight Cost mappings
+            update_freight_rates_with_default_value(freight_cost_id,datetime.utcnow().year,db)
+
+
+
+    db.commit()
+    if flag:
+        db.refresh(new_mapping)
+    return {"status":"Updated the mapping successfully"}
+
+@router.get('/get_growers')
+def get_growers(db: Session = Depends(get_db)):
+    all_growers = db.query(models.growers).filter(models.growers.status=="ACTIVE").distinct().all()
+    return {"growers":all_growers}
+
+
+@router.get('/get_grower/{grower_name}')
+def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    grower_details = db.query(models.growers).filter(models.growers.grower_name == grower_name,
+                                                    models.growers.status == "ACTIVE").all()
+    grower_growing_area_details = (db.query(models.preferred_grower.grower_name,models.preferred_grower.growing_area_name,
+                                            models.preferred_grower.grower_id,models.preferred_grower.growing_area_id).
+                                    filter(models.preferred_grower.grower_name==grower_name).distinct().all())
+    return {"grower_details":grower_details,"gr_grarea_details":grower_growing_area_details}
+
+@router.post('/modify_ex_grower')
+def modify_ex_grower(payload: schemas.edit_gr_grarea_masters,db:Session = Depends(get_db)):
+    grower_name = payload.grower_name
+    grower_id = payload.grower_id
+    flag=False
+    existingRecord = db.query(models.preferred_grower)\
+                            .filter(models.preferred_grower.grower_name==grower_name).all()
+    seen_combinations = set()
+    for ex in existingRecord:
+        db.delete(ex)
+
+    for ga, ga_id in zip(payload.growing_area_name, payload.growing_area_id):
+        unique_combination = (payload.grower_name, ga)
+        if unique_combination in seen_combinations:
+            continue
+
+        seen_combinations.add(unique_combination)
+        new_mapping = models.preferred_grower(
+            grower_name=payload.grower_name,
+            growing_area_name=ga,
+            growing_area_id=ga_id,
+            grower_id=grower_id
+        )
+        db.add(new_mapping)
+        flag=True
+    db.commit()
+    if flag:
+        db.refresh(new_mapping)
+    return {"status":"Updated the grower growing area mapping successfully"}
