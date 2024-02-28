@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import (growing_area, solid_rate_mapping, solids_rate_table_period,
-                    solids_rates)
+                    solids_rates,region)
 from schemas import solidRateMappingPayload,SolidRatesSchema
 from pydantic import BaseModel
 
@@ -61,16 +61,43 @@ def update_solid_rates_records(payload: solidRateMappingPayload,db: Session = De
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get('/solid_rate_period_year/{year}/{region_id}')
-def solid_rate_period_year(year:int, region_id:int,db: Session = Depends(get_db)):
+# @router.get('/solid_rate_period_year/{year}/{region_id}')
+# def solid_rate_period_year(year:int, region_id:int,db: Session = Depends(get_db)):
+#     """Function to fetch all records from solids_rate table for a particular year """
+#     try:
+#         records = db.query(solids_rate_table_period).filter(
+#             solids_rate_table_period.columns.year == year,
+#             solids_rate_table_period.columns.region == region_id
+#             ).order_by(solids_rate_table_period.columns.growing_area_id,
+#                        solids_rate_table_period.columns.period).all()
+#         return {"solids_rate_period_year": records}
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/solid_rate_period_year_region/{year}/{region}')
+def solid_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)): # pragma: no cover
     """Function to fetch all records from solids_rate table for a particular year """
     try:
-        records = db.query(solids_rate_table_period).filter(
-            solids_rate_table_period.columns.year == year,
-            solids_rate_table_period.columns.region == region_id
-            ).order_by(solids_rate_table_period.columns.growing_area_id,
-                       solids_rate_table_period.columns.period).all()
-        return {"solids_rate_period_year": records}
+        if region_name == 'All':
+            records = db.query(solids_rate_table_period
+                           ).filter(solids_rate_table_period.columns.year == year
+                                    ).order_by(solids_rate_table_period.columns.growing_area_id,
+                                               solids_rate_table_period.columns.period).all()
+        elif region_name == 'US':
+            records =db.query(solids_rate_table_period).join(
+                growing_area,growing_area.growing_area_id==solids_rate_table_period.columns.growing_area_id).join(
+                    region,growing_area.region == region.region_id).filter(
+                        region.country == region_name,solids_rate_table_period.columns.year == year).order_by(
+                            solids_rate_table_period.columns.growing_area_id,solids_rate_table_period.columns.period).all()
+            
+        else:
+            records = db.query(solids_rate_table_period
+                           ).filter(solids_rate_table_period.columns.year == year,
+                                    solids_rate_table_period.columns.region_name == region_name
+                                    ).order_by(solids_rate_table_period.columns.growing_area_id,
+                                               solids_rate_table_period.columns.period).all()
+        
+        return {"solids_period_year_region": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
