@@ -20,6 +20,16 @@ class ExPlantSchemaDummy(BaseModel): # pragma: no cover
     plant_name: str
     region_id: int
 
+
+class UpdatePlantSchema(BaseModel): # pragma: no cover
+    # plant_id: int
+    plant_code: str
+    plant_name: str
+    company_name: Optional[str] = None
+    region_id: int
+    status: str
+    crop_category_id: Optional[int] = None
+
 class PlantSchemaDummy(BaseModel): # pragma: no cover
     # plant_id: int
     plant_code: str
@@ -71,6 +81,25 @@ class MastersMappingExPlant(BaseModel):
     psga_map: PlantSiteGrowingAreaMappingDummy
     growing_area: GrowingAreaDummy
     vsc: VendorSiteCodeDummy
+
+
+class UpdateGrowingAreaSchema(BaseModel):
+    # growing_area_id: int
+    growing_area_name: str
+    region: int
+    country: str
+    status: str
+    growing_area_desc: Optional[str] = None
+    fresh_period_start: Optional[int] = None
+    fresh_week_start: Optional[int] = None
+    fresh_period_end: Optional[int] = None
+    fresh_week_end: Optional[int] = None
+    storage_period_start: Optional[int] = None
+    storage_week_start: Optional[int] = None
+    created_time: Optional[datetime] = None
+    updated_time: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
 class GrowingAreaSchemaMasters(BaseModel):
     # growing_area_id: int
@@ -173,6 +202,14 @@ class Region(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
+
+class UpdateRegion(BaseModel):
+    region: str
+    country: Optional[str] = None
+    status: Optional[str] = None
+    updated_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
 
 
 class PlantGrowingMappingSchema(BaseModel):
@@ -385,6 +422,15 @@ class VendorSiteCodeSchemaMasters(BaseModel):
     # updated_time: Optional[datetime] = None
     region_id: Optional[int] = None
 
+
+class UpdateVendorSiteCodeSchema(BaseModel):
+    VENDOR_SITE_CODE: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    status: Optional[str] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+    region_id: Optional[int] = None
 
 class VendorSiteCodeSchema(BaseModel):
     VENDOR_SITE_CODE: Optional[int] = None
