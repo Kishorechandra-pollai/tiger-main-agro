@@ -286,7 +286,7 @@ async def fetch_records(
                     FreightCostRate.vendor_site_id == PlantSiteGrowingAreaMapping.vendor_site_id,
                 )
             )
-            .filter(FreightCostMapping.year == year)
+            .filter(FreightCostMapping.year == year).distinct(FreightCostMapping.freight_cost_id)
             .all()
         )
 
@@ -326,8 +326,13 @@ async def fetch_records(
                     "Vendor_Site_Code": Vendor_Site_Code,
                 }
             )
+        # count= len(consolidated_data)
+        # print(count)
 
         return {"status": "success", "data": consolidated_data}
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+
