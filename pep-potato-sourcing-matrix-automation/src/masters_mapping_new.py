@@ -235,6 +235,89 @@ def modify_ex_plant(payload: schemas.EditPSGAMastersSchema,db:Session = Depends(
         db.refresh(new_mapping)
     return {"status":"Updated the mapping successfully"}
 
+@router.put('/update_plant/{plant_id}', status_code=status.HTTP_200_OK)
+def update_plant(plant_id: int, update_payload: schemas.UpdatePlantSchema, db: Session = Depends(get_db)):
+    # Fetch the existing region
+    plant_to_update = db.query(models.Plant).filter(models.Plant.plant_id == plant_id).first()
+    
+    if not plant_to_update:
+        raise HTTPException(status_code=404, detail="Plant not found")
+
+    # Update fields if provided in the payload
+    update_data = update_payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(plant_to_update, key, value)
+
+    # Automatically set updated_time if not provided
+    if 'updated_time' not in update_data:
+        plant_to_update.updated_time = datetime.now()
+
+    db.commit()
+    return {"status": "plant updated successfully"}
+
+
+@router.put('/update_grower/{grower_id}', status_code=status.HTTP_200_OK)
+def update_plant(grower_id: int, update_payload: schemas.GrowersDummy, db: Session = Depends(get_db)):
+    # Fetch the existing region
+    grower_to_update = db.query(models.growers).filter(models.growers.grower_id == grower_id).first()
+    
+    if not grower_to_update:
+        raise HTTPException(status_code=404, detail="Grower not found")
+
+    # Update fields if provided in the payload
+    update_data = update_payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(grower_to_update, key, value)
+
+    # Automatically set updated_time if not provided
+    if 'updated_time' not in update_data:
+        grower_to_update.updated_time = datetime.now()
+
+    db.commit()
+    return {"status": "grower updated successfully"}
+
+
+@router.put('/update_growing_area/{growing_area_id}', status_code=status.HTTP_200_OK)
+def update_plant(growing_area_id: int, update_payload: schemas.UpdateGrowingAreaSchema, db: Session = Depends(get_db)):
+    # Fetch the existing region
+    ga_to_update = db.query(models.growing_area).filter(models.growing_area.growing_area_id == growing_area_id).first()
+    
+    if not ga_to_update:
+        raise HTTPException(status_code=404, detail="Growing Area not found")
+
+    # Update fields if provided in the payload
+    update_data = update_payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(ga_to_update, key, value)
+
+    # Automatically set updated_time if not provided
+    if 'updated_time' not in update_data:
+        ga_to_update.updated_time = datetime.now()
+
+    db.commit()
+    return {"status": "Growing Area updated successfully"}
+
+@router.put('/update_vendor_site/{vendor_site_id}', status_code=status.HTTP_200_OK)
+def update_plant(vendor_site_id: int, update_payload: schemas.UpdateVendorSiteCodeSchema, db: Session = Depends(get_db)):
+    # Fetch the existing region
+    vsc_to_update = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).first()
+    
+    if not vsc_to_update:
+        raise HTTPException(status_code=404, detail="vendor site not found")
+
+    # Update fields if provided in the payload
+    update_data = update_payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(vsc_to_update, key, value)
+
+    # Automatically set updated_time if not provided
+    if 'updated_time' not in update_data:
+        vsc_to_update.updated_time = datetime.now()
+
+    db.commit()
+    return {"status": "Vendor Site updated successfully"}
+
+
 @router.get('/get_growers')
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     all_growers = db.query(models.growers).filter(models.growers.status=="ACTIVE").distinct().all()
@@ -279,3 +362,82 @@ def modify_ex_grower(payload: schemas.edit_gr_grarea_masters,db:Session = Depend
     if flag:
         db.refresh(new_mapping)
     return {"status":"Updated the grower growing area mapping successfully"}
+
+
+@router.get('/get_region')
+def get_region(db: Session = Depends(get_db)):  # pragma: no cover
+    all_regions = db.query(models.region).filter(models.region.status=="ACTIVE").distinct().all()
+    return {"regions":all_regions}
+
+
+@router.get('/get_region/{region_name}')
+def get_plant(region_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    region_details = db.query(models.region).filter(models.region.region_name == region_name,
+                                                    models.region.status == "ACTIVE").all()
+    return {"region_details":region_details}
+
+@router.post('/add_region', status_code=status.HTTP_201_CREATED)
+def add_new_region(payload: schemas.Region, db: Session = Depends(get_db)): # pragma: no cover
+    new_region = models.region(**payload.dict())
+    db.add(new_region)
+    db.commit()
+    return {"status":"New region added successfully"}
+
+@router.put('/update_region/{region_id}', status_code=status.HTTP_200_OK)
+def update_region(region_id: int, update_payload: schemas.UpdateRegion, db: Session = Depends(get_db)):
+    # Fetch the existing region
+    region_to_update = db.query(models.region).filter(models.region.region_id == region_id).first()
+    
+    if not region_to_update:
+        raise HTTPException(status_code=404, detail="Region not found")
+
+    # Update fields if provided in the payload
+    update_data = update_payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(region_to_update, key, value)
+
+    # Automatically set updated_time if not provided
+    if 'updated_time' not in update_data:
+        region_to_update.updated_time = datetime.now()
+
+    db.commit()
+    return {"status": "Region updated successfully"}
+
+@router.get('/get_crop_category')
+def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
+    all_crop_cat = db.query(models.category).filter(models.category.status=="ACTIVE").distinct().all()
+    return {"crop_categories":all_crop_cat}
+
+
+@router.get('/get_crop_cat/{category_name}')
+def get_plant(category_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    crop_details = db.query(models.category).filter(models.category.category_name == category_name,
+                                                    models.category.status == "ACTIVE").all()
+    return {"crop_details":crop_details}
+
+@router.post('/add_crop', status_code=status.HTTP_201_CREATED)
+def add_new_crop(payload: schemas.Category, db: Session = Depends(get_db)): # pragma: no cover
+    new_crop_cat = models.category(**payload.dict())
+    db.add(new_crop_cat)
+    db.commit()
+    return {"status":"New crop category added successfully"}
+
+@router.put('/update_crop/{crop_category}', status_code=status.HTTP_200_OK)
+def update_region(crop_category: int, update_payload: schemas.Category, db: Session = Depends(get_db)):
+    # Fetch the existing region
+    crop_to_update = db.query(models.category).filter(models.category.crop_category == crop_category).first()
+    
+    if not crop_to_update:
+        raise HTTPException(status_code=404, detail="Crop category not found")
+
+    # Update fields if provided in the payload
+    update_data = update_payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(crop_to_update, key, value)
+
+    # Automatically set updated_time if not provided
+    if 'updated_time' not in update_data:
+        crop_to_update.updated_time = datetime.now()
+
+    db.commit()
+    return {"status": "crop category updated successfully"}
