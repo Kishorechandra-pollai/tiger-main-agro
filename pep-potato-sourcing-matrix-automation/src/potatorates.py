@@ -4,7 +4,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from models import (growing_area, potato_rate_mapping,
                     potato_rate_table_period, potato_rate_table_weekly,
-                    potato_rates)
+                    potato_rates,region)
 from schemas import potatoRateMappingPayload,PotatoRatesSchema
 from pydantic import BaseModel
 from sqlalchemy import and_
@@ -72,32 +72,86 @@ def update_potato_rates_records(payload: potatoRateMappingPayload, db: Session =
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-@router.get('/potato_rate_period_year/{year}/{region_id}')
-def potato_rate_period_year(year:int,region_id:int, db: Session = Depends(get_db)):
-    """Function to fetch all records from potato_rate table for a particular year """
+# @router.get('/potato_rate_period_year/{year}/{region_id}')
+# def potato_rate_period_year(year:int,region_id:int, db: Session = Depends(get_db)):
+#     """Function to fetch all records from potato_rate table for a particular year """
+#     try:
+#         records = db.query(potato_rate_table_period
+#                            ).filter(potato_rate_table_period.columns.p_year == year,
+#                                     potato_rate_table_period.columns.region == region_id
+#                                     ).order_by(potato_rate_table_period.columns.growing_area_id,
+#                                                potato_rate_table_period.columns.period).all()
+#         return {"potato_rate_period_year": records}
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/potato_rate_period_year_region/{year}/{region}')
+def potato_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)):
+    """Function to fetch all records from potato_rate table for a particular year and region """
     try:
-        records = db.query(potato_rate_table_period
-                           ).filter(potato_rate_table_period.columns.p_year == year,
-                                    potato_rate_table_period.columns.region == region_id
+        if region_name == 'All':
+            records = db.query(potato_rate_table_period
+                           ).filter(potato_rate_table_period.columns.p_year == year
                                     ).order_by(potato_rate_table_period.columns.growing_area_id,
                                                potato_rate_table_period.columns.period).all()
-        return {"potato_rate_period_year": records}
+        elif region_name == 'US':
+            records =db.query(potato_rate_table_period).join(
+                growing_area,growing_area.growing_area_id==potato_rate_table_period.columns.growing_area_id).join(
+                    region,growing_area.region == region.region_id).filter(
+                        region.country == region_name,potato_rate_table_period.columns.p_year == year).order_by(
+                            potato_rate_table_period.columns.growing_area_id,potato_rate_table_period.columns.period).all()
+            
+        else:
+            records = db.query(potato_rate_table_period
+                           ).filter(potato_rate_table_period.columns.p_year == year,
+                                    potato_rate_table_period.columns.region_name == region_name
+                                    ).order_by(potato_rate_table_period.columns.growing_area_id,
+                                               potato_rate_table_period.columns.period).all()
+        
+        return {"potato_rate_period_year_region": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get('/potato_rate_period_week_year/{year}/{region_id}')
-def potato_rate_period_week_year(year:int,region_id:int, db: Session = Depends(get_db)):
-    """Function to fetch all records from potato_rate table for a particular year """
+# @router.get('/potato_rate_period_week_year/{year}/{region_id}')
+# def potato_rate_period_week_year(year:int,region_id:int, db: Session = Depends(get_db)):
+#     """Function to fetch all records from potato_rate table for a particular year """
+#     try:
+#         records = db.query(potato_rate_table_weekly).filter(potato_rate_table_weekly
+#                                                             .columns.p_year == year,
+#                                                             potato_rate_table_weekly.columns.region_id == region_id).order_by(
+#                                                                 potato_rate_table_weekly.columns.growing_area_id,
+#                                                                 potato_rate_table_weekly.columns.period,
+#                                                                 potato_rate_table_weekly.columns.week
+#                                                                 ).all()
+#         return {"potato_rate_period_week_year": records}
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/potato_rate_period_week_year_region/{year}/{region}')
+def potato_rate_period_week_year_region(year:int,region_name:str, db: Session = Depends(get_db)):
+    """Function to fetch all records from potato_rate table for a particular year and region """
     try:
-        records = db.query(potato_rate_table_weekly).filter(potato_rate_table_weekly
-                                                            .columns.p_year == year,
-                                                            potato_rate_table_weekly.columns.region_id == region_id).order_by(
-                                                                potato_rate_table_weekly.columns.growing_area_id,
-                                                                potato_rate_table_weekly.columns.period,
-                                                                potato_rate_table_weekly.columns.week
-                                                                ).all()
-        return {"potato_rate_period_week_year": records}
+        if region_name == 'All':
+            records = db.query(potato_rate_table_weekly
+                           ).filter(potato_rate_table_weekly.columns.p_year == year
+                                    ).order_by(potato_rate_table_weekly.columns.growing_area_id,
+                                               potato_rate_table_weekly.columns.period).all()
+        elif region_name == 'US':
+            records =db.query(potato_rate_table_weekly).join(
+                growing_area,growing_area.growing_area_id==potato_rate_table_weekly.columns.growing_area_id).join(
+                    region,growing_area.region == region.region_id).filter(
+                        region.country == region_name,potato_rate_table_weekly.columns.p_year == year).order_by(
+                            potato_rate_table_weekly.columns.growing_area_id,potato_rate_table_weekly.columns.period).all()
+            
+        else:
+            records = db.query(potato_rate_table_weekly
+                           ).filter(potato_rate_table_weekly.columns.p_year == year,
+                                    potato_rate_table_weekly.columns.region_name == region_name
+                                    ).order_by(potato_rate_table_weekly.columns.growing_area_id,
+                                               potato_rate_table_weekly.columns.period).all()
+        
+        return {"potato_rate_period_week_year_region": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
