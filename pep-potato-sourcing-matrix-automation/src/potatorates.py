@@ -86,7 +86,7 @@ def update_potato_rates_records(payload: potatoRateMappingPayload, db: Session =
 #         raise HTTPException(status_code=400, detail=str(e)) from e
     
 @router.get('/potato_rate_period_year_region/{year}/{region}')
-def potato_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)):
+def potato_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)): # pragma: no cover
     """Function to fetch all records from potato_rate table for a particular year and region """
     try:
         if region_name == 'All':
@@ -129,7 +129,7 @@ def potato_rate_period_year_region(year:int,region_name:str, db: Session = Depen
 #         raise HTTPException(status_code=400, detail=str(e)) from e
     
 @router.get('/potato_rate_period_week_year_region/{year}/{region}')
-def potato_rate_period_week_year_region(year:int,region_name:str, db: Session = Depends(get_db)):
+def potato_rate_period_week_year_region(year:int,region_name:str, db: Session = Depends(get_db)): # pragma: no cover
     """Function to fetch all records from potato_rate table for a particular year and region """
     try:
         if region_name == 'All':

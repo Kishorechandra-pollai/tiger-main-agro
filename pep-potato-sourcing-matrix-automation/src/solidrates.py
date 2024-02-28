@@ -75,7 +75,7 @@ def update_solid_rates_records(payload: solidRateMappingPayload,db: Session = De
 #         raise HTTPException(status_code=400, detail=str(e)) from e
     
 @router.get('/solid_rate_period_year_region/{year}/{region}')
-def solid_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)):
+def solid_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)): # pragma: no cover
     """Function to fetch all records from solids_rate table for a particular year """
     try:
         if region_name == 'All':

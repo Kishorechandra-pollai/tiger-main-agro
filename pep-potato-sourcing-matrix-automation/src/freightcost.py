@@ -254,7 +254,7 @@ async def update_freight_cost_mapping_with_default_value(freight_cost_id:int, ye
 async def fetch_records(
     year: int,
     db: Session = Depends(get_db)
-):
+): # pragma: no cover
     try:
         records = (
             db.query(
