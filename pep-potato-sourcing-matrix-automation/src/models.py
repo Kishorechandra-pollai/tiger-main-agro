@@ -24,6 +24,7 @@ class Plant(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
+    pgt_plant_name = Column(String, nullable=False)
 
 
 class growing_area(Base):
@@ -47,7 +48,7 @@ class growing_area(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
-
+    pgt_growing_area = Column(String, nullable=False)
 
 class growers(Base):
     __tablename__ = 'growers'
@@ -67,6 +68,7 @@ class growers(Base):
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
     grower_abbreviation_code = Column(String, nullable=True)
+    pgt_grower_name = Column(String, nullable=False)
 
 class preferred_grower(Base):
     __tablename__ = 'grower_growing_area_mapping'
@@ -229,6 +231,7 @@ class vendor_site_code(Base):
     updated_by = Column(String, nullable=True)
     updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     region_id = Column(Integer, nullable=False)
+    pgt_vsc = Column(Integer, nullable=False)
 
 
 View_site_plant_growing_area_mapping = db.Table('View_site_plant_growing_area_mapping', metadata, autoload=True,
