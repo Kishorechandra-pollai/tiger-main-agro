@@ -29,6 +29,7 @@ class UpdatePlantSchema(BaseModel): # pragma: no cover
     region_id: int
     status: str
     crop_category_id: Optional[int] = None
+    pgt_plant_name: str
 
 class PlantSchemaDummy(BaseModel): # pragma: no cover
     # plant_id: int
@@ -38,6 +39,7 @@ class PlantSchemaDummy(BaseModel): # pragma: no cover
     region_id: int
     # status: str
     crop_category_id: Optional[int] = None
+    pgt_plant_name: str
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
@@ -100,6 +102,7 @@ class UpdateGrowingAreaSchema(BaseModel):
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
+    pgt_growing_area: str
 
 class GrowingAreaSchemaMasters(BaseModel):
     # growing_area_id: int
@@ -114,6 +117,7 @@ class GrowingAreaSchemaMasters(BaseModel):
     fresh_week_end: Optional[int] = None
     storage_period_start: Optional[int] = None
     storage_week_start: Optional[int] = None
+    pgt_growing_area: str
     # created_time: Optional[datetime] = None
     # updated_time: Optional[datetime] = None
     # created_by: Optional[str] = None
@@ -154,6 +158,7 @@ class GrowersDummy(BaseModel): # pragma: no cover
     status: str
     volume: int
     grower_abbreviation_code: str
+    pgt_grower_name: str
 
 class GrAreaMapDummy(BaseModel): # pragma: no cover
     growing_area_name: List[str]
@@ -421,6 +426,7 @@ class VendorSiteCodeSchemaMasters(BaseModel):
     # updated_by: Optional[str] = None
     # updated_time: Optional[datetime] = None
     region_id: Optional[int] = None
+    pgt_vsc: str
 
 
 class UpdateVendorSiteCodeSchema(BaseModel):
@@ -431,6 +437,7 @@ class UpdateVendorSiteCodeSchema(BaseModel):
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
     region_id: Optional[int] = None
+    pgt_vsc: str
 
 class VendorSiteCodeSchema(BaseModel):
     VENDOR_SITE_CODE: Optional[int] = None

@@ -505,3 +505,64 @@ def update_region(crop_category: int, update_payload: schemas.Category, db: Sess
         return {"status": "crop category updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post('/plant/{plant_id}')
+def delete_plant(plant_id: int, db: Session = Depends(get_db)): # pragma: no cover
+    grower_query = db.query(models.Plant).filter(models.Plant.plant_id == plant_id).update({'status': 'INACTIVE'})
+    if not grower_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No growers  with this id: {id} found')
+
+    db.commit()
+    return {"status":"Plant deleted successfully"}
+
+@router.post('/grower/{grower_id}')
+def delete_grower(grower_id: int, db: Session = Depends(get_db)): # pragma: no cover
+    grower_query = db.query(models.growers).filter(models.growers.grower_id == grower_id).update({'status': 'INACTIVE'})
+    if not grower_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No growers  with this id: {id} found')
+
+    db.commit()
+    return {"status":"Grower deleted successfully"}
+
+@router.post('/growing_area/{growing_area_id}')
+def delete_growing_area(growing_area_id: int, db: Session = Depends(get_db)): # pragma: no cover
+    grower_query = db.query(models.growing_area).filter(models.growing_area.growing_area_id == growing_area_id).update({'status': 'INACTIVE'})
+    if not grower_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No growers  with this id: {id} found')
+
+    db.commit()
+    return {"status":"Growing area deleted successfully"}
+
+@router.post('/vendor_site/{vendor_site_id}')
+def delete_vendor_site(vendor_site_id: int, db: Session = Depends(get_db)): # pragma: no cover
+    vendor_site_query = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).update({'status': 'INACTIVE'})
+    if not vendor_site_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No growers  with this id: {id} found')
+
+    db.commit()
+    return {"status":"Vendor Site deleted successfully"}
+
+@router.post('/region/{region_id}')
+def delete_region(region_id: int, db: Session = Depends(get_db)): # pragma: no cover
+    region_query = db.query(models.region).filter(models.region.region_id == region_id).update({'status': 'INACTIVE'})
+    if not region_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No growers  with this id: {id} found')
+
+    db.commit()
+    return {"status":"Region deleted successfully"}
+
+@router.post('/crop_category/{crop_cat_id}')
+def delete_category(crop_cat_id: int, db: Session = Depends(get_db)): # pragma: no cover
+    category_query = db.query(models.category).filter(models.category.crop_category == crop_cat_id).update({'status': 'INACTIVE'})
+    if not category_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'No growers  with this id: {id} found')
+
+    db.commit()
+    return {"status":"Crop category deleted successfully"}
