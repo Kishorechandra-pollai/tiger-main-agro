@@ -1,5 +1,7 @@
 from datetime import date,datetime
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Depends, HTTPException, status, APIRouter,File, UploadFile
+import pandas as pd
+from io import StringIO,BytesIO
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
@@ -566,3 +568,19 @@ def delete_category(crop_cat_id: int, db: Session = Depends(get_db)): # pragma: 
 
     db.commit()
     return {"status":"Crop category deleted successfully"}
+
+@router.post("/upload_file")
+def upload_file(file: UploadFile = File(...)):
+    contents = file.file.read()
+    file_format = file.filename.split(".")[1]
+    if file_format=="csv":
+        s = str(contents,'utf-8')
+        data = StringIO(s) 
+        df = pd.read_csv(data)
+    elif file_format in ["xls","xlsx"]:
+        data = BytesIO(contents)
+        df = pd.read_excel(data)
+    data.close()
+    file.file.close()
+    response_json = df.head().to_dict(orient="records")
+    return {"filename": file.filename, "file_content":response_json}
