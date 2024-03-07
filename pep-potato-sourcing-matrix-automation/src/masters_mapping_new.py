@@ -192,9 +192,6 @@ def get_plant(plant_name: str, db: Session = Depends(get_db)): # pragma: no cove
             "growing_area_id": 000,
             "vendor_site_id": 000
             }]
-        # combined_result = {
-        #         "plant_detail": plant_details if plant_details else ["No plant detail found"],
-        #         "vsc_ga": vsc_ga if vsc_ga else ["No VSC and GA mapping found"]}
         combined_result = {
             "plant_detail": plant_details if plant_details else ["No plant detail found"],
             "vsc_ga": vsc_ga if vsc_ga else empty_json}
