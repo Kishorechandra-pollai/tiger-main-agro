@@ -186,9 +186,15 @@ def get_plant(plant_name: str, db: Session = Depends(get_db)): # pragma: no cove
         vsc_ga = db.query(models.PlantSiteGrowingAreaMapping.growing_area,models.PlantSiteGrowingAreaMapping.Vendor_Site_Code,
                         models.PlantSiteGrowingAreaMapping.growing_area_id,
                         models.PlantSiteGrowingAreaMapping.vendor_site_id).filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
+        empty_json =  [{
+            "growing_area": "Not Appl",
+            "Vendor_Site_Code": "Not Appl",
+            "growing_area_id": 000,
+            "vendor_site_id": 000
+            }]
         combined_result = {
-                "plant_detail": plant_details if plant_details else "No plant detail found",
-                "vsc_ga": vsc_ga if vsc_ga else "No VSC and GA mapping found"}
+            "plant_detail": plant_details if plant_details else ["No plant detail found"],
+            "vsc_ga": vsc_ga if vsc_ga else empty_json}
         return {"details":combined_result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -368,7 +374,13 @@ def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cov
         grower_growing_area_details = (db.query(models.preferred_grower.grower_name,models.preferred_grower.growing_area_name,
                                                 models.preferred_grower.grower_id,models.preferred_grower.growing_area_id).
                                         filter(models.preferred_grower.grower_name==grower_name).distinct().all())
-        return {"grower_details":grower_details,"gr_grarea_details":grower_growing_area_details}
+        empty_json = {
+        "grower_name": "Not Appl",
+        "growing_area_name": "Not Appl",
+        "grower_id": 000,
+        "growing_area_id": 0
+        }
+        return {"grower_details":grower_details,"gr_grarea_details":grower_growing_area_details if grower_growing_area_details else [empty_json]}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
