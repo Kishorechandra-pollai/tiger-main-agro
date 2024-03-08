@@ -2,7 +2,6 @@
 import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi import APIRouter, Depends, HTTPException, status
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table)
@@ -250,9 +249,10 @@ async def update_freight_cost_mapping_with_default_value(freight_cost_id:int, ye
     return {"status": "success"}
 
 
-@router.get("/fetch_freight_records/{year}")
+@router.get("/fetch_freight_records/{year}/{country}")
 async def fetch_records(
     year: int,
+    country:str,
     db: Session = Depends(get_db)
 ): # pragma: no cover
     try:
@@ -286,7 +286,7 @@ async def fetch_records(
                     FreightCostRate.vendor_site_id == PlantSiteGrowingAreaMapping.vendor_site_id,
                 )
             )
-            .filter(FreightCostMapping.year == year).distinct(FreightCostMapping.freight_cost_id)
+            .filter(FreightCostMapping.year == year,FreightCostMapping.company_name == country).distinct(FreightCostMapping.freight_cost_id)
             .all()
         )
 
@@ -336,3 +336,6 @@ async def fetch_records(
 
 
 
+
+
+  
