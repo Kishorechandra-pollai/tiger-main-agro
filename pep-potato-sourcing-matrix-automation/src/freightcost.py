@@ -92,11 +92,12 @@ def create_freight_mapping(
     return freight_cost_mapping_data
 
 
-@router.post("/update_freight_mapping/{freight_cost_id}/{year}/{period}")
+@router.post("/update_freight_mapping/{freight_cost_id}/{year}/{period}/{country}")
 def update_freight_mapping(
     freight_cost_id: int,
     year: int,
     period: int,
+    country:str,
     new_rate: float,
     db: Session = Depends(get_db)
 ):
@@ -105,6 +106,7 @@ def update_freight_mapping(
     records_to_update = db.query(FreightCostMapping).filter(
         FreightCostMapping.freight_cost_id == freight_cost_id,
         FreightCostMapping.year == year,
+        FreightCostMapping.company_name == country,
         FreightCostMapping.period >= period
     ).all()
     if not records_to_update:
