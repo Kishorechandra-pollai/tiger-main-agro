@@ -43,6 +43,32 @@ def get_plantid(plantId: str, db: Session = Depends(get_db)):
     return {"status": "success", "plant": plant}
 
 
+@router.get('/get_country_company_name/{filter_value}')
+def get_plants_region_based(filter_value: str, db: Session = Depends(get_db())):
+    try:
+        if filter_value == 'US' or filter_value == 'Canada' or filter_value == 'Canada-Core':
+            plants = db.query(models.Plant) \
+                .join(models.region, models.Plant.region_id == models.region.region_id) \
+                .filter(models.region.country == filter_value, models.Plant.status == 'ACTIVE') \
+                .all()
+        else:
+            plants = db.query(models.Plant).filter(models.Plant.company_name == filter_value).all()
+        return {"Status": "success", "plants": plants}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
+
+
+@router.get('/get_region/{filter_value}')
+def get_plants_region_based(filter_value: int, db: Session = Depends(get_db())):
+    try:
+        plants = db.query(models.Plant)\
+            .filter(models.Plant.region_id == filter_value, models.Plant.status == 'ACTIVE') \
+            .all()
+        return {"Status": "success", "plants": plants}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
+
+
 # @router.delete('/{plantId}')
 # def delete_plant(plantId: str, db: Session = Depends(get_db)):
 #     plant_query = db.query(models.Plant).filter(models.Plant.plant_id == plantId)
