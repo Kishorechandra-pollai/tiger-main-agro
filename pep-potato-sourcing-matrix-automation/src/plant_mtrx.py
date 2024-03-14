@@ -1,10 +1,12 @@
 from datetime import date
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Depends, File, UploadFile, HTTPException, status, APIRouter
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
+from io import StringIO,BytesIO
 import models
-from models import View_PlantMtrx_table,erp_logs_table
+import pandas as pd
+from models import View_PlantMtrx_table
 import schemas
 import extensionMapping
 import period_week_calc
@@ -31,7 +33,7 @@ def get_plantMtrx_common(filter_conditions, name_or_id, year, db):
                     View_PlantMtrx_table.columns.status == 'active', *filter_conditions) \
             .order_by(View_PlantMtrx_table.columns.period,
                       View_PlantMtrx_table.columns.week).all()
-        if not data:   # pragma: no cover
+        if not data:  # pragma: no cover
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Plant Mtrx data not found for : {name_or_id}")
 
@@ -77,7 +79,7 @@ def get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, d
                         View_PlantMtrx_table.columns.period_with_P,
                         View_PlantMtrx_table.columns.week,
                         View_PlantMtrx_table.columns.year,
-                        func.sum(View_PlantMtrx_table.columns.value).label('total_value'))\
+                        func.sum(View_PlantMtrx_table.columns.value).label('total_value')) \
             .filter(View_PlantMtrx_table.columns.year == year,
                     *filter_conditions) \
             .group_by(View_PlantMtrx_table.columns.year,
@@ -139,11 +141,11 @@ def getplantmtrx_region(year: int, db: Session = Depends(get_db)):
             .order_by(View_PlantMtrx_table.columns.region_id,
                       View_PlantMtrx_table.columns.period,
                       View_PlantMtrx_table.columns.week).all()
-        if not data: # pragma: no cover
+        if not data:  # pragma: no cover
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"No data is found for this region:")
         return {"status": "success", "plant_mtrx_regionWise": data}
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -513,17 +515,55 @@ def prev_year_insert(year: int, db: Session = Depends(get_db)):  # pragma: no co
         return {"status": "success", "record_updated": new_record_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
-@router.get('/getdate')
-def get_plantMtrx_by_region(db: Session = Depends(get_db)): # pragma: no cover
-    """Get the last refreshed date of ERP data"""
-    latest_record = db.query(models.erp_logs_table.date_time)\
-                      .order_by(models.erp_logs_table.date_time.desc())\
-                      .first()
 
-    if latest_record:
-        formatted_date = latest_record[0].strftime('%m-%d-%Y') if latest_record[0] else None
-        return {"last_refresh_date": formatted_date}
-    else:
-        return {"error": "No data found"}
-    
+
+@router.post("/upload_file/")
+async def upload_plant_matrix_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    try:
+        if not file.filename.lower().endswith((".csv", ".xlsx", ".xls")):
+            raise HTTPException(status_code=400, detail="Only CSV and Excel files are allowed")
+        contents = file.file.read()
+        # Check the file type and read data accordingly
+        if file.filename.lower().endswith(".csv"):
+            s = str(contents, 'utf-8')
+            data_byte = StringIO(s)
+            df = pd.read_csv(data_byte)
+        else:
+            data_byte = BytesIO(contents)
+            df = pd.read_excel(data_byte)
+        print(df)
+
+        df_unpivoted = df.melt(id_vars=['plant name', 'year'], var_name='period_week_number',
+                               value_name='area_volume_string')
+
+        # Extract period and week numbers from the period_week_number column
+        df_unpivoted[['period', 'week']] = df_unpivoted['period_week_number'].str.split('x', expand=True)
+
+        df_unpivoted['area_volume_string_single'] = df_unpivoted['area_volume_string'].str.split(',')
+        # Explode the areas column to create separate rows for each area
+
+        df_unpivoted = df_unpivoted.explode('area_volume_string_single')
+        # Split the area_volume_string into separate columns
+
+        df_unpivoted[['areas', 'volume']] = df_unpivoted['area_volume_string_single']\
+            .str.split(':', expand=True)
+
+        # Reset index to ensure correct alignment
+        df_unpivoted = df_unpivoted.reset_index(drop=True)
+
+        df_final = df_unpivoted[['plant name', 'areas', 'year', 'period', 'week', 'volume']]
+
+        print(df_final)
+        for index, row in df_final.iterrows():
+            # Assuming the plant name is in the first column of the DataFrame
+            plant_name = row[0]
+
+            # Query the plants table to get the plant ID based on the plant name
+            plant_id = db.query(models.Plant.plant_id)\
+                .filter(models.Plant.plant_name == plant_name).scalar()
+            if not plant_id:
+                raise HTTPException(status_code=404, detail=f"Plant '{plant_name}' not found")
+            print(plant_id, row)
+        return {"message": "Data inserted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
