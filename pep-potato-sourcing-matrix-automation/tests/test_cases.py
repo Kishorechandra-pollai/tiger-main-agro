@@ -481,6 +481,16 @@ def test_get_plantid():
     assert response.status_code == 200
 
 
+def test_get_plants_country_based():
+    response = client.get('/api/plant/get_country_company_name/US')
+    assert response.status_code == 200
+
+
+def test_get_plant_region_based():
+    response = client.get('/api/plant/get_region/8')
+    assert response.status_code == 200
+
+
 """________allocation.py_________"""
 
 
@@ -1374,13 +1384,17 @@ def test_inflation_deflation_task_mappings_by_year():
     response = client.get('/api/inflation_deflation/inflation_deflation_task_mappings_by_year/2023/CANADA')
     assert response.status_code == 200
 
+
 """________vendor_site_code.py_________"""
+
 
 def test_get_view_vendor_site_code():
     response = client.get('/api/vendor_site_code/get_vendor_site_code')
     assert response.status_code == 200
 
+
 """________freightcost.py_________"""
+
 
 def test_view_freight_cost():
     response = client.get('/api/freight-cost/get_freight_cost_rate')
@@ -1401,13 +1415,17 @@ def test_freight_cost_period_view_year():
     response = client.get('/api/freight-cost/get_rate_gowing_area/2023')
     assert response.status_code == 200
 
+
 """________vendor_site_code.py_________"""
+
 
 def test_get_view_vendor_site_code():
     response = client.get('/api/vendor_site_code/get_vendor_site_code')
     assert response.status_code == 200
 
+
 """________summary_price_variance.py_________"""
+
 
 def test_get_price_variance_task_mapping():
     response = client.get('/api/summary_price_variance/price_variance_task_mapping')
@@ -1427,7 +1445,6 @@ def test_get_price_variance_task_mapping_by_year():
 def test_get_total_price_variance():
     response = client.get('/api/summary_price_variance/get_total_price_variance/2023/Canada')
     assert response.status_code == 200
-
 
 # """________plantGrowingMapping.py_________"""
 #

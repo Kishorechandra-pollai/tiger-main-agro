@@ -1,4 +1,5 @@
 from sqlalchemy import or_
+from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from fastapi import Depends, HTTPException, status, APIRouter
@@ -21,8 +22,8 @@ def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
 
         ownership_metric = db.query(models.View_OwnershipMetrics_country) \
             .filter(models.View_OwnershipMetrics_country.columns.country == region,
-                    or_(models.View_OwnershipMetrics_region.columns.year == year -1,
-                        models.View_OwnershipMetrics_region.columns.year == year))\
+                    or_(models.View_OwnershipMetrics_region.columns.year == year - 1,
+                        models.View_OwnershipMetrics_region.columns.year == year)) \
             .distinct().all()
         if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -40,7 +41,7 @@ def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
         ownership_metric = db.query(models.View_OwnershipMetrics_region) \
             .filter(models.View_OwnershipMetrics_region.columns.region_name == region,
                     or_(models.View_OwnershipMetrics_region.columns.year == year - 1,
-                        models.View_OwnershipMetrics_region.columns.year == year))\
+                        models.View_OwnershipMetrics_region.columns.year == year)) \
             .distinct().all()
         if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -51,12 +52,12 @@ def get_ownership_region(region: str, year: int, db: Session = Depends(get_db)):
 
 @router.get('/year/{year}')
 def get_ownership(year: int, db: Session = Depends(get_db)):
-    ownership = db.query(models.View_Ownership)\
+    ownership = db.query(models.View_Ownership) \
         .filter(or_(models.View_Ownership.columns.year == year - 1,
                     models.View_Ownership.columns.year == year)).all()
     ownership_metric_all = db.query(models.View_OwnershipMetrics_all) \
         .filter(or_(models.View_OwnershipMetrics_all.columns.year == year - 1,
-                    models.View_OwnershipMetrics_all.columns.year == year))\
+                    models.View_OwnershipMetrics_all.columns.year == year)) \
         .distinct().all()
     if not ownership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -130,15 +131,15 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
             db.commit()
             update_count += 1
             mapping_data = db.query(models.OwnershipGrowerGrowing.growing_area_id,
-                                    func.sum(models.OwnershipGrowerGrowing.contract))\
+                                    func.sum(models.OwnershipGrowerGrowing.contract)) \
                 .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
                         models.OwnershipGrowerGrowing.status == 'ACTIVE',
                         models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id,
-                        models.OwnershipGrowerGrowing.contract != 0)\
-                .group_by(models.OwnershipGrowerGrowing.growing_area_id)\
+                        models.OwnershipGrowerGrowing.contract != 0) \
+                .group_by(models.OwnershipGrowerGrowing.growing_area_id) \
                 .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
             if len(mapping_data) == 0:
-                db.query(models.Ownership)\
+                db.query(models.Ownership) \
                     .filter(models.Ownership.ownership_id == item.ownership_id) \
                     .update({models.Ownership.contract: 0,
                              models.Ownership.shrinkage: 0,
@@ -152,7 +153,7 @@ def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrower
                     models.OwnershipGrowerGrowing.ownership_id) \
                     .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
                             models.OwnershipGrowerGrowing.status == 'ACTIVE',
-                            models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id)\
+                            models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id) \
                     .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
                 sums_dict = {}
                 for items in per_grower_shrinkage:
@@ -245,15 +246,15 @@ def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db))
     try:
         min_crop_year = db.query(func.min(models.View_total_sum_growing_area.columns.crop_year)) \
             .filter(models.View_total_sum_growing_area.columns.STORAGE_period == crop_year).scalar()
-        view_data = db.query(models.View_total_sum_growing_area)\
+        view_data = db.query(models.View_total_sum_growing_area) \
             .filter(models.View_total_sum_growing_area.columns.STORAGE_period == crop_year,
-                    models.View_total_sum_growing_area.columns.crop_year == min_crop_year)\
+                    models.View_total_sum_growing_area.columns.crop_year == min_crop_year) \
             .all()
         if len(view_data) > 0:
             for data in view_data:
-                existing_record = db.query(models.Ownership)\
+                existing_record = db.query(models.Ownership) \
                     .filter(models.Ownership.growing_area_id == data.growing_area_id,
-                            models.Ownership.crop_year == crop_year)\
+                            models.Ownership.crop_year == crop_year) \
                     .first()
                 if existing_record is not None:
                     db.query(models.Ownership).filter(
@@ -266,4 +267,52 @@ def update_ownership_contract_erp(crop_year: str, db: Session = Depends(get_db))
         else:
             return {"message": f"Total Contract ERP is not available for {crop_year} in erp table."}
     except Exception as e:  # pragma: no cover
+        raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
+
+
+def generate_ownership_payload(growing_area_id, crop_year, crop_type, year):  # pragma: no cover
+    ownership_id = str(growing_area_id) + "#" + str(crop_year)
+    payload = {
+        "ownership_id": ownership_id,
+        "growing_area_id": growing_area_id,
+        "contract": 0,
+        "contract_erp_value": 0,
+        "shrinkage": 0,
+        "to_ship": 0,
+        "extension": 0,
+        "market_and_flex": 0,
+        "total_ship": 0,
+        "year": year,
+        "crop_type": crop_type,
+        "crop_year": str(crop_year)
+    }
+    return payload
+
+
+@router.post('/new_growing_area/{growing_area_id}')
+def new_growing_area(growing_area_id: int, db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        current_year = date.today().year
+        fresh_crop_year = str(current_year)
+        previous_crop_year = str(current_year - 1) + "-" + str(current_year)[2:]
+        storage_crop_year = str(current_year) + "-" + str(current_year + 1)[2:]
+
+        prev_storage_ownership_payload = generate_ownership_payload(growing_area_id, previous_crop_year,
+                                                                    'Storage', current_year - 1)
+        fresh_ownership_payload = generate_ownership_payload(growing_area_id, fresh_crop_year,
+                                                             'Fresh', current_year)
+        storage_ownership_payload = generate_ownership_payload(growing_area_id, storage_crop_year,
+                                                               'Storage', current_year)
+
+        prev_ownership = models.Ownership(**prev_storage_ownership_payload)
+        fresh_ownership = models.Ownership(**fresh_ownership_payload)
+        storage_ownership = models.Ownership(**storage_ownership_payload)
+        db.add(prev_ownership)
+        db.add(fresh_ownership)
+        db.add(storage_ownership)
+        db.commit()
+        return {"Status": "success",
+                "message": f" Ownership record is added for {previous_crop_year}, "
+                           f"{fresh_crop_year}, {storage_crop_year} seasons."}
+    except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
