@@ -2,7 +2,7 @@
 import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from models import (user_information,user_page_mapping_table)
+from models import (user_information,user_page_mapping_table,user_page_mapping)
 from sqlalchemy.orm import Session
 
 
@@ -10,10 +10,19 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 @router.get('/get_user_information')
-def view_user_information(db: Session = Depends(get_db)):
+def get_user_information(db: Session = Depends(get_db)):
     """Function to fetch all records from user_information table """
     try:
         records = db.query(user_information).all()
+        return {"data": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/get_user_page_mapping')
+def get_user_page_mapping(db: Session = Depends(get_db)):
+    """Function to fetch all records from user_information table """
+    try:
+        records = db.query(user_page_mapping).all()
         return {"data": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -26,8 +35,8 @@ def create_user_information(payload: schemas.UserInfoSchema, db: Session = Depen
     db.refresh(user_info)
     return {"status": "success"}
 
-@router.get('/user_page_mapping')
-def user_page_mapping(db: Session = Depends(get_db)):
+@router.get('/user_page_mapping_view')
+def user_page_mapping_view(db: Session = Depends(get_db)):
     """Function to fetch all records from user_information view table """
     try:
         records = db.query(user_page_mapping_table).all()

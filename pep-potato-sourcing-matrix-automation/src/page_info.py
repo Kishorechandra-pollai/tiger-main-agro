@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 @router.get('/get_page_information')
-def view_page_information(db: Session = Depends(get_db)):
+def get_page_information(db: Session = Depends(get_db)):
     """Function to fetch all records from page_information table """
     try:
         records = db.query(page_information).all()
@@ -19,7 +19,7 @@ def view_page_information(db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e)) from e
     
 @router.get('/get_country_information')
-def view_country_information(db: Session = Depends(get_db)):
+def get_country_information(db: Session = Depends(get_db)):
     """Function to fetch all records from country_information table """
     try:
         records = db.query(country_information).all()
@@ -28,7 +28,7 @@ def view_country_information(db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e)) from e
     
 @router.get('/get_access_information')
-def view_country_information(db: Session = Depends(get_db)):
+def get_access_type_information(db: Session = Depends(get_db)):
     """Function to fetch all records from country_information table """
     try:
         records = db.query(access_type_information).all()
