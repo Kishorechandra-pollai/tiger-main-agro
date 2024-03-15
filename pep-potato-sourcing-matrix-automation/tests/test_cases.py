@@ -1445,6 +1445,32 @@ def test_get_price_variance_task_mapping_by_year():
 def test_get_total_price_variance():
     response = client.get('/api/summary_price_variance/get_total_price_variance/2023/Canada')
     assert response.status_code == 200
+    
+"""________user_info.py_________"""
+def test_get_user_information():
+    response = client.get('/api/user_info/get_user_information')
+    assert response.status_code == 200
+    
+def test_get_user_page_mapping():
+    response = client.get('/api/user_info/get_user_page_mapping')
+    assert response.status_code == 200
+
+def test_user_page_mapping_view():
+    response = client.get('/api/user_info/user_page_mapping_view')
+    assert response.status_code == 200
+   
+"""________page_info.py_________"""
+def test_get_page_information():
+    response = client.get('/api/page_info/get_page_information')
+    assert response.status_code == 200
+    
+def test_get_country_information():
+    response = client.get('/api/page_info/get_country_information')
+    assert response.status_code == 200
+
+def test_get_access_type_information():
+    response = client.get('/api/page_info/get_access_information')
+    assert response.status_code == 200
 
 # """________plantGrowingMapping.py_________"""
 #

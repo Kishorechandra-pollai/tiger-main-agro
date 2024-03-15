@@ -1,5 +1,5 @@
 from sqlalchemy import FLOAT
-from sqlalchemy import TIMESTAMP, Column, String, ForeignKey, Integer, Float, MetaData
+from sqlalchemy import TIMESTAMP, Column, String, ForeignKey, Integer, Float, MetaData,Boolean
 from sqlalchemy.sql import func
 from database import engine
 import sqlalchemy as db
@@ -505,6 +505,7 @@ summary_freight_total_yag = db.Table('view_summary_Freight_Total_EXP_YAG',metada
 summary_total_exp_w_solids_yag = db.Table('view_summary_TOTAL_Exp_With_Solids_YAG',metadata, autoload=True, autoload_with=engine)
 summary_total_exp_wo_solids_yag = db.Table('view_summary_TOTAL_EXP_Without_Solids_YAG',metadata, autoload=True, autoload_with=engine)
 inflation_deflation = db.Table('view_inflation_deflation_summary_main',metadata, autoload=True, autoload_with=engine)
+user_page_mapping_table = db.Table('View_user_information',metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
@@ -574,3 +575,46 @@ class erp_logs_table(Base):
     records_inserted = Column(Integer, nullable=True)
     date_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     pipeline_status = Column(String, nullable=True)
+
+class user_information(Base):
+    __tablename__ = "user_information"
+    user_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    email = Column(String, nullable=True)
+    country = Column(String, nullable=True)
+    user_status = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=True)
+    created_by = Column(String, nullable=True,default='SYSTEM')
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True,default='SYSTEM')
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())   
+
+class page_information(Base):
+    __tablename__ = "page_information"
+    page_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    page_name = Column(String, nullable=True)
+    page_status = Column(Boolean, default=True)
+    page_description = Column(String, nullable=True)
+    created_by = Column(String, nullable=True,default='SYSTEM')
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True,default='SYSTEM')
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now()) 
+    
+class user_page_mapping(Base):
+    __tablename__ = "user_page_mapping"
+    user_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    page_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    access_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    country_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    
+class access_type_information(Base):
+    __tablename__ = "access_type_information"
+    access_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    access_name = Column(String, nullable=True)
+    access_value = Column(Integer, nullable=True)
+    
+class country_information(Base):
+    __tablename__ = "country_information"
+    country_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    country_name = Column(String, nullable=True)
