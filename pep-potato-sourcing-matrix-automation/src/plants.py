@@ -44,7 +44,7 @@ def get_plantid(plantId: str, db: Session = Depends(get_db)):
 
 
 @router.get('/get_country_company_name/{filter_value}')
-def get_plants_region_based(filter_value: str, db: Session = Depends(get_db())):
+def get_plants_country_based(filter_value: str, db: Session = Depends(get_db())):
     try:
         if filter_value == 'US' or filter_value == 'Canada' or filter_value == 'Canada-Core':
             plants = db.query(models.Plant) \
