@@ -798,9 +798,9 @@ class UserInfoSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-class NewUserInfoSchema(BaseModel):
+class EditActiveStatusSchema(BaseModel):
     email: Optional[str] = None
-    is_admin: Optional[bool] = None
+    user_status: Optional[bool] = None
 
     class Config:
         orm_mode = True
