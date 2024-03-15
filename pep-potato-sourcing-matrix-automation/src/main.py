@@ -35,6 +35,8 @@ import plant_mtrx_templt
 # import infl_defl_py
 import masters_mapping
 import masters_mapping_new
+import page_info
+import user_info
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -78,7 +80,8 @@ app.include_router(summary_price_variance.router, tags=['summary_price_variance'
 app.include_router(inflation_deflation.router, tags=['inflation_deflation'], prefix='/api/inflation_deflation')
 app.include_router(summary_solids.router, tags=['summary_solids'], prefix='/api/summary_solids')
 app.include_router(summary_overall_cost.router, tags=['summary_overall_cost'], prefix='/api/summary_overall_cost')
-
+app.include_router(user_info.router, tags=['user_info'], prefix='/api/user_info')
+app.include_router(page_info.router, tags=['page_info'], prefix='/api/page_info')
 app.include_router(plant_mtrx_templt.router, tags=['plant_mtrx_templt'], prefix='/api/plant_mtrx_templt')
 app.include_router(masters_mapping.router, tags=['masters_mapping'], prefix='/api/masters_mapping')
 app.include_router(masters_mapping_new.router, tags=['masters_mapping_latest'], prefix='/api/masters_mapping_latest')

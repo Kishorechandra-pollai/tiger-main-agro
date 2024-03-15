@@ -781,3 +781,60 @@ class planVolumeUsageSchema(BaseModel):
 class planVolumeUsagePayload(BaseModel):
     data: List[planVolumeUsageSchema]
 
+class UserInfoSchema(BaseModel):
+    email: Optional[str] = None
+    country: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    user_status: Optional[bool] = None
+    is_admin: Optional[bool] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class NewUserInfoSchema(BaseModel):
+    email: Optional[str] = None
+    is_admin: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class CountryInfoSchema(BaseModel):
+    country_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True        
+
+class AccessInfoSchema(BaseModel):
+    access_name: Optional[str] = None
+    access_value: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True  
+        
+class PageInfoSchema(BaseModel):
+    page_name: Optional[str] = None
+    page_description: Optional[str] = None
+    page_status: Optional[bool] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        

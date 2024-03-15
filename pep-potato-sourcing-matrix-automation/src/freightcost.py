@@ -2,12 +2,17 @@
 import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
+#, File, UploadFile
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table)
 from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+# from typing import List
+# import pandas as pd
+# from io import BytesIO
+# from io import StringIO
 
 router = APIRouter()
 
@@ -336,7 +341,32 @@ async def fetch_records(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+# @router.post("/upload_file/")
+# async def upload_plant_matrix_file(files: List[UploadFile] = File(...), db: Session = Depends(get_db)):
+#     try:
+#         for file in files:
+#             if not file.filename.lower().endswith((".csv", ".xlsx", ".xls")):
+#                 raise HTTPException(status_code=400, detail="Only CSV and Excel files are allowed")
+#             contents = file.file.read()
+           
+#         # Check the file type and read data accordingly
+#         if file.filename.lower().endswith(".csv"):
+#             s = str(contents, 'utf-8')
+#             data_byte = StringIO(s)
+#             df = pd.read_csv(data_byte)
+#         else:
+#             data_byte = BytesIO(contents)
+#             df = pd.read_excel(data_byte)
+#         print(df)
+#         df = df.drop(columns=['growing_area_id', 'plant_id', 'vendor_site_id', 'plant_name', 'growing_area', 'Vendor_Site_Code'], axis=1)
+#         melted_df = df.melt(id_vars=['freight_cost_id', 'company_name', 'year'], var_name='period', value_name='Rate')
+#         melted_df[['period']] = melted_df['period'].str.extract('(\d+)')
+#         melted_df['period'] = pd.to_numeric(melted_df['period'])
+#         return melted_df
 
+#         #return {"message": "Data inserted successfully"}
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))
 
 
 
