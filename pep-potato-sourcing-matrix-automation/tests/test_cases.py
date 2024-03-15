@@ -476,8 +476,8 @@ def test_get_plant():
     assert response.status_code == 200
 
 
-def test_get_plant_region_based():
-    response = client.get('/api/plant/get_region/8')
+def test_get_plantid():
+    response = client.get('/api/plant/10')
     assert response.status_code == 200
 
 
@@ -486,8 +486,8 @@ def test_get_plants_country_based():
     assert response.status_code == 200
 
 
-def test_get_plantid():
-    response = client.get('/api/plant/10')
+def test_get_plant_region_based():
+    response = client.get('/api/plant/get_region/8')
     assert response.status_code == 200
 
 
