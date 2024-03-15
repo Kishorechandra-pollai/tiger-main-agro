@@ -521,65 +521,151 @@ def update_region(crop_category: int, update_payload: schemas.Category, db: Sess
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post('/plant/{plant_id}')
-def delete_plant(plant_id: int, db: Session = Depends(get_db)): # pragma: no cover
-    grower_query = db.query(models.Plant).filter(models.Plant.plant_id == plant_id).update({'status': 'INACTIVE'})
+@router.post('/plant/{plant_id}/{status}')
+def delete_plant(plant_id: int,status:str, db: Session = Depends(get_db)): # pragma: no cover
+    grower_query = db.query(models.Plant).filter(models.Plant.plant_id == plant_id).update({'status': status})
     if not grower_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growers  with this id: {id} found')
 
     db.commit()
-    return {"status":"Plant deleted successfully"}
+    if status=="INACTIVE":
+        return {"status":"Plant deleted successfully"}
+    else:
+        return {"status":"Plant made into Active state"}
 
-@router.post('/grower/{grower_id}')
-def delete_grower(grower_id: int, db: Session = Depends(get_db)): # pragma: no cover
-    grower_query = db.query(models.growers).filter(models.growers.grower_id == grower_id).update({'status': 'INACTIVE'})
+@router.post('/grower/{grower_id}/{status}')
+def delete_grower(grower_id: int,status:str, db: Session = Depends(get_db)): # pragma: no cover
+    grower_query = db.query(models.growers).filter(models.growers.grower_id == grower_id).update({'status': status})
     if not grower_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growers  with this id: {id} found')
 
     db.commit()
-    return {"status":"Grower deleted successfully"}
+    if status=="INACTIVE":
+        return {"status":"Grower deleted successfully"}
+    else:
+        return {"status":"Grower made into Active state"}
 
-@router.post('/growing_area/{growing_area_id}')
-def delete_growing_area(growing_area_id: int, db: Session = Depends(get_db)): # pragma: no cover
-    grower_query = db.query(models.growing_area).filter(models.growing_area.growing_area_id == growing_area_id).update({'status': 'INACTIVE'})
+@router.post('/growing_area/{growing_area_id}/{status}')
+def delete_growing_area(growing_area_id: int,status:str, db: Session = Depends(get_db)): # pragma: no cover
+    grower_query = db.query(models.growing_area).filter(models.growing_area.growing_area_id == growing_area_id).update({'status': STATUS})
     if not grower_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growers  with this id: {id} found')
 
     db.commit()
-    return {"status":"Growing area deleted successfully"}
+    if status=="INACTIVE":
+        return {"status":"Growing area deleted successfully"}
+    else:
+        return {"status":"Growing area made into Active state"}
 
-@router.post('/vendor_site/{vendor_site_id}')
-def delete_vendor_site(vendor_site_id: int, db: Session = Depends(get_db)): # pragma: no cover
-    vendor_site_query = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).update({'status': 'INACTIVE'})
+@router.post('/vendor_site/{vendor_site_id}/{status}')
+def delete_vendor_site(vendor_site_id: int,status:str, db: Session = Depends(get_db)): # pragma: no cover
+    vendor_site_query = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_ID == vendor_site_id).update({'status': status})
     if not vendor_site_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growers  with this id: {id} found')
 
     db.commit()
-    return {"status":"Vendor Site deleted successfully"}
+    if status=="INACTIVE":
+        return {"status":"Vendor Site deleted successfully"}
+    else:
+        return {"status":"Vendor Site made into Active state"}
 
-@router.post('/region/{region_id}')
-def delete_region(region_id: int, db: Session = Depends(get_db)): # pragma: no cover
-    region_query = db.query(models.region).filter(models.region.region_id == region_id).update({'status': 'INACTIVE'})
+@router.post('/region/{region_id}/{status}')
+def delete_region(region_id: int,status:str, db: Session = Depends(get_db)): # pragma: no cover
+    region_query = db.query(models.region).filter(models.region.region_id == region_id).update({'status': status})
     if not region_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growers  with this id: {id} found')
 
     db.commit()
-    return {"status":"Region deleted successfully"}
+    if status=="INACTIVE":
+        return {"status":"Region deleted successfully"}
+    else:
+        return {"status":"Region made into Active state"}
 
-@router.post('/crop_category/{crop_cat_id}')
-def delete_category(crop_cat_id: int, db: Session = Depends(get_db)): # pragma: no cover
-    category_query = db.query(models.category).filter(models.category.crop_category == crop_cat_id).update({'status': 'INACTIVE'})
+@router.post('/crop_category/{crop_cat_id}/{status}')
+def delete_category(crop_cat_id: int,status:str, db: Session = Depends(get_db)): # pragma: no cover
+    category_query = db.query(models.category).filter(models.category.crop_category == crop_cat_id).update({'status': status})
     if not category_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growers  with this id: {id} found')
 
     db.commit()
-    return {"status":"Crop category deleted successfully"}
+    if status=="INACTIVE":
+        return {"status":"Crop category deleted successfully"}
+    else:
+        return {"status":"Crop category made into Active state"}
+    
+@router.get('/get_inactive_plants')
+def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_plants = db.query(models.Plant).filter(models.Plant.status=="INACTIVE").distinct().all()
+        return {"in_plants":all_plants}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+		
+		
+@router.get('/get_inactive_growers')
+def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_growers = db.query(models.growers).filter(models.growers.status=="INACTIVE").distinct().all()
+        return {"in_growers":all_growers}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+		
+		
+@router.get('/get_growing_area')
+def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_ga = db.query(models.growing_area).filter(models.growing_area.status=="ACTIVE").distinct().all()
+        return {"growing_area":all_ga}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('/get_inactive_growing_area')
+def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_ga = db.query(models.growing_area).filter(models.growing_area.status=="INACTIVE").distinct().all()
+        return {"in_growing_area":all_ga}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('/get_vsc')
+def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_vsc = db.query(models.vendor_site_code).filter(models.vendor_site_code.status=="ACTIVE").distinct().all()
+        return {"vsc":all_vsc}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('/get_inactive_vsc')
+def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_vsc = db.query(models.vendor_site_code).filter(models.vendor_site_code.status=="INACTIVE").distinct().all()
+        return {"in_vsc":all_vsc}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+	
+@router.get('/get_inactive_region')
+def get_region(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_regions = db.query(models.region).filter(models.region.status=="INACTIVE").distinct().all()
+        return {"in_regions":all_regions}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+		
+		
+@router.get('/get_inactive_crop_category')
+def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_crop_cat = db.query(models.category).filter(models.category.status=="INACTIVE").distinct().all()
+        return {"in_crop_categories":all_crop_cat}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/upload_file")
 def upload_file(file: UploadFile = File(...)):
