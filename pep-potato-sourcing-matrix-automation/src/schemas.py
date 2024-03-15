@@ -806,6 +806,31 @@ class EditActiveStatusSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+class NewUserInfoSchema(BaseModel):
+    email: Optional[str] = None
+    user_status: Optional[bool] = None
+    page_name: Optional[str] = None
+    access_name: Optional[str] = None
+    country_name: Optional[str] = None
+    is_admin: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        
+
+class UpdateUserInfoSchema(BaseModel):
+    email: Optional[str] = None
+    page_name: Optional[str] = None
+    access_name: Optional[str] = None
+    country_name: Optional[str] = None
+    is_admin: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
 
 class CountryInfoSchema(BaseModel):
     country_name: Optional[str] = None
