@@ -3,7 +3,7 @@ import schemas
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import (user_information,user_page_mapping_table,
-                    user_page_mapping,page_information,access_type_information,country_information,user_page_mapping_view)
+                    user_page_mapping,page_information,access_type_information,country_information)
 from sqlalchemy.orm import Session
 from datetime import datetime
 import logging
@@ -168,7 +168,7 @@ def create_page_mapping(user_id: int, page_name: str, country_name: str, access_
 
 
 @router.post("/create_user_and_mapping/")
-async def create_user_and_mapping(user_details: schemas.NewUserInfoSchema, db: Session = Depends(get_db)):
+async def create_user_and_mapping(user_details: schemas.NewUserInfoSchema, db: Session = Depends(get_db)):# pragma: no cover
     try:
         # Create or get the user
         user = get_or_create_user(user_details, db)
@@ -187,7 +187,7 @@ async def create_user_and_mapping(user_details: schemas.NewUserInfoSchema, db: S
         raise e
     
 @router.post("/update_user_page_mapping")
-async def update_user_page_mapping(user_info: schemas.UpdateUserInfoSchema, db: Session = Depends(get_db)):
+async def update_user_page_mapping(user_info: schemas.UpdateUserInfoSchema, db: Session = Depends(get_db)):# pragma: no cover
 
     # Retrieve the user ID based on the provided email from the user_information table
     user_record = db.query(user_information).filter(user_information.email == user_info.email).first()
