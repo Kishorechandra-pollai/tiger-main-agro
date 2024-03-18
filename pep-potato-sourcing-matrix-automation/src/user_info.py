@@ -55,7 +55,6 @@ async def user_page_mapping_view(db: Session = Depends(get_db)):
                 "country_id": record.country_id,  
                 "access_id": record.access_id, 
                 "email": record.email,  
-                "country": record.country, 
                 "first_name": record.first_name,  
                 "last_name": record.last_name, 
                 "is_admin": record.is_admin,  
