@@ -1,5 +1,5 @@
 from sqlalchemy import FLOAT
-from sqlalchemy import TIMESTAMP, Column, String, ForeignKey, Integer, Float, MetaData,Boolean
+from sqlalchemy import TIMESTAMP, Column, String, ForeignKey, Integer, Float, MetaData,Boolean,PrimaryKeyConstraint
 from sqlalchemy.sql import func
 from database import engine
 import sqlalchemy as db
@@ -506,6 +506,7 @@ summary_total_exp_w_solids_yag = db.Table('view_summary_TOTAL_Exp_With_Solids_YA
 summary_total_exp_wo_solids_yag = db.Table('view_summary_TOTAL_EXP_Without_Solids_YAG',metadata, autoload=True, autoload_with=engine)
 inflation_deflation = db.Table('view_inflation_deflation_summary_main',metadata, autoload=True, autoload_with=engine)
 user_page_mapping_table = db.Table('View_user_information',metadata, autoload=True, autoload_with=engine)
+#user_page_mapping_view = db.Table('View_user_information_country',metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
@@ -583,12 +584,12 @@ class user_information(Base):
     country = Column(String, nullable=True)
     user_status = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=True)
-    created_by = Column(String, nullable=True,default='SYSTEM')
+    created_by = Column(String, nullable=True)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
-    updated_by = Column(String, nullable=True,default='SYSTEM')
-    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())   
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now(), onupdate=func.now())   
 
 class page_information(Base):
     __tablename__ = "page_information"
@@ -603,10 +604,13 @@ class page_information(Base):
     
 class user_page_mapping(Base):
     __tablename__ = "user_page_mapping"
-    user_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
-    page_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
-    access_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
-    country_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    user_id = Column(Integer(), nullable=False, primary_key=True)
+    page_id = Column(Integer(), nullable=False, primary_key=True)
+    access_id = Column(Integer(), nullable=False, primary_key=True)
+    country_id = Column(Integer(), nullable=False, primary_key=True)
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', 'page_id','access_id','country_id'),
+    )
     
 class access_type_information(Base):
     __tablename__ = "access_type_information"
