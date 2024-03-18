@@ -808,17 +808,26 @@ class EditActiveStatusSchema(BaseModel):
         arbitrary_types_allowed = True
 class NewUserInfoSchema(BaseModel):
     email: Optional[str] = None
-    user_status: Optional[bool] = None
     page_name: Optional[str] = None
     access_name: Optional[str] = None
     country_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class NewUserInfoPayload(BaseModel):
+    data: List[NewUserInfoSchema]        
+
+class UserCreationPayload(BaseModel):
+    email: Optional[str] = None
     is_admin: Optional[bool] = None
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
-        
 
 class UpdateUserInfoSchema(BaseModel):
     email: Optional[str] = None
@@ -831,6 +840,9 @@ class UpdateUserInfoSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
+class UpdateUserInfoPayload(BaseModel):
+    data: List[UpdateUserInfoSchema] 
 
 class CountryInfoSchema(BaseModel):
     country_name: Optional[str] = None
