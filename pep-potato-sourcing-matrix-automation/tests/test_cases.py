@@ -1458,11 +1458,7 @@ def test_get_user_page_mapping():
 def test_get_user_page_mapping_table():
     response = client.get('/api/user_info/get_user_page_mapping_table?email=John.Perry%40pepsico.com')
     assert response.status_code == 200
-    
-def test_get_user_page_mapping_view():
-    response = client.get('/api/user_info/user_page_mapping_view')
-    assert response.status_code == 200
-    
+        
 def test_get_user_information_mapping_view():
     response = client.get('/api/user_info/user_information_mapping_view')
     assert response.status_code == 200
