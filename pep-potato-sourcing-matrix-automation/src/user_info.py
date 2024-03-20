@@ -4,7 +4,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import (user_information,user_page_mapping_table,
                     user_page_mapping,page_information,access_type_information,country_information,
-                    user_page_mapping_view,user_information_mapping_view)
+                    user_information_mapping_view)
 from sqlalchemy.orm import Session
 from datetime import datetime
 import logging
@@ -45,16 +45,6 @@ async def get_user_page_mapping_table(email:str,db: Session = Depends(get_db)):
     """Function to fetch records from user_information view table """
     try:
         records = db.query(user_page_mapping_table).filter(user_page_mapping_table.columns.email == email).all()
-        return {"message": "Success", "data": records}
-    except Exception as e:
-        error_detail = str(e)
-        raise HTTPException(status_code=400, detail=error_detail) from e
-
-@router.get('/user_page_mapping_view')
-async def get_user_page_mapping_view(db: Session = Depends(get_db)):
-    """Function to fetch records from user_information view table """
-    try:
-        records = db.query(user_page_mapping_view).all()
         return {"message": "Success", "data": records}
     except Exception as e:
         error_detail = str(e)
