@@ -1,10 +1,11 @@
-from sqlalchemy import or_
+from sqlalchemy import or_, delete
 from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from fastapi import Depends, HTTPException, status, APIRouter
 import schemas
 import models
+from models import Ownership, OwnershipGrowerGrowing
 from database import get_db
 
 router = APIRouter()
@@ -66,145 +67,145 @@ def get_ownership(year: int, db: Session = Depends(get_db)):
             "ownership_metric_region": ownership_metric_all}
 
 
-def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
-    ownership_record = db.query(models.Ownership) \
-        .filter(models.Ownership.ownership_id == ownership_id).first()
-
-    ownership_record.total_ship = ownership_record.to_ship + ownership_record.market_and_flex
-    db.commit()
-
-
-@router.post('/UpdateOwnershipGrowing_mapping/{cropyear_input}')
-def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrowerGrowing,
-                     db: Session = Depends(get_db)):
-    DataUpdateGrowerGrowing = payload.PayloadOwnership
-    update_count = 0
-    cropyear_input = cropyear_input.lstrip().rstrip()
-
-    try:
-        for item in DataUpdateGrowerGrowing:
-            row_id = item.row_id
-            existing_record = db.query(models.OwnershipGrowerGrowing).filter(
-                models.OwnershipGrowerGrowing.row_id == row_id).first()
-            if existing_record is not None:
-                if item.contract == 0:
-                    (db.query(models.OwnershipGrowerGrowing).filter(
-                        models.OwnershipGrowerGrowing.row_id == row_id)
-                     .update({models.OwnershipGrowerGrowing.contract: item.contract,
-                              models.OwnershipGrowerGrowing.shrinkage: 0,
-                              models.OwnershipGrowerGrowing.status: "INACTIVE"}))
-                else:
-                    (db.query(models.OwnershipGrowerGrowing).filter(
-                        models.OwnershipGrowerGrowing.row_id == row_id)
-                     .update({models.OwnershipGrowerGrowing.contract: item.contract,
-                              models.OwnershipGrowerGrowing.shrinkage: item.shrinkage,
-                              models.OwnershipGrowerGrowing.status: "ACTIVE"}))
-            else:  # pragma: no cover
-                if item.contract == 0:
-                    payload = {"row_id": item.row_id,
-                               "growing_area_id": item.growing_area_id,
-                               "grower_id": item.grower_id,
-                               "contract_erp": item.contract_erp,
-                               "contract": item.contract,
-                               "shrinkage": 0,
-                               "contract": item.contract,
-                               "shrinkage": item.shrinkage,
-                               "year": item.year,
-                               "crop_type": item.crop_type,
-                               "crop_year": item.crop_year,
-                               "ownership_id": item.ownership_id,
-                               "status": "INACTIVE"}
-                else:
-                    payload = {"row_id": item.row_id,
-                               "growing_area_id": item.growing_area_id,
-                               "grower_id": item.grower_id,
-                               "contract": item.contract,
-                               "contract_erp": item.contract_erp,
-                               "shrinkage": item.shrinkage,
-                               "year": item.year,
-                               "crop_type": item.crop_type,
-                               "crop_year": item.crop_year,
-                               "ownership_id": item.ownership_id,
-                               "status": "ACTIVE"}
-                new_record = models.OwnershipGrowerGrowing(**payload)
-                db.add(new_record)
-            db.commit()
-            update_count += 1
-            mapping_data = db.query(models.OwnershipGrowerGrowing.growing_area_id,
-                                    func.sum(models.OwnershipGrowerGrowing.contract)) \
-                .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
-                        models.OwnershipGrowerGrowing.status == 'ACTIVE',
-                        models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id,
-                        models.OwnershipGrowerGrowing.contract != 0) \
-                .group_by(models.OwnershipGrowerGrowing.growing_area_id) \
-                .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
-            if len(mapping_data) == 0:
-                db.query(models.Ownership) \
-                    .filter(models.Ownership.ownership_id == item.ownership_id) \
-                    .update({models.Ownership.contract: 0,
-                             models.Ownership.shrinkage: 0,
-                             models.Ownership.to_ship: 0}, synchronize_session='fetch')
-                total_ship_calculation(item.ownership_id, db)
-            else:
-                per_grower_shrinkage = db.query(
-                    models.OwnershipGrowerGrowing.growing_area_id,
-                    models.OwnershipGrowerGrowing.contract,
-                    models.OwnershipGrowerGrowing.shrinkage,
-                    models.OwnershipGrowerGrowing.ownership_id) \
-                    .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
-                            models.OwnershipGrowerGrowing.status == 'ACTIVE',
-                            models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id) \
-                    .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
-                sums_dict = {}
-                for items in per_grower_shrinkage:
-                    key = items[0]  # item[0]: growing_area_id
-                    value1 = items[1]  # item[1]: contract
-                    value2 = items[2]  # item[2]: shrinkage
-
-                    if key in sums_dict:
-                        sums_dict[key][0] += value1
-                        sums_dict[key][1] += value1 * value2 * 0.01
-                    else:
-                        sums_dict[key] = [value1, value1 * value2 * 0.01]
-                output_data = [(key, value[0], value[1]) for key, value in sums_dict.items()]
-                # output_data has growing_id, total_contract_value and total
-                shrinkage_output = [(item[0], (item[2] * 100 / item[1]), (item[1] - item[2])) for item
-                                    in
-                                    output_data]
-                ownership_id_dict = {item[0]: item[3] for item in per_grower_shrinkage}
-                data_list = []
-                for row in mapping_data:
-                    growing_area_id = row[0]
-                    contracted = row[1]
-                    ownership_id = ownership_id_dict.get(growing_area_id)
-                    if ownership_id is not None:
-                        data_list.append(
-                            {"growing_area_id": growing_area_id, "contracted": contracted,
-                             "ownership_id": ownership_id})
-
-                combined_data = [
-                    (var1[0], var1[1], var1[2], var2['contracted'], var2['ownership_id'])
-                    for
-                    var1, var2 in zip(shrinkage_output, data_list)]
-
-                # Populating Ownership table
-                for column_data in combined_data:
-                    growing_id, shrinkage_perc, toship, cont_volume, ownershipid = column_data[0], \
-                        column_data[1], column_data[
-                        2], column_data[3], column_data[4]
-                    db.query(models.Ownership).filter(models.Ownership.ownership_id == ownershipid) \
-                        .update({models.Ownership.ownership_id: ownershipid,
-                                 models.Ownership.growing_area_id: growing_id,
-                                 models.Ownership.contract: cont_volume,
-                                 models.Ownership.shrinkage: shrinkage_perc,
-                                 models.Ownership.to_ship: toship}, synchronize_session='fetch')
-
-                    db.commit()
-                total_ship_calculation(item.ownership_id, db)
-
-        return {"status": "success", "records_updated": update_count}
-    except Exception as e:  # pragma: no cover
-        raise HTTPException(status_code=400, detail=str(e))
+# def total_ship_calculation(ownership_id: str, db: Session = Depends(get_db)):
+#     ownership_record = db.query(models.Ownership) \
+#         .filter(models.Ownership.ownership_id == ownership_id).first()
+#
+#     ownership_record.total_ship = ownership_record.to_ship + ownership_record.market_and_flex
+#     db.commit()
+#
+#
+# @router.post('/UpdateOwnershipGrowing_mapping/{cropyear_input}')
+# def Update_Ownership(cropyear_input: str, payload: schemas.UpdateOwnershipGrowerGrowing,
+#                      db: Session = Depends(get_db)):
+#     DataUpdateGrowerGrowing = payload.PayloadOwnership
+#     update_count = 0
+#     cropyear_input = cropyear_input.lstrip().rstrip()
+#
+#     try:
+#         for item in DataUpdateGrowerGrowing:
+#             row_id = item.row_id
+#             existing_record = db.query(models.OwnershipGrowerGrowing).filter(
+#                 models.OwnershipGrowerGrowing.row_id == row_id).first()
+#             if existing_record is not None:
+#                 if item.contract == 0:
+#                     (db.query(models.OwnershipGrowerGrowing).filter(
+#                         models.OwnershipGrowerGrowing.row_id == row_id)
+#                      .update({models.OwnershipGrowerGrowing.contract: item.contract,
+#                               models.OwnershipGrowerGrowing.shrinkage: 0,
+#                               models.OwnershipGrowerGrowing.status: "INACTIVE"}))
+#                 else:
+#                     (db.query(models.OwnershipGrowerGrowing).filter(
+#                         models.OwnershipGrowerGrowing.row_id == row_id)
+#                      .update({models.OwnershipGrowerGrowing.contract: item.contract,
+#                               models.OwnershipGrowerGrowing.shrinkage: item.shrinkage,
+#                               models.OwnershipGrowerGrowing.status: "ACTIVE"}))
+#             else:  # pragma: no cover
+#                 if item.contract == 0:
+#                     payload = {"row_id": item.row_id,
+#                                "growing_area_id": item.growing_area_id,
+#                                "grower_id": item.grower_id,
+#                                "contract_erp": item.contract_erp,
+#                                "contract": item.contract,
+#                                "shrinkage": 0,
+#                                "contract": item.contract,
+#                                "shrinkage": item.shrinkage,
+#                                "year": item.year,
+#                                "crop_type": item.crop_type,
+#                                "crop_year": item.crop_year,
+#                                "ownership_id": item.ownership_id,
+#                                "status": "INACTIVE"}
+#                 else:
+#                     payload = {"row_id": item.row_id,
+#                                "growing_area_id": item.growing_area_id,
+#                                "grower_id": item.grower_id,
+#                                "contract": item.contract,
+#                                "contract_erp": item.contract_erp,
+#                                "shrinkage": item.shrinkage,
+#                                "year": item.year,
+#                                "crop_type": item.crop_type,
+#                                "crop_year": item.crop_year,
+#                                "ownership_id": item.ownership_id,
+#                                "status": "ACTIVE"}
+#                 new_record = models.OwnershipGrowerGrowing(**payload)
+#                 db.add(new_record)
+#             db.commit()
+#             update_count += 1
+#             mapping_data = db.query(models.OwnershipGrowerGrowing.growing_area_id,
+#                                     func.sum(models.OwnershipGrowerGrowing.contract)) \
+#                 .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
+#                         models.OwnershipGrowerGrowing.status == 'ACTIVE',
+#                         models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id,
+#                         models.OwnershipGrowerGrowing.contract != 0) \
+#                 .group_by(models.OwnershipGrowerGrowing.growing_area_id) \
+#                 .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
+#             if len(mapping_data) == 0:
+#                 db.query(models.Ownership) \
+#                     .filter(models.Ownership.ownership_id == item.ownership_id) \
+#                     .update({models.Ownership.contract: 0,
+#                              models.Ownership.shrinkage: 0,
+#                              models.Ownership.to_ship: 0}, synchronize_session='fetch')
+#                 total_ship_calculation(item.ownership_id, db)
+#             else:
+#                 per_grower_shrinkage = db.query(
+#                     models.OwnershipGrowerGrowing.growing_area_id,
+#                     models.OwnershipGrowerGrowing.contract,
+#                     models.OwnershipGrowerGrowing.shrinkage,
+#                     models.OwnershipGrowerGrowing.ownership_id) \
+#                     .filter(models.OwnershipGrowerGrowing.crop_year == cropyear_input,
+#                             models.OwnershipGrowerGrowing.status == 'ACTIVE',
+#                             models.OwnershipGrowerGrowing.growing_area_id == item.growing_area_id) \
+#                     .order_by(models.OwnershipGrowerGrowing.growing_area_id).all()
+#                 sums_dict = {}
+#                 for items in per_grower_shrinkage:
+#                     key = items[0]  # item[0]: growing_area_id
+#                     value1 = items[1]  # item[1]: contract
+#                     value2 = items[2]  # item[2]: shrinkage
+#
+#                     if key in sums_dict:
+#                         sums_dict[key][0] += value1
+#                         sums_dict[key][1] += value1 * value2 * 0.01
+#                     else:
+#                         sums_dict[key] = [value1, value1 * value2 * 0.01]
+#                 output_data = [(key, value[0], value[1]) for key, value in sums_dict.items()]
+#                 # output_data has growing_id, total_contract_value and total
+#                 shrinkage_output = [(item[0], (item[2] * 100 / item[1]), (item[1] - item[2])) for item
+#                                     in
+#                                     output_data]
+#                 ownership_id_dict = {item[0]: item[3] for item in per_grower_shrinkage}
+#                 data_list = []
+#                 for row in mapping_data:
+#                     growing_area_id = row[0]
+#                     contracted = row[1]
+#                     ownership_id = ownership_id_dict.get(growing_area_id)
+#                     if ownership_id is not None:
+#                         data_list.append(
+#                             {"growing_area_id": growing_area_id, "contracted": contracted,
+#                              "ownership_id": ownership_id})
+#
+#                 combined_data = [
+#                     (var1[0], var1[1], var1[2], var2['contracted'], var2['ownership_id'])
+#                     for
+#                     var1, var2 in zip(shrinkage_output, data_list)]
+#
+#                 # Populating Ownership table
+#                 for column_data in combined_data:
+#                     growing_id, shrinkage_perc, toship, cont_volume, ownershipid = column_data[0], \
+#                         column_data[1], column_data[
+#                         2], column_data[3], column_data[4]
+#                     db.query(models.Ownership).filter(models.Ownership.ownership_id == ownershipid) \
+#                         .update({models.Ownership.ownership_id: ownershipid,
+#                                  models.Ownership.growing_area_id: growing_id,
+#                                  models.Ownership.contract: cont_volume,
+#                                  models.Ownership.shrinkage: shrinkage_perc,
+#                                  models.Ownership.to_ship: toship}, synchronize_session='fetch')
+#
+#                     db.commit()
+#                 total_ship_calculation(item.ownership_id, db)
+#
+#         return {"status": "success", "records_updated": update_count}
+#     except Exception as e:  # pragma: no cover
+#         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post('/create_new_ownership/{year}')
@@ -280,7 +281,8 @@ def generate_ownership_payload(growing_area_id, crop_year, crop_type, year):  # 
         "shrinkage": 0,
         "to_ship": 0,
         "extension": 0,
-        "market_and_flex": 0,
+        "market": 0,
+        "flex": 0,
         "total_ship": 0,
         "year": year,
         "crop_type": crop_type,
@@ -292,7 +294,7 @@ def generate_ownership_payload(growing_area_id, crop_year, crop_type, year):  # 
 @router.post('/new_growing_area/{growing_area_name}')
 def new_growing_area(growing_area_name: str, db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        growing_area_id = db.query(models.growing_area.growing_area_id)\
+        growing_area_id = db.query(models.growing_area.growing_area_id) \
             .filter(models.growing_area.growing_area_name == growing_area_name).scalar()
         current_year = date.today().year
         fresh_crop_year = str(current_year)
@@ -318,3 +320,92 @@ def new_growing_area(growing_area_name: str, db: Session = Depends(get_db)):  # 
                            f"{fresh_crop_year}, {storage_crop_year} seasons."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update: {str(e)}")
+
+
+def calculate_to_ship(growing_area_id: int, crop_period: str, db):
+    total_contract = 0
+    total_to_ship = 0
+    total_shrinkage_per = 0
+    get_contract_shrinkage = db.query(OwnershipGrowerGrowing.contract, OwnershipGrowerGrowing.shrinkage) \
+        .filter(OwnershipGrowerGrowing.growing_area_id == growing_area_id,
+                OwnershipGrowerGrowing.crop_year == crop_period,
+                OwnershipGrowerGrowing.status == 'ACTIVE').all()
+    if len(get_contract_shrinkage) != 0:
+        print(len(get_contract_shrinkage))
+        for item in get_contract_shrinkage:
+            print(item[0], item[1])
+            total_contract += item[0]
+            total_to_ship += item[0] - (item[0] * (item[1] / 100))
+        total_shrinkage_per = ((total_contract - total_to_ship) / total_contract) * 100
+        print(total_contract, total_shrinkage_per, total_to_ship)
+    """Update the Ownership Table."""
+    db.query(Ownership) \
+        .filter(Ownership.crop_year == crop_period,
+                Ownership.growing_area_id == growing_area_id) \
+        .update({Ownership.contract: total_contract,
+                 Ownership.shrinkage: total_shrinkage_per,
+                 Ownership.to_ship: total_to_ship}, synchronize_session=False)
+    db.commit()
+
+
+def calculate_market_and_flex(growing_area_id: int, crop_period: str, db):
+    total_market = 0
+    total_flex = 0
+    get_market_flex = db.query(OwnershipGrowerGrowing.market, OwnershipGrowerGrowing.flex) \
+        .filter(OwnershipGrowerGrowing.status == 'ACTIVE',
+                OwnershipGrowerGrowing.growing_area_id == growing_area_id,
+                OwnershipGrowerGrowing.crop_year == crop_period).all()
+    if len(get_market_flex) != 0:
+        for item in get_market_flex:
+            total_market += item[0]
+            total_flex += item[1]
+    """Update the Ownership Table."""
+    db.query(Ownership) \
+        .filter(Ownership.crop_year == crop_period,
+                Ownership.growing_area_id == growing_area_id) \
+        .update({Ownership.market: total_market,
+                 Ownership.flex: total_flex}, synchronize_session=False)
+    db.commit()
+
+
+def total_ship_calculation(growing_area_id: int, crop_period: str, db):
+    ownership_record = db.query(Ownership) \
+        .filter(Ownership.growing_area_id == growing_area_id,
+                Ownership.crop_year == crop_period).first()
+    print(ownership_record.to_ship)
+    ownership_record.total_ship = float(ownership_record.to_ship) + float(ownership_record.market) \
+                                  + float(ownership_record.flex)
+    db.commit()
+
+
+@router.post('/update_contract_shrinkage_mkt_flex/growing_area_id/{growing_area_id}/crop/{crop_period}')
+def update_contract_shrinkage_mkt_flex(payload: schemas.UpdateOwnershipGrowerGrowing,
+                                       growing_area_id: int, crop_period: str, db: Session = Depends(get_db)):
+    try:
+        data = payload.PayloadOwnership
+        old_records = db.query(OwnershipGrowerGrowing) \
+            .filter(OwnershipGrowerGrowing.growing_area_id == growing_area_id,
+                    OwnershipGrowerGrowing.crop_year == str(crop_period)).all()
+        if old_records:
+            print(len(old_records))
+            db.execute(delete(OwnershipGrowerGrowing)
+                       .filter(OwnershipGrowerGrowing.growing_area_id == growing_area_id,
+                               OwnershipGrowerGrowing.crop_year == crop_period))
+            db.commit()
+            print("Records deleted successfully.")
+        # Insert the records:
+        for data_items in data:
+            new_records = OwnershipGrowerGrowing(**data_items.dict())
+            db.add(new_records)
+            print(new_records)
+        db.commit()
+        print("--------- calculation started -------")
+        calculate_to_ship(growing_area_id, crop_period, db)
+        print("--------- to ship completed -------")
+        calculate_market_and_flex(growing_area_id, crop_period, db)
+        print("--------- market and flex -------")
+        total_ship_calculation(growing_area_id, crop_period, db)
+        return {"status": "success",
+                "message": f"Ownership is updated for this growing_area_id: {growing_area_id}"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

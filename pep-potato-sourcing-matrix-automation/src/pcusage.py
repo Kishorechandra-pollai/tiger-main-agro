@@ -1,5 +1,6 @@
 from sqlalchemy import func
 import models
+from datetime import date
 from models import View_forecast_pcusage, Plant
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, APIRouter
@@ -203,4 +204,39 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.post('/create_new_plant_forcast/{plant_id}')
+def create_new_plant_forecast(plant_id : int, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to create forecast data for new plant added."""
+    try:
+        current_year = date.today().year
+        old_records = db.query(models.pcusage)\
+            .filter(models.pcusage.plant_id == plant_id, models.pcusage.year >= current_year)\
+            .all()
+        if len(old_records) != 0:
+            db.delete(old_records)
+            db.commit()
+        # delete junk data for new plant_id if present.
+        plant_country = db.query(models.region.country)\
+            .join(models.Plant, models.Plant.region_id == models.Plant.region_id)\
+            .filter(models.Plant.plant_id == plant_id).scalar()
+        period_value = 1
+        while period_value <= 13:
+            week_value = 1
+            if period_week_calc.calculate_week_num(current_year, int(period_value)):
+                no_of_week = 5
+            else:
+                no_of_week = 4
+            while week_value <= no_of_week:
+                pc_usage_id = str(plant_id) + "#" + str(current_year) + "#" + str(period_value) + "#" + str(week_value)
+                payload = {"pcusage_id": pc_usage_id, "year": current_year, "period": period_value,
+                           "plant_id": plant_id, "forecasted_value": 0, "country": trim(plant_country),
+                           "week_no": week_value}
+                new_forecast_record = models.pcusage(**payload)
+                db.add(new_forecast_record)
+                week_value += 1
+            db.commit()
+            period_value += 1
+        return {"status": "success", "message": "Forecast data for new plant is generated for current year."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
