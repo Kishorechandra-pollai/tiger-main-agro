@@ -290,7 +290,7 @@ def generate_ownership_payload(growing_area_id, crop_year, crop_type, year):  # 
 
 
 @router.post('/new_growing_area/{growing_area_name}')
-def new_growing_area(growing_area_id: str, db: Session = Depends(get_db)):  # pragma: no cover
+def new_growing_area(growing_area_name: str, db: Session = Depends(get_db)):  # pragma: no cover
     try:
         growing_area_id = db.query(models.growing_area.growing_area_id)\
             .filter(models.growing_area.growing_area_name == growing_area_name).scalar()
