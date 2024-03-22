@@ -167,24 +167,39 @@ async def create_user_and_mapping(user_details: schemas.UserCreationPayload, db:
         if not view_access_id:
             raise HTTPException(status_code=404, detail="Access type with name 'view' not found")
         
+        # Get access_id for edit access if user is admin
+        edit_access_id = None
+        if user_details.is_admin:
+            edit_access = db.query(access_type_information).filter(access_type_information.access_name == 'edit').first()
+            if not edit_access:
+                raise HTTPException(status_code=404, detail="Access type with name 'edit' not found")
+            edit_access_id = edit_access.access_id
+        
         # Create view only access for all unique page IDs for all countries
         country_id = db.query(country_information.country_id).filter(country_information.country_name == 'All').scalar()
         if not country_id:
-            raise HTTPException(status_code=404, detail=f"Country with name '{country_information.country_name}' not found")
+            raise HTTPException(status_code=404, detail=f"Country with name 'All' not found")
+        
         for page_id_tuple in unique_page_ids:
             page_id = page_id_tuple[0]
             # Check if the mapping already exists
             mapping = db.query(user_page_mapping).filter(
                 user_page_mapping.user_id == user.user_id,
-                user_page_mapping.page_id == page_id,  # page_id is a tuple, so accessing the first element
+                user_page_mapping.page_id == page_id,
                 user_page_mapping.country_id == country_id
             ).first()
             if not mapping:
+                # Determine access_id based on user's admin status
+                if user_details.is_admin:
+                    access_id = edit_access_id
+                else:
+                    access_id = view_access_id
+                
                 # Create a new mapping
                 new_mapping = user_page_mapping(
                     user_id=user.user_id,
-                    page_id=page_id,  # page_id is a tuple, so accessing the first element
-                    access_id=view_access_id,
+                    page_id=page_id,
+                    access_id=access_id,
                     country_id=country_id
                 )
                 db.add(new_mapping)
