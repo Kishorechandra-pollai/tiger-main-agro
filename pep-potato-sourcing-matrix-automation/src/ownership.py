@@ -289,9 +289,11 @@ def generate_ownership_payload(growing_area_id, crop_year, crop_type, year):  # 
     return payload
 
 
-@router.post('/new_growing_area/{growing_area_id}')
-def new_growing_area(growing_area_id: int, db: Session = Depends(get_db)):  # pragma: no cover
+@router.post('/new_growing_area/{growing_area_name}')
+def new_growing_area(growing_area_id: str, db: Session = Depends(get_db)):  # pragma: no cover
     try:
+        growing_area_id = db.query(models.growing_area.growing_area_id)\
+            .filter(models.growing_area.growing_area_name == growing_area_name).scalar()
         current_year = date.today().year
         fresh_crop_year = str(current_year)
         previous_crop_year = str(current_year - 1) + "-" + str(current_year)[2:]
