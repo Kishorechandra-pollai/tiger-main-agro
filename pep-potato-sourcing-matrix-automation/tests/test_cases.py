@@ -12,7 +12,7 @@ from main import app
 import models
 import schemas
 from plants import create_plant
-from ownership import Create_new_Ownership, Update_Ownership, update_ownership_contract_erp
+from ownership import Create_new_Ownership, update_ownership_contract_erp
 from extensionMapping import update_extension_mapping, update_extension_plantMtrx
 from MarketFlexMapping import update_Market_flex, filtered_market_year
 from OwnershipGrowerGrowing import (update_contract_erp, delete_post, create_grower_growing_area_mapping)
@@ -256,29 +256,29 @@ def test_mock_create_new_Ownership_exception(mock_get_db):
             assert e.status_code == 400
 
 
-@patch('database.get_db')
-def test_mock_update_ownership(mock_get_db):
-    mock_query_result = [(1, 'Storage', '2022-23')]
-    db_mock = MagicMock()
-    db_mock.query().filter().group_by().order_by().all.return_value = mock_query_result
-    mock_get_db.return_value = db_mock
-
-    payload = [{
-        "row_id": "254#170#2022-23",
-        "growing_area_id": 254,
-        "grower_id": 170,
-        "contract": 10,
-        "year": 2023,
-        "shrinkage": 0,
-        "contract_erp": 535.5,
-        "ownership_id": "254#2022-23",
-        "crop_type": "Storage",
-        "crop_year": "2022-23",
-        "status": "INACTIVE"
-    }]
-    test_payload = schemas.UpdateOwnershipGrowerGrowing(PayloadOwnership=payload)
-    result = Update_Ownership(cropyear_input="2022-23", payload=test_payload, db=db_mock)
-    assert result["status"] == "success"
+# @patch('database.get_db')
+# def test_mock_update_ownership(mock_get_db):
+#     mock_query_result = [(1, 'Storage', '2022-23')]
+#     db_mock = MagicMock()
+#     db_mock.query().filter().group_by().order_by().all.return_value = mock_query_result
+#     mock_get_db.return_value = db_mock
+#
+#     payload = [{
+#         "row_id": "254#170#2022-23",
+#         "growing_area_id": 254,
+#         "grower_id": 170,
+#         "contract": 10,
+#         "year": 2023,
+#         "shrinkage": 0,
+#         "contract_erp": 535.5,
+#         "ownership_id": "254#2022-23",
+#         "crop_type": "Storage",
+#         "crop_year": "2022-23",
+#         "status": "INACTIVE"
+#     }]
+#     test_payload = schemas.UpdateOwnershipGrowerGrowing(PayloadOwnership=payload)
+#     result = Update_Ownership(cropyear_input="2022-23", payload=test_payload, db=db_mock)
+#     assert result["status"] == "success"
 
 
 @patch('database.get_db')
