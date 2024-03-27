@@ -16,12 +16,13 @@ class PlantSchema(BaseModel):
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
 
-class ExPlantSchemaDummy(BaseModel): # pragma: no cover
+
+class ExPlantSchemaDummy(BaseModel):  # pragma: no cover
     plant_name: str
     region_id: int
 
 
-class UpdatePlantSchema(BaseModel): # pragma: no cover
+class UpdatePlantSchema(BaseModel):  # pragma: no cover
     # plant_id: int
     plant_code: str
     plant_name: str
@@ -31,7 +32,8 @@ class UpdatePlantSchema(BaseModel): # pragma: no cover
     crop_category_id: Optional[int] = None
     pgt_plant_name: str
 
-class PlantSchemaDummy(BaseModel): # pragma: no cover
+
+class PlantSchemaDummy(BaseModel):  # pragma: no cover
     # plant_id: int
     plant_code: str
     plant_name: str
@@ -40,15 +42,18 @@ class PlantSchemaDummy(BaseModel): # pragma: no cover
     # status: str
     crop_category_id: Optional[int] = None
     pgt_plant_name: str
+
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-class PlantSiteGrowingAreaMappingDummy(BaseModel): # pragma: no cover
+
+class PlantSiteGrowingAreaMappingDummy(BaseModel):  # pragma: no cover
     plant_name: str
     growing_area: str
     Vendor_Site_Code: str
+
     # plant_id: int
     # vendor_site_id: int
     # growing_area_id: int
@@ -58,7 +63,8 @@ class PlantSiteGrowingAreaMappingDummy(BaseModel): # pragma: no cover
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
-class GrowingAreaDummy(BaseModel): # pragma: no cover
+
+class GrowingAreaDummy(BaseModel):  # pragma: no cover
     ga_status: Optional[str] = "ACTIVE"
     country: str
     ga_desc: str
@@ -69,14 +75,17 @@ class GrowingAreaDummy(BaseModel): # pragma: no cover
     sp_start: int
     sw_start: int
 
-class VendorSiteCodeDummy(BaseModel): # pragma: no cover
+
+class VendorSiteCodeDummy(BaseModel):  # pragma: no cover
     vsc_status: Optional[str] = "ACTIVE"
 
-class MastersMapping(BaseModel): # pragma: no cover
+
+class MastersMapping(BaseModel):  # pragma: no cover
     plant: PlantSchemaDummy
     psga_map: PlantSiteGrowingAreaMappingDummy
     growing_area: GrowingAreaDummy
     vsc: VendorSiteCodeDummy
+
 
 class MastersMappingExPlant(BaseModel):
     plant: ExPlantSchemaDummy
@@ -104,6 +113,7 @@ class UpdateGrowingAreaSchema(BaseModel):
     updated_by: Optional[str] = None
     pgt_growing_area: str
 
+
 class GrowingAreaSchemaMasters(BaseModel):
     # growing_area_id: int
     growing_area_name: str
@@ -122,6 +132,7 @@ class GrowingAreaSchemaMasters(BaseModel):
     # updated_time: Optional[datetime] = None
     # created_by: Optional[str] = None
     # updated_by: Optional[str] = None
+
 
 class GrowingAreaSchema(BaseModel):
     growing_area_id: int
@@ -144,13 +155,15 @@ class GrowingAreaSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+
 class edit_gr_grarea_masters(BaseModel):
     grower_name: str
     grower_id: int
     growing_area_name: List[str]
     growing_area_id: List[int]
 
-class GrowersDummy(BaseModel): # pragma: no cover
+
+class GrowersDummy(BaseModel):  # pragma: no cover
     grower_name: str
     owner: str
     region: int
@@ -160,19 +173,23 @@ class GrowersDummy(BaseModel): # pragma: no cover
     grower_abbreviation_code: str
     pgt_grower_name: str
 
-class GrAreaMapDummy(BaseModel): # pragma: no cover
+
+class GrAreaMapDummy(BaseModel):  # pragma: no cover
     growing_area_name: List[str]
 
-class MastersMappingGrowers(BaseModel): # pragma: no cover
+
+class MastersMappingGrowers(BaseModel):  # pragma: no cover
     growers: GrowersDummy
     gr_area_map: GrAreaMapDummy
 
-class ExGrowersDummy(BaseModel): # pragma: no cover
+
+class ExGrowersDummy(BaseModel):  # pragma: no cover
     grower_name: str
     ex_growing_area_name: str
     new_growing_area_name: str
 
-class MastersMappingExGrowers(BaseModel): # pragma: no cover
+
+class MastersMappingExGrowers(BaseModel):  # pragma: no cover
     growers_gr_area: ExGrowersDummy
 
 
@@ -264,6 +281,8 @@ class OwnershipGrowerGrowingSchema(BaseModel):
     year: Optional[int] = None
     shrinkage: Optional[float] = None
     contract_erp: Optional[float] = None
+    market: Optional[float] = None
+    flex: Optional[float] = None
     ownership_id: str
     crop_type: Optional[str] = None
     crop_year: str
@@ -303,6 +322,7 @@ class PlantSiteGrowingAreaMappingSchema(BaseModel):
     vendor_site_id: int
     plant_id: int
     growing_area_id: int
+
 
 class EditPSGAMastersSchema(BaseModel):
     plant_name: str
@@ -344,9 +364,10 @@ class FreightCostMappingSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+
 class FreightCostRatesSchema(BaseModel):
     """Class representing schema for freight_cost_rates table"""
-    plant_id:Optional[int] = None
+    plant_id: Optional[int] = None
     growing_area_id: Optional[int] = None
     vendor_site_id: Optional[int] = None
     currency: Optional[str] = None
@@ -360,6 +381,8 @@ class FreightCostRatesSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
+
 class OwnershipSchema(BaseModel):
     """Class representing schema for ownership table"""
     ownership_id: str
@@ -383,6 +406,7 @@ class OwnershipSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
 
 class PlantMatrix(BaseModel):
     plant_matrix_id: str
@@ -418,6 +442,7 @@ class plantMtrx_template(BaseModel):
     growing_area_id: int
     percentage_value: float
 
+
 class VendorSiteCodeSchemaMasters(BaseModel):
     VENDOR_SITE_CODE: Optional[str] = None
     # created_by: Optional[str] = None
@@ -438,6 +463,7 @@ class UpdateVendorSiteCodeSchema(BaseModel):
     updated_time: Optional[datetime] = None
     region_id: Optional[int] = None
     pgt_vsc: str
+
 
 class VendorSiteCodeSchema(BaseModel):
     VENDOR_SITE_CODE: Optional[int] = None
@@ -568,6 +594,7 @@ class FreightTaskMappingsSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+
 class FreightTaskMappingsPayload(BaseModel):
     data: List[FreightTaskMappingsSchema]
 
@@ -674,6 +701,7 @@ class p4pMasterInfoSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+
 class p4pTaskMappingsSchema(BaseModel):
     period: Optional[int] = None
     p4p_id: Optional[int] = None
@@ -709,6 +737,7 @@ class MarketFlexMappingSchema(BaseModel):
     ownership_id: Optional[str] = None
     status: Optional[str] = None
     market_flex_value: Optional[int] = None
+
 
 class SolidTaskMasterSchema(BaseModel):
     task_name: Optional[str] = None
@@ -781,6 +810,7 @@ class planVolumeUsageSchema(BaseModel):
 class planVolumeUsagePayload(BaseModel):
     data: List[planVolumeUsageSchema]
 
+
 class UserInfoSchema(BaseModel):
     email: Optional[str] = None
     country: Optional[str] = None
@@ -797,6 +827,7 @@ class UserInfoSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
 
 class EditActiveStatusSchema(BaseModel):
     email: Optional[str] = None
@@ -844,13 +875,15 @@ class UpdateUserInfoSchema(BaseModel):
 class UpdateUserInfoPayload(BaseModel):
     data: List[UpdateUserInfoSchema] 
 
+
 class CountryInfoSchema(BaseModel):
     country_name: Optional[str] = None
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
-        arbitrary_types_allowed = True        
+        arbitrary_types_allowed = True
+
 
 class AccessInfoSchema(BaseModel):
     access_name: Optional[str] = None
@@ -859,8 +892,9 @@ class AccessInfoSchema(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
-        arbitrary_types_allowed = True  
-        
+        arbitrary_types_allowed = True
+
+
 class PageInfoSchema(BaseModel):
     page_name: Optional[str] = None
     page_description: Optional[str] = None
@@ -874,4 +908,3 @@ class PageInfoSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
-        
