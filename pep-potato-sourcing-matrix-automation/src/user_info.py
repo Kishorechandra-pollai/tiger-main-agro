@@ -70,46 +70,6 @@ async def update_user_status(user_info: schemas.EditActiveStatusSchema,db: Sessi
     db.commit()
     return {"message": "User status updated successfully"}
     
-# @router.post("/update_user_page_mapping")
-# async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: Session = Depends(get_db)):# pragma: no cover
-#     for user_info in payload.data:
-#         user_record = db.query(user_information).filter(user_information.email == user_info.email).first()
-#         if not user_record:
-#             raise HTTPException(status_code=404, detail=f"User with email {user_info.email} not found")
-#         user_id = user_record.user_id
-        
-#         # Fetch page_id based on provided page_name from frontend
-#         page_record = db.query(page_information).filter(page_information.page_name == user_info.page_name).first()
-#         if not page_record:
-#             raise HTTPException(status_code=404, detail=f"Page with name {user_info.page_name} not found")
-#         page_id = page_record.page_id
-
-#         # Fetch access_id and country_id based on provided access type and country from frontend
-#         access_record = db.query(access_type_information).filter(access_type_information.access_name == user_info.access_name).first()
-#         country_record = db.query(country_information).filter(country_information.country_name == user_info.country_name).first()
-
-#         if not access_record:
-#             raise HTTPException(status_code=404, detail=f"Access type {user_info.access_name} not found")
-#         if not country_record:
-#             raise HTTPException(status_code=404, detail=f"Country {user_info.country_name} not found")
-
-#         access_id = access_record.access_id
-#         country_id = country_record.country_id
-
-#         # Update user_page_mapping table for the provided user_id and page_id
-#         db.query(user_page_mapping).filter(user_page_mapping.user_id == user_id, user_page_mapping.page_id == page_id).update({
-#             "access_id": access_id,
-#             "country_id": country_id
-#         })
-
-#         # Update is_admin status in user_information table
-#         db.query(user_information).filter(user_information.user_id == user_id).update({
-#             "is_admin": user_info.is_admin
-#         })
-
-#     db.commit()
-#     return {"message": "User page mappings updated successfully"}
-
 @router.post("/update_user_page_mapping")
 async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: Session = Depends(get_db)):# pragma: no cover
     for user_info in payload.data:
@@ -140,7 +100,7 @@ async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: S
         if user_info.is_admin == False:
             admin_count = db.query(user_information).filter(user_information.is_admin == True).count()
             if admin_count <= 1:
-                raise HTTPException(status_code=400, detail="At least one admin user must exist")
+                return{"message": "At least one admin user must exist"}
 
         # Update user_page_mapping table for the provided user_id and page_id
         db.query(user_page_mapping).filter(user_page_mapping.user_id == user_id, user_page_mapping.page_id == page_id).update({
