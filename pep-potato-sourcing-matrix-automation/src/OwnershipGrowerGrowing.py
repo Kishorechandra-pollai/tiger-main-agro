@@ -14,6 +14,7 @@ def get_ownershipMapping(year: int, db: Session = Depends(get_db)):
     grower_growing = db.query(models.OwnershipGrowerGrowing.row_id,
                               models.OwnershipGrowerGrowing.ownership_id,
                               models.OwnershipGrowerGrowing.growing_area_id,
+                              models.OwnershipGrowerGrowing.grower_id,
                               models.growers.grower_name,
                               models.OwnershipGrowerGrowing.shrinkage,
                               models.OwnershipGrowerGrowing.contract_erp,
@@ -21,7 +22,9 @@ def get_ownershipMapping(year: int, db: Session = Depends(get_db)):
                               models.OwnershipGrowerGrowing.market,
                               models.OwnershipGrowerGrowing.flex,
                               models.OwnershipGrowerGrowing.year,
-                              models.OwnershipGrowerGrowing.crop_year)\
+                              models.OwnershipGrowerGrowing.crop_type,
+                              models.OwnershipGrowerGrowing.crop_year,
+                              models.OwnershipGrowerGrowing.status)\
         .join(models.growers,
               models.OwnershipGrowerGrowing.grower_id == models.growers.grower_id)\
         .filter(models.OwnershipGrowerGrowing.status == "ACTIVE",
