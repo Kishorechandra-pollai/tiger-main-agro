@@ -18,6 +18,8 @@ def get_ownershipMapping(year: int, db: Session = Depends(get_db)):
                               models.OwnershipGrowerGrowing.shrinkage,
                               models.OwnershipGrowerGrowing.contract_erp,
                               models.OwnershipGrowerGrowing.contract,
+                              models.OwnershipGrowerGrowing.market,
+                              models.OwnershipGrowerGrowing.flex,
                               models.OwnershipGrowerGrowing.year,
                               models.OwnershipGrowerGrowing.crop_year)\
         .join(models.growers,
@@ -103,6 +105,8 @@ def update_contract_erp(crop_year: str, db: Session = Depends(get_db)):
                                "contract": 0,
                                "contract_erp": data.sum_contract,
                                "shrinkage": 0,
+                               "market": 0,
+                               "flex": 0,
                                "year": data.STORAGE_period[:4],
                                "crop_type": data.CROP_TYPE,
                                "crop_year": data.STORAGE_period,
