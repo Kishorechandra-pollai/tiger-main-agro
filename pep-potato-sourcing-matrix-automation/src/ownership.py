@@ -336,8 +336,10 @@ def calculate_to_ship(growing_area_id: int, crop_period: str, db):
             print(item[0], item[1])
             total_contract += item[0]
             total_to_ship += item[0] - (item[0] * (item[1] / 100))
-        total_shrinkage_per = ((total_contract - total_to_ship) / total_contract) * 100
-        print(total_contract, total_shrinkage_per, total_to_ship)
+        if total_contract == 0:
+            total_shrinkage_per = 0
+        else:
+            total_shrinkage_per = ((total_contract - total_to_ship) / total_contract) * 100
     """Update the Ownership Table."""
     db.query(Ownership) \
         .filter(Ownership.crop_year == crop_period,
@@ -387,7 +389,6 @@ def update_contract_shrinkage_mkt_flex(payload: schemas.UpdateOwnershipGrowerGro
             .filter(OwnershipGrowerGrowing.growing_area_id == growing_area_id,
                     OwnershipGrowerGrowing.crop_year == str(crop_period)).all()
         if old_records:
-            print(len(old_records))
             db.execute(delete(OwnershipGrowerGrowing)
                        .filter(OwnershipGrowerGrowing.growing_area_id == growing_area_id,
                                OwnershipGrowerGrowing.crop_year == crop_period))
@@ -397,7 +398,6 @@ def update_contract_shrinkage_mkt_flex(payload: schemas.UpdateOwnershipGrowerGro
         for data_items in data:
             new_records = OwnershipGrowerGrowing(**data_items.dict())
             db.add(new_records)
-            print(new_records)
         db.commit()
         print("--------- calculation started -------")
         calculate_to_ship(growing_area_id, crop_period, db)
