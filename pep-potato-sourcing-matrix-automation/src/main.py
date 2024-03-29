@@ -69,7 +69,7 @@ app.include_router(dashboard.router, tags=['dashboard'], prefix='/api/dashboard'
 app.include_router(potatorates.router,tags=['potato-rates'], prefix='/api/potato_rates')
 
 app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
-app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
+# app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
 app.include_router(solidrates.router,tags=['solid-rates'], prefix='/api/solid_rates')
 app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
 app.include_router(generaladministrative.router, tags=['general-administrative'], prefix='/api/general_administrative')

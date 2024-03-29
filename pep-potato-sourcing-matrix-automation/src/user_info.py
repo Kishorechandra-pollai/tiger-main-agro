@@ -79,15 +79,14 @@ async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: S
             raise HTTPException(status_code=404, detail=f"User with email {user_info.email} not found")
         user_id = user_record.user_id
         
-        # Fetch page_id based on provided page_name from frontend
-        page_record = db.query(page_information).filter(page_information.page_name == user_info.page_name).first()
-        if not page_record:
-            raise HTTPException(status_code=404, detail=f"Page with name {user_info.page_name} not found")
-        page_id = page_record.page_id
-
         # Fetch access_id and country_id based on provided access type and country from frontend
-        access_record = db.query(access_type_information).filter(access_type_information.access_name == user_info.access_name).first()
-        country_record = db.query(country_information).filter(country_information.country_name == user_info.country_name).first()
+        if user_info.is_admin:
+            # If user is admin, set access to "Edit" and country to "All"
+            access_record = db.query(access_type_information).filter(access_type_information.access_name == "Edit").first()
+            country_record = db.query(country_information).filter(country_information.country_name == "All").first()
+        else:
+            access_record = db.query(access_type_information).filter(access_type_information.access_name == user_info.access_name).first()
+            country_record = db.query(country_information).filter(country_information.country_name == user_info.country_name).first()
 
         if not access_record:
             raise HTTPException(status_code=404, detail=f"Access type {user_info.access_name} not found")
@@ -104,10 +103,25 @@ async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: S
                 raise HTTPException(status_code=400, detail="At least one admin user must exist")
 
         # Update user_page_mapping table for the provided user_id and page_id
-        db.query(user_page_mapping).filter(user_page_mapping.user_id == user_id, user_page_mapping.page_id == page_id).update({
-            "access_id": access_id,
-            "country_id": country_id
-        })
+        if user_info.is_admin:
+            # If user is admin, update access for all pages to "Edit" and country to "All"
+            pages = db.query(page_information).all()
+            for page in pages:
+                db.query(user_page_mapping).filter(user_page_mapping.user_id == user_id, user_page_mapping.page_id == page.page_id).update({
+                    "access_id": access_id,
+                    "country_id": country_id
+                })
+        else:
+            # If user is not admin, update access for the specific page provided in the payload
+            page_record = db.query(page_information).filter(page_information.page_name == user_info.page_name).first()
+            if not page_record:
+                raise HTTPException(status_code=404, detail=f"Page with name {user_info.page_name} not found")
+            page_id = page_record.page_id
+
+            db.query(user_page_mapping).filter(user_page_mapping.user_id == user_id, user_page_mapping.page_id == page_id).update({
+                "access_id": access_id,
+                "country_id": country_id
+            })
 
         # Update is_admin status in user_information table
         db.query(user_information).filter(user_information.user_id == user_id).update({
