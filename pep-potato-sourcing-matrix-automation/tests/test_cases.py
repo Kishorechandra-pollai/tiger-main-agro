@@ -130,6 +130,8 @@ def test_mock_create_grower_growing_area_mapping(mock_get_db):
         "year": 2023,
         "shrinkage": 0,
         "contract_erp": 0,
+        "market": 0,
+        "flex": 0,
         "ownership_id": "254#2022-23",
         "crop_type": "Storage",
         "crop_year": "2022-23",
