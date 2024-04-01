@@ -73,6 +73,9 @@ async def update_user_status(user_info: schemas.EditActiveStatusSchema,db: Sessi
 
 @router.post("/update_user_page_mapping")
 async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: Session = Depends(get_db)):# pragma: no cover
+    # Calculate the admin count outside of the loop
+    admin_count = db.query(user_information).filter(user_information.is_admin == True).count()
+
     for user_info in payload.data:
         user_record = db.query(user_information).filter(user_information.email == user_info.email).first()
         if not user_record:
@@ -98,7 +101,6 @@ async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: S
 
         # Check if the user is an admin and there is more than one admin
         if user_info.is_admin == False:
-            admin_count = db.query(user_information).filter(user_information.is_admin == True).count()
             if admin_count <= 1:
                 raise HTTPException(status_code=400, detail="At least one admin user must exist")
 
