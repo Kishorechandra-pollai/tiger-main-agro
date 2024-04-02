@@ -602,7 +602,8 @@ class page_information(Base):
     created_by = Column(String, nullable=True,default='SYSTEM')
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     updated_by = Column(String, nullable=True,default='SYSTEM')
-    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now()) 
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    is_read_only = Column(Boolean, default=False)
     
 class user_page_mapping(Base):
     __tablename__ = "user_page_mapping"
