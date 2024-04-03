@@ -61,12 +61,19 @@ async def get_user_information_mapping_view(db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=error_detail) from e
     
 @router.post("/update_user_status")
-async def update_user_status(user_info: schemas.EditActiveStatusSchema,db: Session = Depends(get_db)): # pragma: no cover
+async def update_user_status(user_info: schemas.EditActiveStatusSchema, db: Session = Depends(get_db)): # pragma: no cover
     user_record = db.query(user_information).filter(user_information.email == user_info.email).first()
     if not user_record:
         raise HTTPException(status_code=404, detail="User not found")
+    # Check if the user is an admin
+    if user_record.is_admin:
+        # Check if there is only one admin in the database
+        admin_count = db.query(user_information).filter(user_information.is_admin == True).count()
+        if admin_count == 1 and user_info.user_status is False:
+            raise HTTPException(status_code=400, detail="Cannot set status to inactive. The user is the only admin.")
+    
     if user_info.user_status is not None:
-        user_record.user_status = not user_record.user_status  
+        user_record.user_status = not user_record.user_status
     db.commit()
     return {"message": "User status updated successfully"}
     
