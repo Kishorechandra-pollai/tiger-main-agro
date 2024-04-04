@@ -173,7 +173,18 @@ def add_growing_area(payload: schemas.GrowingAreaSchemaMasters, db: Session = De
 @router.get('/get_plants')
 def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_plants = db.query(models.Plant).filter(models.Plant.status=="ACTIVE").distinct().all()
+        all_plants = (db.query(models.Plant.plant_id,
+                               models.Plant.company_name,
+                               func.trim(models.Plant.created_by).label("created_by"),
+                               func.trim(models.Plant.status).label("status"),
+                               func.trim(models.Plant.updated_by).label("updated_by"),
+                               models.Plant.created_time,
+                               models.Plant.pgt_plant_name,
+                               models.Plant.plant_code,
+                               models.Plant.plant_name,
+                               models.Plant.region_id,
+                               models.Plant.crop_category_id,
+                               models.Plant.updated_time).filter(models.Plant.status=="ACTIVE").distinct().all())
         return {"plants":all_plants}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -182,7 +193,18 @@ def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_plant/{plant_name}')
 def get_plant(plant_name: str, db: Session = Depends(get_db)): # pragma: no cover
     try:
-        plant_details = db.query(models.Plant).filter(models.Plant.plant_name == plant_name,models.Plant.status=="ACTIVE").first()
+        plant_details = (db.query(models.Plant.plant_id,
+                               models.Plant.company_name,
+                               func.trim(models.Plant.created_by).label("created_by"),
+                               func.trim(models.Plant.status).label("status"),
+                               func.trim(models.Plant.updated_by).label("updated_by"),
+                               models.Plant.created_time,
+                               models.Plant.pgt_plant_name,
+                               models.Plant.plant_code,
+                               models.Plant.plant_name,
+                               models.Plant.region_id,
+                               models.Plant.crop_category_id,
+                               models.Plant.updated_time).filter(models.Plant.plant_name == plant_name,models.Plant.status=="ACTIVE").first())
         vsc_ga = db.query(models.PlantSiteGrowingAreaMapping.growing_area,models.PlantSiteGrowingAreaMapping.Vendor_Site_Code,
                         models.PlantSiteGrowingAreaMapping.growing_area_id,
                         models.PlantSiteGrowingAreaMapping.vendor_site_id).filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
@@ -360,7 +382,20 @@ def update_plant(vendor_site_id: int, update_payload: schemas.UpdateVendorSiteCo
 @router.get('/get_growers')
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_growers = db.query(models.growers).filter(models.growers.status=="ACTIVE").distinct().all()
+        all_growers = (db.query(models.growers.grower_name, 
+                               func.trim(models.growers.owner).label("owner"), 
+                               func.trim(models.growers.country).label("country"), 
+                               func.trim(models.growers.volume).label("volume"), 
+                               func.trim(models.growers.status).label("status"),
+                               models.growers.updated_by,
+                               models.growers.updated_time,
+                               models.growers.pgt_grower_name,
+                               models.growers.region,
+                               models.growers.grower_id,
+                               models.growers.created_by,
+                               models.growers.created_time,
+                               models.growers.grower_abbreviation_code)
+                               .filter(models.growers.status=="ACTIVE").distinct().all())
         return {"growers":all_growers}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -369,8 +404,20 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_grower/{grower_name}')
 def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cover
     try:
-        grower_details = db.query(models.growers).filter(models.growers.grower_name == grower_name,
-                                                        models.growers.status == "ACTIVE").all()
+        grower_details = (db.query(models.growers.grower_name, 
+                               func.trim(models.growers.owner).label("owner"), 
+                               func.trim(models.growers.country).label("country"), 
+                               func.trim(models.growers.volume).label("volume"), 
+                               func.trim(models.growers.status).label("status"),
+                               models.growers.updated_by,
+                               models.growers.updated_time,
+                               models.growers.pgt_grower_name,
+                               models.growers.region,
+                               models.growers.grower_id,
+                               models.growers.created_by,
+                               models.growers.created_time,
+                               models.growers.grower_abbreviation_code)
+                               .filter(models.growers.grower_name == grower_name,models.growers.status == "ACTIVE").all())
         grower_growing_area_details = (db.query(models.preferred_grower.grower_name,models.preferred_grower.growing_area_name,
                                                 models.preferred_grower.grower_id,models.preferred_grower.growing_area_id).
                                         filter(models.preferred_grower.grower_name==grower_name).distinct().all())
@@ -421,7 +468,16 @@ def modify_ex_grower(payload: schemas.edit_gr_grarea_masters,db:Session = Depend
 @router.get('/get_region')
 def get_region(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_regions = db.query(models.region).filter(models.region.status=="ACTIVE").distinct().all()
+        all_regions = (db.query(models.region.region_name,
+                                func.trim(models.region.country).label("country"),
+                                func.trim(models.region.updated_by).label("updated_by"),
+                                func.trim(models.region.status).label("status"),
+                                models.region.updated_time,
+                                func.trim(models.region.status).label("status"),
+                                models.region.updated_time,
+                                func.trim(models.region.created_by).label("created_by"),
+                                models.region.region_id,
+                                models.region.created_time).filter(models.region.status=="ACTIVE").distinct().all())
         return {"regions":all_regions}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -430,8 +486,17 @@ def get_region(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_region/{region_name}')
 def get_plant(region_name: str, db: Session = Depends(get_db)): # pragma: no cover
     try:
-        region_details = db.query(models.region).filter(models.region.region_name == region_name,
-                                                        models.region.status == "ACTIVE").all()
+        region_details = (db.query(models.region.region_name,
+                                func.trim(models.region.country).label("country"),
+                                func.trim(models.region.updated_by).label("updated_by"),
+                                func.trim(models.region.status).label("status"),
+                                models.region.updated_time,
+                                func.trim(models.region.status).label("status"),
+                                models.region.updated_time,
+                                func.trim(models.region.created_by).label("created_by"),
+                                models.region.region_id,
+                                models.region.created_time).filter(models.region.region_name == region_name,
+                                                        models.region.status == "ACTIVE").all())
         return {"region_details":region_details}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -472,7 +537,14 @@ def update_region(region_id: int, update_payload: schemas.UpdateRegion, db: Sess
 @router.get('/get_crop_category')
 def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_crop_cat = db.query(models.category).filter(models.category.status=="ACTIVE").distinct().all()
+        all_crop_cat = (db.query(models.category.crop_category,
+                                func.trim(models.category.created_by).label("created_by"),
+                                func.trim(models.category.status).label("status"),
+                                models.category.updated_time,
+                                func.trim(models.category.updated_by).label("updated_by"),
+                                models.category.category_name,
+                                func.trim(models.category.country).label("country"),
+                                models.category.created_time).filter(models.category.status=="ACTIVE").distinct().all())
         return {"crop_categories":all_crop_cat}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -481,8 +553,15 @@ def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_crop_cat/{category_name}')
 def get_plant(category_name: str, db: Session = Depends(get_db)): # pragma: no cover
     try:
-        crop_details = db.query(models.category).filter(models.category.category_name == category_name,
-                                                        models.category.status == "ACTIVE").all()
+        crop_details = (db.query(models.category.crop_category,
+                                func.trim(models.category.created_by).label("created_by"),
+                                func.trim(models.category.status).label("status"),
+                                models.category.updated_time,
+                                func.trim(models.category.updated_by).label("updated_by"),
+                                models.category.category_name,
+                                func.trim(models.category.country).label("country"),
+                                models.category.created_time).filter(models.category.category_name == category_name,
+                                                        models.category.status == "ACTIVE").all())
         return {"crop_details":crop_details}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -602,8 +681,33 @@ def delete_category(crop_cat_id: int,status:str, db: Session = Depends(get_db)):
 @router.get('/get_inactive_plants')
 def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_plants = db.query(models.Plant).filter(models.Plant.status=="INACTIVE").distinct().all()
-        return {"in_plants":all_plants}
+        all_plants = db.query(models.Plant.plant_id,
+                               models.Plant.company_name,
+                               func.trim(models.Plant.created_by).label("created_by"),
+                               func.trim(models.Plant.status).label("status"),
+                               func.trim(models.Plant.updated_by).label("updated_by"),
+                               models.Plant.created_time,
+                               models.Plant.pgt_plant_name,
+                               models.Plant.plant_code,
+                               models.Plant.plant_name,
+                               models.Plant.region_id,
+                               models.Plant.crop_category_id,
+                               models.Plant.updated_time).filter(models.Plant.status=="INACTIVE").distinct().all()
+        empty_json =  [{
+            "plant_id": 000,
+            "company_name": "Not Appl.",
+            "created_by": "Not Appl.",
+            "status": "Not Appl.",
+            "updated_by": "Not Appl.",
+            "created_time": "2023-10-18T13:17:55.120000",
+            "pgt_plant_name": "Not Appl.",
+            "plant_code": "Not Appl.",
+            "plant_name": "Not Appl.",
+            "region_id": 000,
+            "crop_category_id": 000,
+            "updated_time": "2024-03-18T16:29:09.660000"
+            }]
+        return {"in_plants":all_plants if all_plants else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 		
@@ -611,8 +715,37 @@ def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_inactive_growers')
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_growers = db.query(models.growers).filter(models.growers.status=="INACTIVE").distinct().all()
-        return {"in_growers":all_growers}
+        all_growers = (db.query(models.growers.grower_name, 
+                               func.trim(models.growers.owner).label("owner"), 
+                               func.trim(models.growers.country).label("country"), 
+                               func.trim(models.growers.volume).label("volume"), 
+                               func.trim(models.growers.status).label("status"),
+                               models.growers.updated_by,
+                               models.growers.updated_time,
+                               models.growers.pgt_grower_name,
+                               models.growers.region,
+                               models.growers.grower_id,
+                               models.growers.created_by,
+                               models.growers.created_time,
+                               models.growers.grower_abbreviation_code)
+                               .filter(models.growers.status=="ACTIVE").filter(models.growers.status=="INACTIVE").distinct().all())
+        empty_json =  [{
+                "grower_name": "Not Appl.",
+                "owner": "Not Appl.",
+                "country": "Not Appl.",
+                "volume": "000",
+                "status": "Not Appl.",
+                "updated_by": "Not Appl.",
+                "updated_time": "2024-03-28T07:49:16.353000",
+                "pgt_grower_name": "Not Appl.",
+                "region": 000,
+                "grower_id": 000,
+                "created_by": "Not Appl.",
+                "created_time": "2023-10-12T08:10:20",
+                "grower_abbreviation_code": "Not Appl."
+                }]
+        
+        return {"in_growers":all_growers if all_growers else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 		
@@ -629,7 +762,26 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
         all_ga = db.query(models.growing_area).filter(models.growing_area.status=="INACTIVE").distinct().all()
-        return {"in_growing_area":all_ga}
+        empty_json = [{
+                "created_by": "Not Appl.",
+                "growing_area_name": "Not Appl.",
+                "region": 000,
+                "status": "Not Appl.",
+                "fresh_period_start": 000,
+                "fresh_period_end": 000,
+                "storage_period_start": 000,
+                "created_time": "2023-10-18T23:05:22.570000",
+                "pgt_growing_area": "Not Appl.",
+                "country": "Not Appl.",
+                "growing_area_id": 000,
+                "updated_by": "Not Appl.",
+                "growing_area_desc": "Not Appl.",
+                "fresh_week_start": 000,
+                "fresh_week_end": 000,
+                "storage_week_start": 000,
+                "updated_time": "2023-10-18T23:05:22.570000"
+                }]
+        return {"in_growing_area":all_ga if all_ga else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -645,7 +797,18 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
         all_vsc = db.query(models.vendor_site_code).filter(models.vendor_site_code.status=="INACTIVE").distinct().all()
-        return {"in_vsc":all_vsc}
+        empty_json = [{
+                "created_by": "Not Appl.",
+                "VENDOR_SITE_CODE": "Not Appl.",
+                "status": "Not Appl.",
+                "updated_time": "2024-03-15T11:06:13.363000",
+                "pgt_vsc": "Not Appl.",
+                "VENDOR_SITE_ID": 000,
+                "created_time": "2024-03-15T11:06:13.363000",
+                "updated_by": "Not Appl.",
+                "region_id": 000
+                }]
+        return {"in_vsc":all_vsc if all_vsc else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -653,8 +816,27 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_inactive_region')
 def get_region(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_regions = db.query(models.region).filter(models.region.status=="INACTIVE").distinct().all()
-        return {"in_regions":all_regions}
+        all_regions = db.query(models.region.region_name,
+                                func.trim(models.region.country).label("country"),
+                                func.trim(models.region.updated_by).label("updated_by"),
+                                func.trim(models.region.status).label("status"),
+                                models.region.updated_time,
+                                func.trim(models.region.status).label("status"),
+                                models.region.updated_time,
+                                func.trim(models.region.created_by).label("created_by"),
+                                models.region.region_id,
+                                models.region.created_time).filter(models.region.status=="INACTIVE").distinct().all()
+        empty_json = [{
+                "region_name": "East - US",
+                "country": "US        ",
+                "updated_by": "SYSTEM    ",
+                "created_time": "2023-10-12T11:21:15.750000",
+                "created_by": "SYSTEM    ",
+                "region_id": 8,
+                "status": "ACTIVE    ",
+                "updated_time": "2023-10-12T11:21:15.750000"
+                }]
+        return {"in_regions":all_regions if all_regions else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 		
@@ -662,8 +844,25 @@ def get_region(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_inactive_crop_category')
 def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_crop_cat = db.query(models.category).filter(models.category.status=="INACTIVE").distinct().all()
-        return {"in_crop_categories":all_crop_cat}
+        all_crop_cat = db.query(models.category.crop_category,
+                                func.trim(models.category.created_by).label("created_by"),
+                                func.trim(models.category.status).label("status"),
+                                models.category.updated_time,
+                                func.trim(models.category.updated_by).label("updated_by"),
+                                models.category.category_name,
+                                func.trim(models.category.country).label("country"),
+                                models.category.created_time).filter(models.category.status=="INACTIVE").distinct().all()
+        empty_json = [{
+                    "crop_category": 0,
+                    "created_by": "Not Appl.",
+                    "status": "Not Appl.",
+                    "updated_time": "2024-03-01T09:37:39.473000",
+                    "updated_by": "Not Appl.",
+                    "category_name": "Not Appl.",
+                    "country": "Not Appl.",
+                    "created_time": "2024-03-01T09:37:39.473000"
+                    }]
+        return {"in_crop_categories":all_crop_cat if all_crop_cat else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
