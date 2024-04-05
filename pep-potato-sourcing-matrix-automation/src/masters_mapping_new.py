@@ -628,7 +628,7 @@ def delete_grower(grower_id: int,status:str, db: Session = Depends(get_db)): # p
 
 @router.post('/growing_area/{growing_area_id}/{status}')
 def delete_growing_area(growing_area_id: int,status:str, db: Session = Depends(get_db)): # pragma: no cover
-    grower_query = db.query(models.growing_area).filter(models.growing_area.growing_area_id == growing_area_id).update({'status': STATUS})
+    grower_query = db.query(models.growing_area).filter(models.growing_area.growing_area_id == growing_area_id).update({'status': status})
     if not grower_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'No growers  with this id: {id} found')
