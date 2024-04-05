@@ -46,10 +46,11 @@ def get_plantid(plantId: str, db: Session = Depends(get_db)):
 @router.get('/get_country_company_name/{filter_value}')
 def get_plants_country_based(filter_value: str, db: Session = Depends(get_db)):
     try:
-        if filter_value == 'US' or filter_value == 'Canada' or filter_value == 'Canada-Core':
+        if filter_value == 'US' or filter_value == 'Canada':
             plants = db.query(models.Plant) \
                 .join(models.region, models.Plant.region_id == models.region.region_id) \
-                .filter(models.region.country == filter_value, models.Plant.status == 'ACTIVE') \
+                .filter(models.region.country == filter_value,
+                        models.Plant.status == 'ACTIVE') \
                 .all()
         else:
             plants = db.query(models.Plant).filter(models.Plant.company_name == filter_value).all()
