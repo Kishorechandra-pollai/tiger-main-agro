@@ -727,8 +727,7 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
                                models.growers.grower_id,
                                models.growers.created_by,
                                models.growers.created_time,
-                               models.growers.grower_abbreviation_code)
-                               .filter(models.growers.status=="ACTIVE").filter(models.growers.status=="INACTIVE").distinct().all())
+                               models.growers.grower_abbreviation_code).filter(models.growers.status=="INACTIVE").distinct().all())
         empty_json =  [{
                 "grower_name": "Not Appl.",
                 "owner": "Not Appl.",
