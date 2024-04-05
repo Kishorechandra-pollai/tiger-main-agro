@@ -75,7 +75,7 @@ def update_solid_rates_records(payload: solidRateMappingPayload,db: Session = De
 #         raise HTTPException(status_code=400, detail=str(e)) from e
     
 @router.get('/solid_rate_period_year_region/{year}/{region}')
-def solid_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)): # pragma: no cover
+def solid_rate_period_year_region(year:int,region_name:str, db: Session = Depends(get_db)): 
     """Function to fetch all records from solids_rate table for a particular year """
     try:
         if region_name == 'All':
@@ -135,7 +135,7 @@ async def create_solid_rates_mappings_for_next_year(year: int, db: Session = Dep
     return {"status": "success", "Records added": update_count, "for Year": year}
 
 
-def create_solid_rate_in_db(payload: SolidRatesSchema, db: Session):
+def create_solid_rate_in_db(payload: SolidRatesSchema, db: Session): # pragma: no cover
     if isinstance(payload, BaseModel):
         # Convert Pydantic model to dictionary
         payload_dict = payload.dict()

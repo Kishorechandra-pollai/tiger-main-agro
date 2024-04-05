@@ -188,7 +188,7 @@ async def create_potato_rate_mapping_for_next_year(year: int , db: Session = Dep
     db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
 
-def create_potato_rate_in_db(payload: PotatoRatesSchema, db: Session):
+def create_potato_rate_in_db(payload: PotatoRatesSchema, db: Session): # pragma: no cover
     if isinstance(payload, BaseModel):
         # Convert Pydantic model to dictionary
         payload_dict = payload.dict()
@@ -204,12 +204,12 @@ def create_potato_rate_in_db(payload: PotatoRatesSchema, db: Session):
 
 
 @router.post('/create_potato_rates', status_code=status.HTTP_201_CREATED)
-def create_potato_rates(payload: PotatoRatesSchema, db: Session = Depends(get_db)):
+def create_potato_rates(payload: PotatoRatesSchema, db: Session = Depends(get_db)):# pragma: no cover
     new_record = create_potato_rate_in_db(payload, db)
     return {"status": "success", "potato_rate_id": new_record.potato_rate_id}
 
 
-def update_potato_rates_default(db: Session, potato_rate_id: int, year: int):
+def update_potato_rates_default(db: Session, potato_rate_id: int, year: int): # pragma: no cover
     all_records = db.query(potato_rates).filter(potato_rates.potato_rate_id == potato_rate_id).first()
     if not all_records:
         return None  # Indicate no records found

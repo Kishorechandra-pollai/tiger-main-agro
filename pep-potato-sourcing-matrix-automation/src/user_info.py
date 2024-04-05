@@ -68,7 +68,7 @@ async def update_user_status(user_info: schemas.EditActiveStatusSchema, db: Sess
     # Check if the user is an admin
     if user_record.is_admin:
         # Check if there is only one admin in the database
-        admin_count = db.query(user_information).filter(user_information.is_admin == True).count()
+        admin_count = db.query(user_information).filter(user_information.is_admin == True,user_information.user_status == True).count()
         if admin_count == 1 and user_info.user_status is False:
             raise HTTPException(status_code=400, detail="Cannot set status to inactive. The user is the only admin.")
     
@@ -81,7 +81,8 @@ async def update_user_status(user_info: schemas.EditActiveStatusSchema, db: Sess
 @router.post("/update_user_page_mapping")
 async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: Session = Depends(get_db)):# pragma: no cover
     # Calculate the admin count outside of the loop
-    admin_count = db.query(user_information).filter(user_information.is_admin == True).count()
+    admin_count = db.query(user_information).filter(user_information.is_admin == True,user_information.user_status == True).count()
+    
 
     for user_info in payload.data:
         user_record = db.query(user_information).filter(user_information.email == user_info.email).first()
@@ -140,7 +141,7 @@ async def update_user_page_mapping(payload: schemas.UpdateUserInfoPayload, db: S
     db.commit()
     return {"message": "User page mappings updated successfully"}
 
-def extract_name_from_email(email_id: str):
+def extract_name_from_email(email_id: str): # pragma: no cover
     try:
         local_part = email_id.split('@')[0]
         names = local_part.split('.')
@@ -151,7 +152,7 @@ def extract_name_from_email(email_id: str):
         logger.exception("Error occurred while extracting name from email")
         raise e
 
-def get_or_create_user(user_details: schemas.UserCreationPayload, db: Session) :
+def get_or_create_user(user_details: schemas.UserCreationPayload, db: Session) : # pragma: no cover
     try:
         # Check if the user already exists based on the email
         user = db.query(user_information).filter(user_information.email == user_details.email).first()

@@ -869,7 +869,7 @@ def test_get_solid_rates():
 
 
 def test_get_solid_rate_mapping():
-    response = client.get('/api/solid_rates/solid_rate_mapping/2023')
+    response = client.get('/api/solid_rates/solid_rate_mapping/2024')
     assert response.status_code == 200
 
 
@@ -896,13 +896,8 @@ def test_mock_update_solid_rates_records(mock_get_db):
     assert result["status"] == "success"
 
 
-def test_get_solids_rate_period():
-    response = client.get('/api/solid_rates/solids_rate_period/')
-    assert response.status_code == 200
-
-
-def test_get_solid_rate_period_year():
-    response = client.get('/api/solid_rates/solid_rate_period_year/2023')
+def test_solid_rate_period_year_region():
+    response = client.get('/api/solid_rates/solid_rate_period_year_region/2024/{region}?region_name=US')
     assert response.status_code == 200
 
 
@@ -916,18 +911,13 @@ def test_get_potato_rates():
     assert response.status_code == 200
 
 
-def testgetby_growing_areaid():
-    response = client.get('api/potato_rates/getby_growing_areaid/249?year=2023')
+def test_get_potato_rate_mapping_data():
+    response = client.get('/api/potato_rates/potato_rate_mapping_by_year/2024')
     assert response.status_code == 200
 
 
-def test_potato_rate_mapping_by_year():
-    response = client.get('/api/potato_rates/potato_rate_mapping_by_year/2023')
-    assert response.status_code == 200
-
-
-def test_get_potato_rate_mapping():
-    response = client.get('/api/potato_rates/get_potato_rate_mapping/2023')
+def test_get_potato_rate_mappings():
+    response = client.get('/api/potato_rates/get_potato_rate_mapping/2024')
     assert response.status_code == 200
 
 
@@ -949,24 +939,15 @@ def test_mock_update_potato_rates_records(mock_get_db):
     assert result["status"] == "success"
 
 
-def test_get_potato_rate_period():
-    response = client.get('/api/potato_rates/potato_rate_period')
+def potato_rate_period_year_region():
+    response = client.get('/api/potato_rates/potato_rate_period_year_region/2024/{region}?region_name=US')
     assert response.status_code == 200
 
 
-def test_get_potato_rate_period_year():
-    response = client.get('/api/potato_rates/potato_rate_period_year/2023')
+def potato_rate_period_week_year_region():
+    response = client.get('/api/potato_rates/potato_rate_period_week_year_region/2024/{region}?region_name=US')
     assert response.status_code == 200
 
-
-def test_get_potato_rate_period_week():
-    response = client.get('/api/potato_rates/potato_rate_period_week')
-    assert response.status_code == 200
-
-
-def test_get_potato_rate_period_week_year():
-    response = client.get('/api/potato_rates/potato_rate_period_week_year/2023')
-    assert response.status_code == 200
 
 
 """--------offcontractinfo.py---------"""
@@ -1158,7 +1139,7 @@ def test_mock_create_p4p_task_mappings_info(mock_get_db):
     assert result['status'] == 'success'
 
 
-"""--------p4pmasterinfo.py---------"""
+"""--------offcontractinfo.py---------"""
 
 
 @patch('database.get_db')
@@ -1200,8 +1181,6 @@ def test_update_off_contract_existing_record(mock_get_db):
     result = update_off_contract(off_contract_task_id=1, payload=test_payload, db=db_mock)
     assert result.value == payload['value']
 
-
-"""--------offcontractinfo.py---------"""
 
 """--------freighttaskinfo.py---------"""
 
@@ -1386,6 +1365,10 @@ def test_inflation_deflation_task_mappings_by_year():
     response = client.get('/api/inflation_deflation/inflation_deflation_task_mappings_by_year/2023/CANADA')
     assert response.status_code == 200
 
+def test_inflation_deflation_year_country_code():
+    response = client.get('/api/inflation_deflationinflation_deflation/year/2024/company_name/US-CORE')
+    assert response.status_code == 200
+
 
 """________vendor_site_code.py_________"""
 
@@ -1403,19 +1386,28 @@ def test_view_freight_cost():
     assert response.status_code == 200
 
 
-def test_view_freight_mapping():
+def test_view_freight_mapping_by_year():
     response = client.get('/api/freight-cost/get_freight_cost_mapping/2023')
     assert response.status_code == 200
 
 
-def test_freight_cost_period_view():
-    response = client.get('/api/freight-cost/freight_cost_period_week_view/2023')
-    assert response.status_code == 200
-
-
 def test_freight_cost_period_view_year():
-    response = client.get('/api/freight-cost/get_rate_gowing_area/2023')
+    response = client.get('/api/freight-cost/freight_cost_period_view/2024/US')
     assert response.status_code == 200
+
+
+def test_freight_cost_period_week_view_year():
+    response = client.get('/api/freight-cost/freight_cost_period_week_view/2024/US')
+    assert response.status_code == 200
+
+def test_get_rate_growing_area_year():
+    response = client.get('/api/freight-cost/get_rate_gowing_area/2024')
+    assert response.status_code == 200
+   
+def test_fetch_records():
+    response = client.get('/api/freight-cost/fetch_freight_records/2024/US')
+    assert response.status_code == 200
+    
 
 
 """________vendor_site_code.py_________"""

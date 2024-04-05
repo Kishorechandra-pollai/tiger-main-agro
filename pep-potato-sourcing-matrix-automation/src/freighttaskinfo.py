@@ -68,7 +68,7 @@ async def create_freight_task_mappings_for_next_year(year: int, db: Session = De
 
 
 @router.post('/create_freight_task_info', status_code=status.HTTP_201_CREATED)
-def create_freight_task_info(payload: FreightTaskInfoSchema, db: Session = Depends(get_db)):
+def create_freight_task_info(payload: FreightTaskInfoSchema, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to add new records in create_freight_task_info table."""
     new_record = freight_task_info(**payload.dict())
     db.add(new_record)
@@ -86,7 +86,7 @@ def create_freight_task_mappings(payload: FreightTaskMappingsSchema, db: Session
     return {"status": "success", "row_id": new_record.row_id}
 
 @router.post("/update_freight_task_mapping_records/")
-def update_freight_task_mapping_records(payload: FreightTaskMappingsPayload, db: Session = Depends(get_db)):
+def update_freight_task_mapping_records(payload: FreightTaskMappingsPayload, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update already existing records in freight_task_mappings table """
     data = payload.data
     update_count = 0

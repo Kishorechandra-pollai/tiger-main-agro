@@ -117,7 +117,7 @@ def update_inflation_deflation_task_mappings_records(payload: InflationDeflation
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.get('inflation_deflation/year/{year}/company_name/{company_name}')
-def inflation_deflation_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): # pragma: no cover
+def inflation_deflation_year_country_code(year: int, company_name: str, db: Session = Depends(get_db)): 
     """Function to fetch all records from inflation_deflation view based on year and country_Code filter """
     try:
         records = db.query(inflation_deflation).filter(
