@@ -826,13 +826,13 @@ def get_region(db: Session = Depends(get_db)):  # pragma: no cover
                                 models.region.region_id,
                                 models.region.created_time).filter(models.region.status=="INACTIVE").distinct().all()
         empty_json = [{
-                "region_name": "East - US",
-                "country": "US        ",
-                "updated_by": "SYSTEM    ",
+                "region_name": "Not Appl.",
+                "country": "Not Appl.",
+                "updated_by": "Not Appl.",
                 "created_time": "2023-10-12T11:21:15.750000",
-                "created_by": "SYSTEM    ",
-                "region_id": 8,
-                "status": "ACTIVE    ",
+                "created_by": "Not Appl.",
+                "region_id": 000,
+                "status": "Not Appl.",
                 "updated_time": "2023-10-12T11:21:15.750000"
                 }]
         return {"in_regions":all_regions if all_regions else empty_json}
