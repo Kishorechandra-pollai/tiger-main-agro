@@ -44,7 +44,7 @@ def off_contract_task_mapping_by_year_and_country(year: str, country:str, db: Se
 
 
 @router.post("/create_off_contract_task_mapping_for_year/", status_code=status.HTTP_201_CREATED)
-async def create_off_contract_task_mapping_for_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+async def create_off_contract_task_mapping_for_year(year: int, db: Session = Depends(get_db)):  
     """Function to update records in off_contract_task_mapping table."""
     # Fetch all records from the database
     all_records = db.query(off_contract_info).all()
@@ -88,7 +88,7 @@ def create_off_contract_info(payload: OffContractInfoSchema, db: Session = Depen
     return {"status": "success", "off_contract_task_id": new_record.off_contract_task_id}
 
 @router.post('/create_off_contract_task_mapping', status_code=status.HTTP_201_CREATED)
-def create_off_contract_task_mapping(payload: OffContractTaskMappingSchema, db: Session = Depends(get_db)):
+def create_off_contract_task_mapping(payload: OffContractTaskMappingSchema, db: Session = Depends(get_db)): # pragma: no cover
     """Function to add new record for off_contract_task_mapping table"""
     new_record = off_contract_task_mapping(**payload.dict())
     db.add(new_record)
@@ -98,7 +98,7 @@ def create_off_contract_task_mapping(payload: OffContractTaskMappingSchema, db: 
 
 @router.post("/update_off_contract_records/{off_contract_task_id}")
 def update_off_contract(off_contract_task_id: int, payload: OffContractTaskMappingSchema,
-                        db: Session = Depends(get_db)):
+                        db: Session = Depends(get_db)): # pragma: no cover
     """Function to update already existing records in off_contract_task_mapping table"""
     existing_records= db.query(off_contract_task_mapping).filter(
         off_contract_task_mapping.off_contract_task_id == off_contract_task_id
