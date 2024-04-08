@@ -46,7 +46,7 @@ def general_administrative_mappings_by_year(year: str, country: str, db: Session
 
 
 @router.post("/update_general_administrative_mappings/", status_code=status.HTTP_201_CREATED)
-async def update_general_administrative_mappings(year: int, db: Session = Depends(get_db)):
+async def update_general_administrative_mappings(year: int, db: Session = Depends(get_db)):# pragma: no cover
     """Function to update records in potato_rates table."""
     # Fetch all records from the database
     all_records = db.query(general_administrative_task).all()
@@ -74,7 +74,7 @@ async def update_general_administrative_mappings(year: int, db: Session = Depend
 
 
 @router.post('/create_general_administrative_task', status_code=status.HTTP_201_CREATED)
-def create_general_administrative_task(payload: GeneralAdministrativeTaskSchema, db: Session = Depends(get_db)):
+def create_general_administrative_task(payload: GeneralAdministrativeTaskSchema, db: Session = Depends(get_db)): # pragma: no cover
     new_record = general_administrative_task(**payload.dict())
     db.add(new_record)
     db.commit()

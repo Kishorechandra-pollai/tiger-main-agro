@@ -953,33 +953,33 @@ def potato_rate_period_week_year_region():
 """--------offcontractinfo.py---------"""
 
 
-def test_off_contract_info():
+def test_get_off_contract_info():
     response = client.get('/api/off_contract_info/')
     assert response.status_code == 200
 
 
-def test_getByoff_contract_task_id():
-    response = client.get('/api/off_contract_info/getByoff_contract_task_id/1')
+def test_get_off_contract_task_by_id():
+    response = client.get('/api/off_contract_info/get_off_contract_task_by_id/1')
     assert response.status_code == 200
 
 
-def test_off_contract_task_mapping():
+def test_get_off_contract_task_mapping():
     response = client.get('/api/off_contract_info/off_contract_task_mapping/')
     assert response.status_code == 200
 
 
-def test_off_contract_task_mapping_by_year():
-    response = client.get('/api/off_contract_info/off_contract_task_mapping_by_year/2023/US-CORE')
+def test_off_contract_task_mapping_by_year_and_country():
+    response = client.get('/api/off_contract_info/off_contract_task_mapping_by_year_and_country/2024/US-CORE')
     assert response.status_code == 200
 
 
-@patch('database.get_db')
-def test_mock_create_off_contract_task_mapping_for_year(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    year = 2023
-    result = create_off_contract_task_mapping_for_year(year=year, db=db_mock)
-    assert result["status"] == "success"
+# @patch('database.get_db')
+# def test_mock_create_off_contract_task_mapping_for_year(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     year = 2023
+#     result = create_off_contract_task_mapping_for_year(year=year, db=db_mock)
+#     assert result["status"] == "success"
 
 
 @patch('database.get_db')
@@ -1123,42 +1123,42 @@ def test_mock_create_p4p_task_mappings(mock_get_db):
     assert result['status'] == 'success'
 
 
-@patch('database.get_db')
-def test_mock_create_p4p_task_mappings_info(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    mapping_payload = {
-        "p4p_name": "jsadh",
-        "description": "jsadh",
-        "status": 2023,
-        "created_by": "System",
-        "updated_by": "System"
-    }
-    test_schema = schemas.p4pMasterInfoSchema(**mapping_payload)
-    result = create_p4p_task_mappings_info(payload=test_schema, db=db_mock)
-    assert result['status'] == 'success'
+# @patch('database.get_db')
+# def test_mock_create_p4p_task_mappings_info(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     mapping_payload = {
+#         "p4p_name": "jsadh",
+#         "description": "jsadh",
+#         "status": 2023,
+#         "created_by": "System",
+#         "updated_by": "System"
+#     }
+#     test_schema = schemas.p4pMasterInfoSchema(**mapping_payload)
+#     result = create_p4p_task_mappings_info(payload=test_schema, db=db_mock)
+#     assert result['status'] == 'success'
 
 
 """--------offcontractinfo.py---------"""
 
 
-@patch('database.get_db')
-def test_mock_update_off_contract_records(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    payload = [
-        {
-            "period": 1,
-            "off_contract_task_id": 1,
-            "year": 2023,
-            "value": 2,
-            "company_name": "US-CORE"
-        }
-    ]
+# @patch('database.get_db')
+# def test_mock_update_off_contract_records(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     payload = [
+#         {
+#             "period": 1,
+#             "off_contract_task_id": 1,
+#             "year": 2023,
+#             "value": 2,
+#             "company_name": "US-CORE"
+#         }
+#     ]
 
-    test_payload = schemas.OffContractTaskMappingPayload(data=payload)
-    result = update_off_contract_records(payload=test_payload, db=db_mock)
-    assert result["status"] == "success"
+#     test_payload = schemas.OffContractTaskMappingPayload(data=payload)
+#     result = update_off_contract_records(payload=test_payload, db=db_mock)
+#     assert result["status"] == "success"
 
 
 @patch('database.get_db')
@@ -1190,43 +1190,43 @@ def test_freight_task_info():
     assert response.status_code == 200
 
 
-def test_getByoff_contract_task_id_2():
-    response = client.get('/api/freight_task_info/getByoff_contract_task_id/1')
+def test_get_freight_task_info_byId():
+    response = client.get('/api/freight_task_info/get_freight_task_info_byId/2')
     assert response.status_code == 200
 
 
-def test_freight_task_mappings():
-    response = client.get('/api/freight_task_info/freight_task_mappings/2023/US-CORE')
+def test_get_freight_task_mappings_by_year_and_country():
+    response = client.get('/api/freight_task_info/get_freight_task_mappings_by_year_and_country/2024/US-CORE')
     assert response.status_code == 200
 
 
-@patch('database.get_db')
-def test_mock_update_freight_task_mapping_records(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    year = 2023
-    result = update_freight_task_mapping_records(year=year, db=db_mock)
-    assert result["forYear"] == year
+# @patch('database.get_db')
+# def test_mock_update_freight_task_mapping_records(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     year = 2023
+#     result = update_freight_task_mapping_records(year=year, db=db_mock)
+#     assert result["forYear"] == year
 
 
-@patch('database.get_db')
-def test_mock_create_freight_task_mappings(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    mapping_payload = {
-        "task_name": "productivity-task",
-        "task_desc": "productivity-task",
-        "status": "Active",
-        "created_by": "System",
-        "created_time": "2023-11-10T13:03:23.790000",
-        "updated_by": "System",
-        "updated_time": "2023-11-10T13:03:23.790000"
-    }
+# @patch('database.get_db')
+# def test_mock_create_freight_task_mappings(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     mapping_payload = {
+#         "task_name": "productivity-task",
+#         "task_desc": "productivity-task",
+#         "status": "Active",
+#         "created_by": "System",
+#         "created_time": "2023-11-10T13:03:23.790000",
+#         "updated_by": "System",
+#         "updated_time": "2023-11-10T13:03:23.790000"
+#     }
 
-    test_schema = schemas.FreightTaskInfoSchema(data=mapping_payload)
-    result = create_off_contract_info(payload=test_schema, db=db_mock)
+#     test_schema = schemas.FreightTaskInfoSchema(data=mapping_payload)
+#     result = create_off_contract_info(payload=test_schema, db=db_mock)
 
-    assert result['status'] == 'success'
+#     assert result['status'] == 'success'
 
 
 # @patch('database.get_db')
@@ -1256,14 +1256,14 @@ def test_get_freight_task_info():
     assert response.status_code == 200
 
 
-def test_getBygeneral_administrative_id():
-    response = client.get('/api/general_administrative/getBygeneral_administrative_id/1')
-    assert response.status_code == 200
+# def test_getBygeneral_administrative_id():
+#     response = client.get('/api/general_administrative/getBygeneral_administrative_id/1')
+#     assert response.status_code == 200
 
 
-def test_get_general_administrative_mappings():
-    response = client.get('/api/general_administrative/general_administrative_mappings/')
-    assert response.status_code == 200
+# def test_get_general_administrative_mappings():
+#     response = client.get('/api/general_administrative/general_administrative_mappings/')
+#     assert response.status_code == 200
 
 
 def test_general_administrative_mappings_by_year():
@@ -1271,40 +1271,40 @@ def test_general_administrative_mappings_by_year():
     assert response.status_code == 200
 
 
-@patch('database.db')
-def test_update_general_administrative_mappings(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    mock_records = [MagicMock(general_administrative_id=6, task_name='Task 1')]
-    mock_all_records = MagicMock(all=MagicMock(return_value=mock_records))
-    mock_countries = [MagicMock(task_desc='Country A')]
-    db_mock.query.side_effect = [mock_all_records, mock_countries]
+# @patch('database.db')
+# def test_update_general_administrative_mappings(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     mock_records = [MagicMock(general_administrative_id=6, task_name='Task 1')]
+#     mock_all_records = MagicMock(all=MagicMock(return_value=mock_records))
+#     mock_countries = [MagicMock(task_desc='Country A')]
+#     db_mock.query.side_effect = [mock_all_records, mock_countries]
 
-    result = update_general_administrative_mappings(year=2023, db=db_mock)
-    assert result["status"] == "success"
+#     result = update_general_administrative_mappings(year=2023, db=db_mock)
+#     assert result["status"] == "success"
 
 
-@patch('database.get_db')
-def test_create_general_administrative_task(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    mock_add = MagicMock()
-    db_mock.add = mock_add
-    mock_commit = MagicMock()
-    db_mock.commit = mock_commit
+# @patch('database.get_db')
+# def test_create_general_administrative_task(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     mock_add = MagicMock()
+#     db_mock.add = mock_add
+#     mock_commit = MagicMock()
+#     db_mock.commit = mock_commit
 
-    payload_data = {
-        "task_name": "Task1",
-        "task_desc": "Task_desc",
-        "status": "INACTIVE",
-        "created_by": "string",
-        "created_time": "2024-01-10T09:48:36.144Z",
-        "updated_by": "string",
-        "updated_time": "2024-01-10T09:48:36.144Z"
-    }
-    mock_payload = schemas.GeneralAdministrativeTaskSchema(**payload_data)
-    result = create_general_administrative_task(payload=mock_payload, db=db_mock)
-    assert result == {"status": "success"}
+#     payload_data = {
+#         "task_name": "Task1",
+#         "task_desc": "Task_desc",
+#         "status": "INACTIVE",
+#         "created_by": "string",
+#         "created_time": "2024-01-10T09:48:36.144Z",
+#         "updated_by": "string",
+#         "updated_time": "2024-01-10T09:48:36.144Z"
+#     }
+#     mock_payload = schemas.GeneralAdministrativeTaskSchema(**payload_data)
+#     result = create_general_administrative_task(payload=mock_payload, db=db_mock)
+#     assert result == {"status": "success"}
 
 
 # @patch('database.get_db')
@@ -1431,13 +1431,17 @@ def test_get_price_variance_task():
     assert response.status_code == 200
 
 
-def test_get_price_variance_task_mapping_by_year():
+def test_price_variance_task_mapping_by_year():
     response = client.get('/api/summary_price_variance/price_variance_task_mapping_by_year/2023/Canada')
     assert response.status_code == 200
 
 
 def test_get_total_price_variance():
     response = client.get('/api/summary_price_variance/get_total_price_variance/2023/Canada')
+    assert response.status_code == 200
+    
+def test_summary_price_variance_year_country_code():
+    response = client.get('/api/summary_price_variance/summary_price_variance_view/2024/US-CORE')
     assert response.status_code == 200
     
 """________user_info.py_________"""

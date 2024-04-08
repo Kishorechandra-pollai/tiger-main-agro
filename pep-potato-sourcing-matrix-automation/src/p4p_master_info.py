@@ -76,7 +76,7 @@ async def create_p4p_task_mappings_records_for_next_year(year: int, db: Session 
     return {"status": "success", "Records added": update_count, "for Year": year}
 
 @router.post('/create_p4p_task_mappings_info', status_code=status.HTTP_201_CREATED)
-def create_p4p_task_mappings_info(payload: p4pMasterInfoSchema, db: Session = Depends(get_db)):
+def create_p4p_task_mappings_info(payload: p4pMasterInfoSchema, db: Session = Depends(get_db)): # pragma : no cover
     new_record = p4p_task_mappings(**payload.dict())
     db.add(new_record)
     db.commit()

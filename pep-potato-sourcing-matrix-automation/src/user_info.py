@@ -73,7 +73,7 @@ async def update_user_status(user_info: schemas.EditActiveStatusSchema, db: Sess
             raise HTTPException(status_code=400, detail="Cannot set status to inactive. The user is the only admin.")
     
     if user_info.user_status is not None:
-        user_record.user_status = not user_record.user_status
+        user_record.user_status = user_info.user_status
     db.commit()
     return {"message": "User status updated successfully"}
     
