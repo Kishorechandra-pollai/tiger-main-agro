@@ -1,4 +1,4 @@
-from datetime import date,datetime
+from datetime import date,datetime,timezone
 from fastapi import Depends, HTTPException, status, APIRouter,File, UploadFile
 import pandas as pd
 from io import StringIO,BytesIO
@@ -44,7 +44,8 @@ def add_new_plant(payload: schemas.PlantSchemaDummy, db: Session = Depends(get_d
         plant_count = db.query(models.Plant).filter(models.Plant.plant_name == plant_name).count()
         if plant_count>0:
             return {"status":"plant already exists"}
-        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        # current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         print(payload.dict())
         new_plant = models.Plant(
             **payload.dict(),
@@ -71,7 +72,8 @@ def add_new_plant(payload: schemas.GrowersDummy, db: Session = Depends(get_db)):
         grower_count = db.query(models.growers).filter(models.growers.grower_name == grower_name).count()
         if grower_count>0:
             return {"status":"grower already exists"}
-        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        # current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         print(payload.dict())
         new_grower = models.growers(
             **payload.dict(),
@@ -96,7 +98,8 @@ def add_vendor_site(payload: schemas.VendorSiteCodeSchemaMasters, db: Session = 
         vsc_count = db.query(models.vendor_site_code).filter(models.vendor_site_code.VENDOR_SITE_CODE == vendor_site_code).count()
         if vsc_count>0:
             return {"status":"Vendor Site already exists"}
-        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        # current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         print(payload.dict())
         new_vsc = models.vendor_site_code(
             **payload.dict(),
@@ -122,7 +125,8 @@ def add_growing_area(payload: schemas.GrowingAreaSchemaMasters, db: Session = De
         ga_count = db.query(models.growing_area).filter(models.growing_area.growing_area_name == growing_area_name).count()
         if ga_count>0:
             return {"status":"growing area already exists"}
-        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        # current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         new_ga = models.growing_area(
             **payload.dict(),
             # grower_id=grower_id,
@@ -137,7 +141,8 @@ def add_growing_area(payload: schemas.GrowingAreaSchemaMasters, db: Session = De
         db.refresh(new_ga)
         growing_area_id = new_ga.growing_area_id
         potato_rate_payload = {# "potato_rate_id":potato_rate_id,
-                                "year":datetime.utcnow().year,
+                                # "year":datetime.utcnow().year,
+                                "year":datetime.now(timezone.utc).year,
                                 "growing_area_id_old":999,
                                 "created_time":current_time,
                                 "created_by":"System",
@@ -160,10 +165,13 @@ def add_growing_area(payload: schemas.GrowingAreaSchemaMasters, db: Session = De
         solid_rate_record = create_solid_rate_in_db(solids_rate_payload, db)
         solids_rate_id = solid_rate_record.solids_rate_id
         ## Potato mappings
-        update_potato_rates_default(db,potato_rate_id,datetime.utcnow().year)
+        # update_potato_rates_default(db,potato_rate_id,datetime.utcnow().year)
+        update_potato_rates_default(db,potato_rate_id,datetime.now(timezone.utc).year)
+        
 
         ## Solids mappings
-        update_solids_rates_default(db, solids_rate_id, datetime.utcnow().year)
+        # update_solids_rates_default(db, solids_rate_id, datetime.utcnow().year)
+        update_solids_rates_default(db, solids_rate_id, datetime.now(timezone.utc).year)
         db.commit()
         return {"status":"New growing area added successfully"}
     except Exception as e:
@@ -229,7 +237,8 @@ def modify_ex_plant(payload: schemas.EditPSGAMastersSchema,db:Session = Depends(
         flag=False
         existingRecord = db.query(models.PlantSiteGrowingAreaMapping)\
                                 .filter(models.PlantSiteGrowingAreaMapping.plant_name==plant_name).all()
-        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        # current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         seen_combinations = set()
         for ex in existingRecord:
             db.delete(ex)
@@ -273,7 +282,8 @@ def modify_ex_plant(payload: schemas.EditPSGAMastersSchema,db:Session = Depends(
                 create_freight_rates_in_db(freight_cost_rate_payload, db)
 
                 ## Freight Cost mappings
-                update_freight_rates_with_default_value(freight_cost_id,datetime.utcnow().year,db)
+                # update_freight_rates_with_default_value(freight_cost_id,datetime.utcnow().year,db)
+                update_freight_rates_with_default_value(freight_cost_id,datetime.now(timezone.utc).year,db)
 
 
 
