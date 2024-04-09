@@ -1449,6 +1449,10 @@ def test_get_user_information():
     response = client.get('/api/user_info/get_user_information')
     assert response.status_code == 200
     
+def test_get_active_user_information():
+    response = client.get('/api/user_info/get_active_user_details')
+    assert response.status_code == 200
+    
 def test_get_user_page_mapping():
     response = client.get('/api/user_info/get_user_page_mapping')
     assert response.status_code == 200
