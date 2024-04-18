@@ -90,6 +90,53 @@ def add_new_plant(payload: schemas.GrowersDummy, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    
+
+@router.post('/add_grower_dummy', status_code=status.HTTP_201_CREATED)
+def add_new_plant(payload: schemas.GrowersDummyMulti, db: Session = Depends(get_db)):
+    """API to add grower in master table and handle is_parent logic."""
+    # try:
+    grower_name = payload.grower_name
+    grower_count = db.query(models.growers_dummy).filter(models.growers_dummy.grower_name == grower_name).count()
+    if grower_count > 0:
+        return {"status": "Grower already exists"}
+    
+    current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    print(payload.dict())
+    # new_grower_data = payload.dict(exclude_unset=True)
+    # new_grower_data.update({
+    #     'created_time': current_time,
+    #     'updated_time': current_time,
+    #     'created_by': "SYSTEM",
+    #     'updated_by': "JP"
+    # })
+    new_grower = models.growers_dummy(
+        **payload.dict(),
+        # grower_id=grower_id,
+        created_time=current_time,
+        updated_time=current_time,
+        created_by="SYSTEM",
+        updated_by="JP"
+    )
+
+    if payload.is_parent == "Yes":
+        new_grower.master_id = None  # Will be updated after insertion
+    else:
+        new_grower.master_id = payload.master_id  # Use provided master_id
+
+    # new_grower = models.growers_dummy(**new_grower)
+    db.add(new_grower)
+    db.commit()
+    db.refresh(new_grower)
+
+    if payload.is_parent == "Yes":
+        # Update master_id to its own id if it is a parent
+        new_grower.master_id = new_grower.grower_id
+        db.commit()
+    return {"status": "New grower added successfully", "grower_id": new_grower.grower_id}
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail=str(e))
+
 @router.post('/add_vendor_site', status_code=status.HTTP_201_CREATED)
 def add_vendor_site(payload: schemas.VendorSiteCodeSchemaMasters, db: Session = Depends(get_db)): # pragma: no cover
     """Api to add grower in master table and the grower - growing area mapping table"""
@@ -341,6 +388,35 @@ def update_plant(grower_id: int, update_payload: schemas.GrowersDummy, db: Sessi
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.put('/update_grower_dummy/{grower_id}', status_code=status.HTTP_200_OK)
+def update_plant(grower_id: int, update_payload: schemas.GrowersDummyMulti, db: Session = Depends(get_db)): # pragma: no cover
+    # try:
+        # Fetch the existing region
+    grower_to_update = db.query(models.growers_dummy).filter(models.growers_dummy.grower_id == grower_id).first()
+    
+    if not grower_to_update:
+        raise HTTPException(status_code=404, detail="Grower not found")
+
+    # Update fields if provided in the payload
+    update_data = update_payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(grower_to_update, key, value)
+
+    # Automatically set updated_time if not provided
+    if 'updated_time' not in update_data:
+        grower_to_update.updated_time = datetime.now()
+
+    if update_payload.is_parent == "Yes":
+        # Update master_id to its own id if it is a parent
+        grower_to_update.master_id = update_payload.grower_id
+    else:
+        grower_to_update.master_id = update_payload.master_id
+
+    db.commit()
+    return {"status": "grower dummy updated successfully"}
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.put('/update_growing_area/{growing_area_id}', status_code=status.HTTP_200_OK)
 def update_plant(growing_area_id: int, update_payload: schemas.UpdateGrowingAreaSchema, db: Session = Depends(get_db)): # pragma: no cover
@@ -409,8 +485,63 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
         return {"growers":all_growers}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('/get_growers_dummy')
+def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
+    try:
+        all_growers = (db.query(models.growers_dummy.grower_name, 
+                               func.trim(models.growers_dummy.owner).label("owner"), 
+                               func.trim(models.growers_dummy.country).label("country"), 
+                               func.trim(models.growers_dummy.volume).label("volume"), 
+                               func.trim(models.growers_dummy.status).label("status"),
+                               models.growers_dummy.updated_by,
+                               models.growers_dummy.updated_time,
+                               models.growers_dummy.pgt_grower_name,
+                               models.growers_dummy.region,
+                               models.growers_dummy.grower_id,
+                               models.growers_dummy.created_by,
+                               models.growers_dummy.created_time,
+                               models.growers_dummy.grower_abbreviation_code,
+                               models.growers_dummy.is_parent,
+                               models.growers_dummy.master_id)
+                               .filter(models.growers_dummy.status=="ACTIVE").distinct().all())
+        return {"growers":all_growers}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get('/get_grower_dummy/{grower_name}')
+def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cover
+    try:
+        grower_details = (db.query(models.growers_dummy.grower_name, 
+                               func.trim(models.growers_dummy.owner).label("owner"), 
+                               func.trim(models.growers_dummy.country).label("country"), 
+                               func.trim(models.growers_dummy.volume).label("volume"), 
+                               func.trim(models.growers_dummy.status).label("status"),
+                               models.growers_dummy.updated_by,
+                               models.growers_dummy.updated_time,
+                               models.growers_dummy.pgt_grower_name,
+                               models.growers_dummy.region,
+                               models.growers_dummy.grower_id,
+                               models.growers_dummy.created_by,
+                               models.growers_dummy.created_time,
+                               models.growers_dummy.grower_abbreviation_code,
+                               models.growers_dummy.is_parent,
+                               models.growers_dummy.master_id)
+                               .filter(models.growers_dummy.grower_name == grower_name,models.growers_dummy.status == "ACTIVE").all())
+        grower_growing_area_details = (db.query(models.preferred_grower.grower_name,models.preferred_grower.growing_area_name,
+                                                models.preferred_grower.grower_id,models.preferred_grower.growing_area_id).
+                                        filter(models.preferred_grower.grower_name==grower_name).distinct().all())
+        empty_json = {
+        "grower_name": "Not Appl",
+        "growing_area_name": "Not Appl",
+        "grower_id": 000,
+        "growing_area_id": 0
+        }
+        return {"grower_details":grower_details,"gr_grarea_details":grower_growing_area_details if grower_growing_area_details else [empty_json]}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
 @router.get('/get_grower/{grower_name}')
 def get_plant(grower_name: str, db: Session = Depends(get_db)): # pragma: no cover
     try:
