@@ -647,3 +647,18 @@ class country_information(Base):
     __tablename__ = "country_information"
     country_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     country_name = Column(String, nullable=True)
+
+class FileUploadTemplate(Base):
+    """Class representing freight_cost_rate table"""
+    __tablename__ = "file_template_upload"
+
+    file_process_id = Column(Integer, primary_key=True, autoincrement=True)
+    file_name = Column(String, nullable=False)
+    file_type = Column(String, nullable=True)
+    file_process_status = Column(Boolean, default=False)
+    file_uploaded_user = Column(String, nullable=True)
+    message = Column(String, nullable=True)
+    file_uploaded_time = Column(TIMESTAMP(timezone=False),
+                          nullable=False, server_default=func.now())
+    file_process_time = Column(TIMESTAMP(timezone=False),
+                          default=None, onupdate=func.now())
