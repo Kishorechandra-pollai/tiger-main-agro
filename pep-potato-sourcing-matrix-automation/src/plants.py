@@ -49,11 +49,12 @@ def get_plants_country_based(filter_value: str, db: Session = Depends(get_db)):
         if filter_value == 'US' or filter_value == 'Canada':
             plants = db.query(models.Plant) \
                 .join(models.region, models.Plant.region_id == models.region.region_id) \
-                .filter(models.region.country == filter_value,
-                        models.Plant.status == 'ACTIVE') \
+                .filter(models.region.country == filter_value, models.Plant.status == 'ACTIVE') \
                 .all()
         else:
-            plants = db.query(models.Plant).filter(models.Plant.company_name == filter_value).all()
+            plants = db.query(models.Plant)\
+                .filter(models.Plant.company_name == filter_value, models.Plant.status == 'ACTIVE').all()
+
         return {"status": "success", "plants": plants}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")

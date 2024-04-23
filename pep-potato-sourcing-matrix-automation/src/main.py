@@ -32,11 +32,11 @@ import dashboard
 import summary_solids
 import summary_overall_cost
 import plant_mtrx_templt
-# import infl_defl_py
 import masters_mapping
 import masters_mapping_new
 import page_info
 import user_info
+import user_log
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -47,6 +47,7 @@ origins = [
     "http://localhost:8000",
 ]
 
+app.include_router(user_log.router, tags=['user_log'], prefix='/api/user_log')
 app.include_router(plants.router, tags=['plant'], prefix='/api/plant')
 app.include_router(growingarea.router, tags=['growing-area'], prefix='/api/growing-area')
 app.include_router(growers.router, tags=['grower'], prefix='/api/grower')
@@ -85,7 +86,6 @@ app.include_router(page_info.router, tags=['page_info'], prefix='/api/page_info'
 app.include_router(plant_mtrx_templt.router, tags=['plant_mtrx_templt'], prefix='/api/plant_mtrx_templt')
 app.include_router(masters_mapping.router, tags=['masters_mapping'], prefix='/api/masters_mapping')
 app.include_router(masters_mapping_new.router, tags=['masters_mapping_latest'], prefix='/api/masters_mapping_latest')
-# app.include_router(infl_defl_py.router, tags=['infl_defl_py'], prefix='/api/infl_defl_py')
 
 app.add_middleware(
     CORSMiddleware,
