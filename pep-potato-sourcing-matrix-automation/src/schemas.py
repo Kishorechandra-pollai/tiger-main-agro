@@ -173,6 +173,18 @@ class GrowersDummy(BaseModel):  # pragma: no cover
     grower_abbreviation_code: str
     pgt_grower_name: str
 
+class GrowersDummyMulti(BaseModel):  # pragma: no cover
+    grower_name: str
+    owner: str
+    region: int
+    country: str
+    status: str
+    volume: int
+    grower_abbreviation_code: str
+    pgt_grower_name: str
+    is_parent: str
+    master_id: int
+
 
 class GrAreaMapDummy(BaseModel):  # pragma: no cover
     growing_area_name: List[str]
