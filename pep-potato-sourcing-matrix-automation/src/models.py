@@ -658,8 +658,8 @@ class user_log(Base):
     id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     email = Column(String, nullable=False)
     date_time = Column(DateTime, nullable=False,
-                       default=datetime.now(pytz.timezone('CST6CDT')).strftime("%Y-%m-%d %H:%M"))
-    date = Column(Date, nullable=False, default=datetime.now().date())
+                       default=datetime.now().strftime("%Y-%m-%d %H:%M"))
+    date = Column(String, nullable=False, default=datetime.now().date())
 
 
 class FileUploadTemplate(Base):
