@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Optional
 from pydantic import BaseModel
 
@@ -915,6 +915,17 @@ class PageInfoSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class UserlogSchema(BaseModel):
+    email: str
+    date_time: Optional[datetime] = None
+    date: Optional[date] = None
 
     class Config:
         orm_mode = True
