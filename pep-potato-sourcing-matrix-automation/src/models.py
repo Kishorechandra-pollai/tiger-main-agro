@@ -659,7 +659,7 @@ class user_log(Base):
     email = Column(String, nullable=False)
     date_time = Column(DateTime, nullable=False,
                        default=datetime.now().strftime("%Y-%m-%d %H:%M"))
-    date = Column(String, nullable=False, default=datetime.now().date())
+    date = Column(String, nullable=False)
 
 
 class FileUploadTemplate(Base):
