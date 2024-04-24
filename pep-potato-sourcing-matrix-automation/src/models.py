@@ -1,9 +1,8 @@
 from sqlalchemy import FLOAT
 from sqlalchemy import TIMESTAMP, Column, String, ForeignKey, Integer, Float, MetaData,\
-    Boolean, PrimaryKeyConstraint, Date, DateTime
+    Boolean, PrimaryKeyConstraint, DateTime
 from sqlalchemy.sql import func
 from datetime import datetime
-import pytz
 from database import engine
 import sqlalchemy as db
 from database import Base
@@ -659,8 +658,7 @@ class user_log(Base):
     email = Column(String, nullable=False)
     date_time = Column(DateTime, nullable=False,
                        default=datetime.now().strftime("%Y-%m-%d %H:%M"))
-    date = Column(String, nullable=False)
-
+    date = Column(DateTime, nullable=False)
 
 class FileUploadTemplate(Base):
     """Class representing freight_cost_rate table"""
