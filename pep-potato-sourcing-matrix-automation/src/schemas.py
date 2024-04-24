@@ -924,8 +924,8 @@ class PageInfoSchema(BaseModel):
 
 class UserlogSchema(BaseModel):
     email: str
-    date_time: Optional[datetime] = None
-    date: Optional[date] = None
+    date_time: datetime
+    date: str
 
     class Config:
         orm_mode = True
