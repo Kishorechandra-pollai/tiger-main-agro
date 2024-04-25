@@ -1,6 +1,8 @@
 from sqlalchemy import FLOAT
-from sqlalchemy import TIMESTAMP, Column, String, ForeignKey, Integer, Float, MetaData,Boolean,PrimaryKeyConstraint
+from sqlalchemy import TIMESTAMP, Column, String, ForeignKey, Integer, Float, MetaData,\
+    Boolean, PrimaryKeyConstraint, DateTime
 from sqlalchemy.sql import func
+from datetime import datetime
 from database import engine
 import sqlalchemy as db
 from database import Base
@@ -592,7 +594,7 @@ class pc_plan_volume_usage(Base):
     volume = Column(Integer, nullable=True)
     created_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
-    
+
 class erp_logs_table(Base):
     __tablename__ = "erp_logs"
     id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
@@ -613,7 +615,7 @@ class user_information(Base):
     last_name = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     updated_by = Column(String, nullable=True)
-    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now(), onupdate=func.now())   
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now(), onupdate=func.now())
 
 class page_information(Base):
     __tablename__ = "page_information"
@@ -626,7 +628,7 @@ class page_information(Base):
     updated_by = Column(String, nullable=True,default='SYSTEM')
     updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     is_read_only = Column(Boolean, default=False)
-    
+
 class user_page_mapping(Base):
     __tablename__ = "user_page_mapping"
     user_id = Column(Integer(), nullable=False, primary_key=True)
@@ -636,17 +638,27 @@ class user_page_mapping(Base):
     __table_args__ = (
         PrimaryKeyConstraint('user_id', 'page_id','access_id','country_id'),
     )
-    
+
 class access_type_information(Base):
     __tablename__ = "access_type_information"
     access_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     access_name = Column(String, nullable=True)
     access_value = Column(Integer, nullable=True)
-    
+
 class country_information(Base):
     __tablename__ = "country_information"
     country_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     country_name = Column(String, nullable=True)
+
+
+class user_log(Base):
+    __tablename__ = "user_log"
+
+    id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    email = Column(String, nullable=False)
+    date_time = Column(DateTime, nullable=False,
+                       default=datetime.now().strftime("%Y-%m-%d %H:%M"))
+    date = Column(DateTime, nullable=False)
 
 class FileUploadTemplate(Base):
     """Class representing freight_cost_rate table"""
