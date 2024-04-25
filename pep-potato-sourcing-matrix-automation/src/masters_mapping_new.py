@@ -239,7 +239,7 @@ def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
                                models.Plant.plant_name,
                                models.Plant.region_id,
                                models.Plant.crop_category_id,
-                               models.Plant.updated_time).filter(models.Plant.status=="ACTIVE").distinct().all())
+                               models.Plant.updated_time).filter(models.Plant.status=="ACTIVE").order_by(models.Plant.updated_time,models.Plant.plant_id).distinct().all())
         return {"plants":all_plants}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -481,7 +481,7 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
                                models.growers.created_by,
                                models.growers.created_time,
                                models.growers.grower_abbreviation_code)
-                               .filter(models.growers.status=="ACTIVE").distinct().all())
+                               .filter(models.growers.status=="ACTIVE").order_by(models.growers.updated_time,models.growers.grower_id).distinct().all())
         return {"growers":all_growers}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -618,7 +618,7 @@ def get_region(db: Session = Depends(get_db)):  # pragma: no cover
                                 models.region.updated_time,
                                 func.trim(models.region.created_by).label("created_by"),
                                 models.region.region_id,
-                                models.region.created_time).filter(models.region.status=="ACTIVE").distinct().all())
+                                models.region.created_time).filter(models.region.status=="ACTIVE").order_by(models.region.updated_time,models.region.region_id).distinct().all())
         return {"regions":all_regions}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -685,7 +685,7 @@ def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
                                 func.trim(models.category.updated_by).label("updated_by"),
                                 models.category.category_name,
                                 func.trim(models.category.country).label("country"),
-                                models.category.created_time).filter(models.category.status=="ACTIVE").distinct().all())
+                                models.category.created_time).filter(models.category.status=="ACTIVE").order_by(models.category.updated_time,models.category.crop_category).distinct().all())
         return {"crop_categories":all_crop_cat}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -833,7 +833,7 @@ def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
                                models.Plant.plant_name,
                                models.Plant.region_id,
                                models.Plant.crop_category_id,
-                               models.Plant.updated_time).filter(models.Plant.status=="INACTIVE").distinct().all()
+                               models.Plant.updated_time).filter(models.Plant.status=="INACTIVE").order_by(models.Plant.updated_time,models.Plant.plant_id).distinct().all()
         empty_json =  [{
             "plant_id": 000,
             "company_name": "Not Appl.",
@@ -868,7 +868,7 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
                                models.growers.grower_id,
                                models.growers.created_by,
                                models.growers.created_time,
-                               models.growers.grower_abbreviation_code).filter(models.growers.status=="INACTIVE").distinct().all())
+                               models.growers.grower_abbreviation_code).filter(models.growers.status=="INACTIVE").order_by(models.growers.updated_time,models.growers.grower_id).distinct().all())
         empty_json =  [{
                 "grower_name": "Not Appl.",
                 "owner": "Not Appl.",
@@ -928,7 +928,7 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_vsc')
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_vsc = db.query(models.vendor_site_code).filter(models.vendor_site_code.status=="ACTIVE").distinct().all()
+        all_vsc = db.query(models.vendor_site_code).filter(models.vendor_site_code.status=="ACTIVE").order_by(models.vendor_site_code.updated_time,models.vendor_site_code.VENDOR_SITE_ID).distinct().all()
         return {"vsc":all_vsc}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -936,7 +936,7 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
 @router.get('/get_inactive_vsc')
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
-        all_vsc = db.query(models.vendor_site_code).filter(models.vendor_site_code.status=="INACTIVE").distinct().all()
+        all_vsc = db.query(models.vendor_site_code).filter(models.vendor_site_code.status=="INACTIVE").order_by(models.vendor_site_code.updated_time,models.vendor_site_code.VENDOR_SITE_ID).distinct().all()
         empty_json = [{
                 "created_by": "Not Appl.",
                 "VENDOR_SITE_CODE": "Not Appl.",
@@ -965,7 +965,7 @@ def get_region(db: Session = Depends(get_db)):  # pragma: no cover
                                 models.region.updated_time,
                                 func.trim(models.region.created_by).label("created_by"),
                                 models.region.region_id,
-                                models.region.created_time).filter(models.region.status=="INACTIVE").distinct().all()
+                                models.region.created_time).filter(models.region.status=="INACTIVE").order_by(models.region.updated_time,models.region.region_id).distinct().all()
         empty_json = [{
                 "region_name": "Not Appl.",
                 "country": "Not Appl.",
@@ -991,7 +991,7 @@ def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
                                 func.trim(models.category.updated_by).label("updated_by"),
                                 models.category.category_name,
                                 func.trim(models.category.country).label("country"),
-                                models.category.created_time).filter(models.category.status=="INACTIVE").distinct().all()
+                                models.category.created_time).filter(models.category.status=="INACTIVE").order_by(models.category.updated_time,models.category.crop_category).distinct().all()
         empty_json = [{
                     "crop_category": 0,
                     "created_by": "Not Appl.",
