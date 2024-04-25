@@ -445,7 +445,7 @@ def handle_upload_file(user_email: str, file: UploadFile, db: Session):# pragma:
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return {"message": f"Freight rates successfully uploaded for the year: {year}"}
+    return {"detail": f"Freight rates successfully uploaded for the year: {year}"}
 
 # FastAPI route for file upload
 @router.post("/upload_file", status_code=status.HTTP_201_CREATED)
