@@ -368,7 +368,7 @@ def handle_upload_file(user_email: str, file: UploadFile, db: Session):# pragma:
         melted_df = df.melt(id_vars=['freight_cost_id', 'company_name', 'year'], var_name='period', value_name='rate')
         melted_df['period'] = melted_df['period'].str.extract('(\d+)').astype(int)
         # Ensure 'year' column exists and is not empty
-        if 'year' not in melted_df.columns or melted_df['year'].empty:
+        if 'year' not in melted_df.columns or melted_df['year'].isnull().all():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No 'year' column found or year data is missing.")
         year = melted_df['year'].iloc[0]
         year = int(year)
