@@ -340,7 +340,7 @@ async def fetch_records(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-def handle_upload_file(user_email: str, file: UploadFile, db: Session):# pragma: no cover
+def handle_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db: Session):# pragma: no cover
     # Capture file upload start time
     file_uploaded_time = datetime.now()
 
@@ -369,11 +369,19 @@ def handle_upload_file(user_email: str, file: UploadFile, db: Session):# pragma:
         melted_df['period'] = melted_df['period'].str.extract('(\d+)').astype(int)
         # Ensure 'year' column exists and is not empty
         if 'year' not in melted_df.columns or melted_df['year'].isnull().all():
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No 'year' column found or year data is missing.")
-        year = melted_df['year'].iloc[0]
-        year = int(year)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Year data is missing in the uploaded excel template.")
+        # Check if the 'year' column has multiple distinct values
+        if len(melted_df['year'].unique()) != 1:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Year column in the uploaded file has multiple year values.Please check it once and then re-upload.")
+        file_year = melted_df['year'].iloc[0]
+
+        # Check if the uploaded_year matches the year value in the Excel file
+        if uploaded_year != file_year:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Dropdown year value {uploaded_year} does not match the year value {file_year} in the uploaded Excel file.")
+        
+        uploaded_year = int(uploaded_year)
         # Delete existing records for the year
-        db.query(FreightCostMapping).filter(FreightCostMapping.year == year).delete()
+        db.query(FreightCostMapping).filter(FreightCostMapping.year == uploaded_year).delete()
         db.commit()
         # Insert new records
         records_to_insert = melted_df.to_dict(orient='records')
@@ -445,12 +453,12 @@ def handle_upload_file(user_email: str, file: UploadFile, db: Session):# pragma:
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return {"detail": f"Freight rates successfully uploaded for the year: {year}"}
+    return {"detail": f"Freight rates successfully uploaded for the year: {uploaded_year}"}
 
 # FastAPI route for file upload
 @router.post("/upload_file", status_code=status.HTTP_201_CREATED)
-async def upload_file(user_email: str, file: UploadFile = File(...), db: Session = Depends(get_db)):# pragma: no cover
-    return handle_upload_file(user_email, file, db)
+async def upload_file(uploaded_year: int, user_email: str, file: UploadFile = File(...), db: Session = Depends(get_db)):# pragma: no cover
+    return handle_upload_file(uploaded_year, user_email, file, db)
 
 @router.get('/get_file_upload_details')
 async def get_file_details(db: Session = Depends(get_db)):# pragma: no cover
