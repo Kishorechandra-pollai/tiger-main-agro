@@ -22,12 +22,24 @@ def user_log(payload: schemas.UserlogSchema, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.post('/get_last_30_days_log')  # pragma: no cover
+def get_user_log(db: Session = Depends(get_db)):
+    try:
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+
+        records = db.query(models.user_log) \
+            .filter(models.user_log.date >= thirty_days_ago.date()).all()
+        return {"status": "success", "user_log": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @router.get('/export_last_30_days')  # pragma: no cover
 def export_last_30_days(db: Session = Depends(get_db)):
     try:
         thirty_days_ago = datetime.now() - timedelta(days=30)
 
-        records = db.query(models.user_log)\
+        records = db.query(models.user_log) \
             .filter(models.user_log.date >= thirty_days_ago.date()).all()
 
         # Prepare CSV data
