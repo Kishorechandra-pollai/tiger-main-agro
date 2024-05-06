@@ -149,21 +149,21 @@ def get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_mes
 def getplantmtrx_growingarea_by_region_period(region_id: int, year: int, db: Session = Depends(get_db)): # pragma: no cover
     filter_conditions = [View_PlantMtrx_table.columns.ga_region_id == region_id]
     detail_message = f"Plant Mtrx data not found for region: {region_id}"
-    return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
+    return get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/period/country/{name}/year/{year}')
 def getplantmtrx_growingarea_by_country_period(name: str, year: int, db: Session = Depends(get_db)): # pragma: no cover
     filter_conditions = [View_PlantMtrx_table.columns.ga_country == name]
     detail_message = f"Plant Mtrx data not found for country: {name}"
-    return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
+    return get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/period/all_data/year/{year}')
 def getplantmtrx_growingarea_all_period(year: int, db: Session = Depends(get_db)): # pragma: no cover
     filter_conditions = []
     detail_message = "Plant Mtrx data not found."
-    return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
+    return get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/only_region_data/year/{year}')
