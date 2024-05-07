@@ -222,7 +222,7 @@ def Create_new_Ownership(year: int, db: Session = Depends(get_db)):
 
             payload = {"ownership_id": fresh_ownership_id, "growing_area_id": growing_area.growing_area_id,
                        "contract": 0, "contract_erp_value": 0, "shrinkage": 0, "to_ship": 0,
-                       "extension": 0, "market_and_flex": 0, "total_ship": 0, "year": year,
+                       "extension": 0, "market": 0, "flex": 0, "total_ship": 0, "year": year,
                        "crop_type": fresh_crop_type,
                        "crop_year": fresh_crop_year}
             new_ownership = models.Ownership(**payload)
@@ -230,7 +230,7 @@ def Create_new_Ownership(year: int, db: Session = Depends(get_db)):
             db.commit()
             payload = {"ownership_id": storage_ownership_id, "growing_area_id": growing_area.growing_area_id,
                        "contract": 0, "contract_erp_value": 0, "shrinkage": 0, "to_ship": 0,
-                       "extension": 0, "market_and_flex": 0, "total_ship": 0, "year": year,
+                       "extension": 0, "market": 0, "flex": 0, "total_ship": 0, "year": year,
                        "crop_type": storage_crop_type,
                        "crop_year": storage_crop_year}
             new_ownership = models.Ownership(**payload)
