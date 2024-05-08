@@ -146,7 +146,8 @@ def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(
 def create_allocation(year: int, db: Session = Depends(get_db)):
     """Create next year allocation table with index as zero."""
     records_count = 0
-    category_table = db.query(models.category.category_name, models.category.country).all()
+    category_table = db.query(models.category.category_name, models.category.country)\
+        .filter(models.category.status == 'Active').all()
     for category_item in category_table:
         i = 1
         while i <= 13:  # No. of period
