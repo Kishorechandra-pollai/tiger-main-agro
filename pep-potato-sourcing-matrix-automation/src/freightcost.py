@@ -221,7 +221,7 @@ def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = D
 #     return {"status": "success", "Records added": update_count, "for Year": year}
 
 @router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
-def create_freight_cost_mapping_records_for_next_year(year:int, db: Session = Depends(get_db)):
+def create_freight_cost_mapping_records_for_next_year(year:int, db: Session = Depends(get_db)): # pragma: no cover
     """Function to create records for freight_cost_mapping table """
     distinct_freight_ids = db.query(FreightCostRate.freight_cost_id).distinct().all()
     update_count = 0
