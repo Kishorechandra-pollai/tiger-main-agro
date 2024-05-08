@@ -185,39 +185,65 @@ def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = D
     return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
 
 
+# @router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
+# def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+#     """Function to create records for freight_cost_mapping table """
+#     distinct_freight_ids = db.query(FreightCostRate.freight_cost_id).distinct().all()
+#     update_count = 0
+#     if distinct_freight_ids.count == 0:
+#         raise HTTPException(status_code=404, detail="No records found in the database")
+#     dict_existing_record = []
+#     existingRecord = db.query(FreightCostMapping)\
+#         .filter(FreightCostMapping.year == year).all()
+#     for ex in existingRecord:
+#         # key = str(ex.freight_cost_id)+"-"+ex.company_name+"-"+str(ex.period)
+#         # dict_existing_record.append(key)
+#         db.delete(ex)
+#     db.commit()
+#     for freight_cost_id_tuple in distinct_freight_ids:
+#         freight_cost_id = freight_cost_id_tuple[0]
+#         for period in range(1, 14):
+#             old_rates = db.query(FreightCostMapping)\
+#                 .filter(FreightCostMapping.year == (year-1),
+#                         FreightCostMapping.freight_cost_id == freight_cost_id,
+#                         FreightCostMapping.period == period).all()
+#             # isKey = str(freight_cost_id)+"-"+old_rates.company_name+"-"+str(period)
+#             # if isKey in dict_existing_record:
+#             #     return {"status": "error", "Records already exists for Year": year}
+#             # else:
+#             new_record = FreightCostMapping(freight_cost_id=freight_cost_id,
+#                                             period=period, year=year,
+#                                             rate=old_rates.rate,
+#                                             company_name=old_rates.company_name)
+#             db.add(new_record)
+#             update_count += 1
+#     db.commit()
+#     return {"status": "success", "Records added": update_count, "for Year": year}
+
 @router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
-def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+def create_freight_cost_mapping_records_for_next_year(year:int, db: Session = Depends(get_db)):
     """Function to create records for freight_cost_mapping table """
     distinct_freight_ids = db.query(FreightCostRate.freight_cost_id).distinct().all()
     update_count = 0
-    if distinct_freight_ids.count == 0:
+    if distinct_freight_ids.count==0:
         raise HTTPException(status_code=404, detail="No records found in the database")
-    dict_existing_record = []
     existingRecord = db.query(FreightCostMapping)\
-        .filter(FreightCostMapping.year == year).all()
+                    .filter(FreightCostMapping.year==year).all()
     for ex in existingRecord:
-        # key = str(ex.freight_cost_id)+"-"+ex.company_name+"-"+str(ex.period)
-        # dict_existing_record.append(key)
         db.delete(ex)
-    db.commit()
+        db.commit()
     for freight_cost_id_tuple in distinct_freight_ids:
         freight_cost_id = freight_cost_id_tuple[0]
         for period in range(1, 14):
-            old_rates = db.query(FreightCostMapping)\
-                .filter(FreightCostMapping.year == (year-1),
-                        FreightCostMapping.freight_cost_id == freight_cost_id,
-                        FreightCostMapping.period == period).first()
-            # isKey = str(freight_cost_id)+"-"+old_rates.company_name+"-"+str(period)
-            # if isKey in dict_existing_record:
-            #     return {"status": "error", "Records already exists for Year": year}
-            # else:
-            new_record = FreightCostMapping(freight_cost_id=freight_cost_id,
-                                            period=period, year=year,
-                                            rate=old_rates.rate,
-                                            company_name=old_rates.company_name)
-            db.add(new_record)
-            update_count += 1
-    db.commit()
+            old_rates = db.query(FreightCostMapping).filter(FreightCostMapping.year == (year-1), FreightCostMapping.freight_cost_id == freight_cost_id, period==period).first()
+            if old_rates:
+                new_record = FreightCostMapping(freight_cost_id = freight_cost_id, period=period, year=year, rate=old_rates.rate, company_name=old_rates.company_name)
+                db.add(new_record)
+                update_count += 1
+                print(update_count)
+            else:
+                print("add new record with default value")
+        db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
 
 def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db: Session = Depends(get_db)): # pragma: no cover
