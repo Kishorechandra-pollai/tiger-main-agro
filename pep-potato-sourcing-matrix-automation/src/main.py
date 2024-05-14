@@ -47,8 +47,8 @@ origins = [
     "http://localhost:8000",
 ]
 
-app.include_router(user_log.router, tags=['user_log'], prefix='/api/user_log')
 app.include_router(plants.router, tags=['plant'], prefix='/api/plant')
+app.include_router(user_log.router, tags=['user_log'], prefix='/api/user_log')
 app.include_router(growingarea.router, tags=['growing-area'], prefix='/api/growing-area')
 app.include_router(growers.router, tags=['grower'], prefix='/api/grower')
 app.include_router(region.router, tags=['region'], prefix='/api/region')
@@ -65,13 +65,13 @@ app.include_router(OwnershipGrowerGrowing.router, tags=['OwnershipGrowerGrowingM
 app.include_router(plant_mtrx.router, tags=['plant_mtrx'], prefix='/api/plant_mtrx')
 app.include_router(plant_site_growing_area_mapping.router, tags=['plant_site_growing_area_mapping'],
                    prefix='/api/plant_site_growing_area_mapping')
-app.include_router(vendor_site_code.router,tags=['vendor_site_code'],prefix='/api/vendor_site_code')
+app.include_router(vendor_site_code.router, tags=['vendor_site_code'], prefix='/api/vendor_site_code')
 app.include_router(dashboard.router, tags=['dashboard'], prefix='/api/dashboard')
-app.include_router(potatorates.router,tags=['potato-rates'], prefix='/api/potato_rates')
+app.include_router(potatorates.router, tags=['potato-rates'], prefix='/api/potato_rates')
 
 app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
 # app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
-app.include_router(solidrates.router,tags=['solid-rates'], prefix='/api/solid_rates')
+app.include_router(solidrates.router, tags=['solid-rates'], prefix='/api/solid_rates')
 app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
 app.include_router(generaladministrative.router, tags=['general-administrative'], prefix='/api/general_administrative')
 app.include_router(freighttaskinfo.router, tags=['freight-task-info'], prefix='/api/freight_task_info')
