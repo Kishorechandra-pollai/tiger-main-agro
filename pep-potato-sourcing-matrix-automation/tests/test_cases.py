@@ -1478,6 +1478,14 @@ def test_get_access_type_information():
     response = client.get('/api/page_info/get_access_information')
     assert response.status_code == 200
 
+
+""" User_log test case"""
+
+
+def test_get_user_log():
+    response = client.get('/api/user_log/get_last_30_days_log')
+    assert response.status_code == 200
+
 # """________plantGrowingMapping.py_________"""
 #
 #
