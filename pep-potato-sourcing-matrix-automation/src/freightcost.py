@@ -211,13 +211,14 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
             # if isKey in dict_existing_record:
             #     return {"status": "error", "Records already exists for Year": year}
             # else:
-            new_record = FreightCostMapping(freight_cost_id=freight_cost_id,
-                                            period=period, year=year,
-                                            rate=old_rates.rate,
-                                            company_name=old_rates.company_name)
-            db.add(new_record)
-            update_count += 1
-    db.commit()
+            if old_rates is not None:  # Ensure old_rates is not None
+                new_record = FreightCostMapping(freight_cost_id=freight_cost_id,
+                                                period=period, year=year,
+                                                rate=old_rates.rate,
+                                                company_name=old_rates.company_name)
+                db.add(new_record)
+                update_count += 1
+        db.commit()
     return {"status": "success", "Records added": update_count, "for Year": year}
 
 def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db: Session = Depends(get_db)): # pragma: no cover

@@ -68,7 +68,7 @@ async def create_p4p_task_mappings_records_for_next_year(year: int, db: Session 
                 if isKey in dict_existing_record:
                     return {"status": "error", "Records already exists for Year": year}
                 else:
-                    new_record = p4p_task_mappings(p4p_id = record.p4p_id, period=period, year=year, value=0.001, company_name=con.task_desc)
+                    new_record = p4p_task_mappings(p4p_id = record.p4p_id, period=period, year=year, value=0.0001, company_name=con.task_desc)
                     db.add(new_record)
                     update_count += 1
 
