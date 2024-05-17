@@ -89,9 +89,7 @@ def update_volume(is_actual_update, item, db: Session = Depends(get_db)):  # pra
             forecast_record.forecasted_value = new_forecast_value
             db.commit()
             if is_actual_update:
-                plant_matrix = db.query(models.plantMtrx.plant_matrix_id,
-                                        models.plantMtrx.growing_area_id,
-                                        models.plantMtrx.value) \
+                plant_matrix = db.query(models.plantMtrx) \
                     .filter(models.plantMtrx.plant_id == plant_id,
                             models.plantMtrx.year == current_year,
                             models.plantMtrx.period == period_value,
