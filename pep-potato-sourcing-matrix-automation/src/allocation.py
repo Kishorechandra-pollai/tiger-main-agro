@@ -99,7 +99,7 @@ def update_volume(is_actual_update, item, db: Session = Depends(get_db)):  # pra
                 if plant_matrix is None:
                     week_value += 1
                     continue
-                plant_mtrx.value = new_forecast_value
+                plant_matrix.value = new_forecast_value
                 db.commit()
                 """Update Extension values if present."""
                 if 6 < period_value < 9:
@@ -132,7 +132,7 @@ def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(
             elif year_data == int(item.year) and current_period < item.period:
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
-                update_volume(True, item, db)
+                update_volume(False, item, db)
             else:
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
