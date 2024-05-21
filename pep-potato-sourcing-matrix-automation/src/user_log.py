@@ -37,7 +37,7 @@ def get_user_log(db: Session = Depends(get_db)):
 
 
 @router.get('/export_last_30_days')  # pragma: no cover
-def export_last_30_days_csv(db: Session = Depends(get_db)):
+def export_last_30_days(db: Session = Depends(get_db)):
     try:
         thirty_days_ago = datetime.now() - timedelta(days=30)
 
