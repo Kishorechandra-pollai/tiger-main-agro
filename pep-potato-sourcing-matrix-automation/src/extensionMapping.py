@@ -40,34 +40,35 @@ def update_ownership_extension_overlap(growing_area_id: int, crop_year, db):  # 
             .filter(models.ExtensionOwnershipMapping.growing_area_id == growing_area_id,
                     models.ExtensionOwnershipMapping.status == 'ACTIVE',
                     models.ExtensionOwnershipMapping.crop_year == crop_year).scalar()
-        get_max_week = db.query(func.max(models.ExtensionOwnershipMapping.week)) \
-            .filter(models.ExtensionOwnershipMapping.growing_area_id == growing_area_id,
-                    models.ExtensionOwnershipMapping.status == 'ACTIVE',
-                    models.ExtensionOwnershipMapping.crop_year == crop_year,
-                    models.ExtensionOwnershipMapping.period == get_max_period).scalar()
-        final_extension_limit = get_max_period * 100 + get_max_week
-        print("final_extension_limit:", final_extension_limit)
-        ga_fresh = db.query(models.growing_area.fresh_period_start,
-                            models.growing_area.fresh_week_start) \
-            .filter(models.growing_area.growing_area_id == growing_area_id).first()
-
-        fresh_start = ga_fresh[0] * 100 + ga_fresh[1]
-        print("fresh_start:", fresh_start)
-
-        if final_extension_limit >= fresh_start:
-            """Update the ownership table with final_extension."""
-            new_final_extension = db.query(func.sum(models.ExtensionOwnershipMapping.total_value)
-                                           .label('total_value_sum')) \
+        if get_max_period:
+            get_max_week = db.query(func.max(models.ExtensionOwnershipMapping.week)) \
                 .filter(models.ExtensionOwnershipMapping.growing_area_id == growing_area_id,
+                        models.ExtensionOwnershipMapping.status == 'ACTIVE',
                         models.ExtensionOwnershipMapping.crop_year == crop_year,
-                        models.ExtensionOwnershipMapping.period * 100 +
-                        models.ExtensionOwnershipMapping.week >= fresh_start) \
-                .group_by(models.ExtensionOwnershipMapping.growing_area_id,
-                          models.ExtensionOwnershipMapping.crop_year).first()
-            if new_final_extension:
-                db.query(models.Ownership).filter(models.Ownership.growing_area_id == growing_area_id,
-                                                  models.Ownership.crop_year == crop_year) \
-                    .update({models.Ownership.final_extension: new_final_extension[0]}, synchronize_session=False)
+                        models.ExtensionOwnershipMapping.period == get_max_period).scalar()
+            final_extension_limit = get_max_period * 100 + get_max_week
+            print("final_extension_limit:", final_extension_limit)
+            ga_fresh = db.query(models.growing_area.fresh_period_start,
+                                models.growing_area.fresh_week_start) \
+                .filter(models.growing_area.growing_area_id == growing_area_id).first()
+
+            fresh_start = ga_fresh[0] * 100 + ga_fresh[1]
+            print("fresh_start:", fresh_start)
+
+            if final_extension_limit >= fresh_start:
+                """Update the ownership table with final_extension."""
+                new_final_extension = db.query(func.sum(models.ExtensionOwnershipMapping.total_value)
+                                               .label('total_value_sum')) \
+                    .filter(models.ExtensionOwnershipMapping.growing_area_id == growing_area_id,
+                            models.ExtensionOwnershipMapping.crop_year == crop_year,
+                            models.ExtensionOwnershipMapping.period * 100 +
+                            models.ExtensionOwnershipMapping.week >= fresh_start) \
+                    .group_by(models.ExtensionOwnershipMapping.growing_area_id,
+                              models.ExtensionOwnershipMapping.crop_year).first()
+                if new_final_extension:
+                    db.query(models.Ownership).filter(models.Ownership.growing_area_id == growing_area_id,
+                                                      models.Ownership.crop_year == crop_year) \
+                        .update({models.Ownership.final_extension: new_final_extension[0]}, synchronize_session=False)
                 db.commit()
         else:
             db.query(models.Ownership).filter(models.Ownership.growing_area_id == growing_area_id,
