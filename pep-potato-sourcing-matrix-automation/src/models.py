@@ -245,6 +245,7 @@ class Ownership(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
+    final_extension = Column(Float, nullable=True)
 
 
 class vendor_site_code(Base):

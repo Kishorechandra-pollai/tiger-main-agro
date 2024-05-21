@@ -413,6 +413,7 @@ class OwnershipSchema(BaseModel):
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
+    final_extension: Optional[float] = None
 
     class Config:
         orm_mode = True
