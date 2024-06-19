@@ -119,7 +119,7 @@ def getplantmtrx_growingarea_all(year: int, db: Session = Depends(get_db)):
     return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
 
 
-def get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db): # pragma: no cover
+def get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db):  # pragma: no cover
     try:
         data = db.query(func.concat(View_PlantMtrx_table.columns.growing_area_name, " | ",
                                     View_PlantMtrx_table.columns.growing_area_desc).label("growing_area_name"),
@@ -146,21 +146,22 @@ def get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_mes
 
 
 @router.get('/growing_area/period/region/{region_id}/year/{year}')
-def getplantmtrx_growingarea_by_region_period(region_id: int, year: int, db: Session = Depends(get_db)): # pragma: no cover
+def getplantmtrx_growingarea_by_region_period(region_id: int, year: int,
+                                              db: Session = Depends(get_db)):  # pragma: no cover
     filter_conditions = [View_PlantMtrx_table.columns.ga_region_id == region_id]
     detail_message = f"Plant Mtrx data not found for region: {region_id}"
     return get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/period/country/{name}/year/{year}')
-def getplantmtrx_growingarea_by_country_period(name: str, year: int, db: Session = Depends(get_db)): # pragma: no cover
+def getplantmtrx_growingarea_by_country_period(name: str, year: int, db: Session = Depends(get_db)):  # pragma: no cover
     filter_conditions = [View_PlantMtrx_table.columns.ga_country == name]
     detail_message = f"Plant Mtrx data not found for country: {name}"
     return get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/period/all_data/year/{year}')
-def getplantmtrx_growingarea_all_period(year: int, db: Session = Depends(get_db)): # pragma: no cover
+def getplantmtrx_growingarea_all_period(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     filter_conditions = []
     detail_message = "Plant Mtrx data not found."
     return get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_message, db)
@@ -315,56 +316,59 @@ def update_plantMtrx(payload: schemas.PlantMtrxPayload, db: Session = Depends(ge
 def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):  # pragma: no cover
     """for all plants generate the plant_mtrx from pc_usage data using preferred growing_area"""
     try:
-        check_data = db.query(models.plantMtrx.plant_matrix_id).filter(models.plantMtrx.year == year).first()
         record_count = 0
-        if check_data is None:
-            plant_list = db.query(models.Plant.plant_id, models.Plant.region_id) \
-                .filter(models.Plant.status == "ACTIVE").all()
-            for plant in plant_list:
-                plant_id = plant[0]
-                region = plant[1]
-                period_value = 1
-                while period_value <= 13:
-                    week_value = 1
-                    if period_week_calc.calculate_week_num(year, int(period_value)):
-                        no_of_week = 5
+        existing_records = db.query(models.plantMtrx.plant_matrix_id).filter(models.plantMtrx.year == year).all()
+        if len(existing_records) != 0:
+            for record in existing_records:
+                db.delete(record)
+            db.commit()
+        plant_list = db.query(models.Plant.plant_id, models.Plant.region_id) \
+            .filter(models.Plant.status == "ACTIVE").all()
+        for plant in plant_list:
+            plant_id = plant[0]
+            region = plant[1]
+            period_value = 1
+            while period_value <= 13:
+                week_value = 1
+                if period_week_calc.calculate_week_num(year, int(period_value)):
+                    no_of_week = 5
+                else:
+                    no_of_week = 4
+                while week_value <= no_of_week:
+                    prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
+                        .filter(models.plantMtrx_template.plant_id == plant_id,
+                                models.plantMtrx_template.period == period_value,
+                                models.plantMtrx_template.week_no == week_value).first()
+                    if prefered_growingarea is not None:
+                        total_value = db.query(models.pcusage.forecasted_value) \
+                            .filter(models.pcusage.plant_id == plant_id,
+                                    models.pcusage.period == period_value,
+                                    models.pcusage.week_no == week_value,
+                                    models.pcusage.year == year).first()
+                        if total_value is None:
+                            total_value[0] = 0
+
+                        plantMtrx_id = str(plant_id) + "#" + str(region) + "#" + str(year) + "#" + str(
+                            period_value) + "#" + str(week_value) + "#" + str(prefered_growingarea[0])
+
+                        crop_type, crop_year = func_getcrop_type(period_value, week_value, year,
+                                                                 prefered_growingarea[0], db)
+                        PlantMtrx_payload = {"plant_matrix_id": plantMtrx_id,
+                                             "region_id": region, "plant_id": plant_id,
+                                             "growing_area_id": prefered_growingarea[0],
+                                             "period": period_value, "week": week_value,
+                                             "year": year, "crop_type": crop_type,
+                                             "crop_year": crop_year, "value": total_value[0],
+                                             "status": 'active'}
+
+                        newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
+                        db.add(newplantMtrx_record)
+                        record_count += 1
+                        week_value += 1
                     else:
-                        no_of_week = 4
-                    while week_value <= no_of_week:
-                        prefered_growingarea = db.query(models.plantMtrx_template.growing_area_id) \
-                            .filter(models.plantMtrx_template.plant_id == plant_id,
-                                    models.plantMtrx_template.period == period_value,
-                                    models.plantMtrx_template.week_no == week_value).first()
-                        if prefered_growingarea is not None:
-                            total_value = db.query(models.pcusage.forecasted_value) \
-                                .filter(models.pcusage.plant_id == plant_id,
-                                        models.pcusage.period == period_value,
-                                        models.pcusage.week_no == week_value,
-                                        models.pcusage.year == year).first()
-                            if total_value is None:
-                                total_value[0] = 0
-
-                            plantMtrx_id = str(plant_id) + "#" + str(region) + "#" + str(year) + "#" + str(
-                                period_value) + "#" + str(week_value) + "#" + str(prefered_growingarea[0])
-
-                            crop_type, crop_year = func_getcrop_type(period_value, week_value, year,
-                                                                     prefered_growingarea[0], db)
-                            PlantMtrx_payload = {"plant_matrix_id": plantMtrx_id,
-                                                 "region_id": region, "plant_id": plant_id,
-                                                 "growing_area_id": prefered_growingarea[0],
-                                                 "period": period_value, "week": week_value,
-                                                 "year": year, "crop_type": crop_type,
-                                                 "crop_year": crop_year, "value": total_value[0],
-                                                 "status": 'active'}
-
-                            newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
-                            db.add(newplantMtrx_record)
-                            record_count += 1
-                            week_value += 1
-                        else:
-                            week_value += 1
-                        db.commit()
-                    period_value += 1
+                        week_value += 1
+                    db.commit()
+                period_value += 1
         return {"status": "Success", "records create": record_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
