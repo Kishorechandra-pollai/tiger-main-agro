@@ -31,7 +31,8 @@ def get_plant_all(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No plant  found")
     return {"status": "success", "plant": plant,
-            "current_period": current_period, "current_week": current_week, "year": year_data}
+            "current_period": current_period, "current_week": current_week,
+            "year": year_data, "current_time": cst_now}
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
