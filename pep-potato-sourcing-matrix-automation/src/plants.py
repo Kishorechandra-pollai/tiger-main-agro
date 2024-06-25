@@ -26,7 +26,6 @@ def get_plant_all(db: Session = Depends(get_db)):
     current_period = res['Period']
     current_week = res['week']
     year_data = res['year']
-    print(current_period, current_week)
     if not plant:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No plant  found")
