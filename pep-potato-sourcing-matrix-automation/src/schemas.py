@@ -654,6 +654,7 @@ class ExtensionMappingSchema(BaseModel):
     crop_year: Optional[str] = None
     total_value: Optional[float] = None
     split: str
+    year: int
     status: Optional[str] = None
 
     class Config:

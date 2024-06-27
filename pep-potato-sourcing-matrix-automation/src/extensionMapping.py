@@ -129,7 +129,6 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                                  models.ExtensionOwnershipMapping.split: item.split},
                                 synchronize_session=False)
                 else:  # pragma: no cover
-                    print("--------new input--------")
                     payload = {
                         "extension_id": item.extension_id,
                         "growing_area_id": item.growing_area_id,
@@ -139,11 +138,11 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                         "week": item.week,
                         "total_value": item.total_value,
                         "split": item.split,
+                        "year": item.year,
                         "status": "ACTIVE"}
                     new_records = models.ExtensionOwnershipMapping(**payload)
                     db.add(new_records)
                 db.commit()
-                print("--------items added --------")
         # Setting status based on the maximum period and week combined value
         db.query(models.ExtensionOwnershipMapping) \
             .filter(models.ExtensionOwnershipMapping.growing_area_id == input_growing_Area_id,
