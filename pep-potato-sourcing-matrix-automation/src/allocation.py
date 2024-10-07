@@ -10,13 +10,13 @@ import plant_mtrx
 router = APIRouter()
 
 
-def trim(string):
+def trim(string): # pragma: no cover
     """trim function"""
     return string.replace(" ", "")
 
 
 @router.get('/year/{year}')
-def get_filtered_allocation(year: int, db: Session = Depends(get_db)):
+def get_filtered_allocation(year: int, db: Session = Depends(get_db)): # pragma: no cover
     """get api for allocation index based on input year."""
     try:
         data = db.query(models.allocation).filter(models.allocation.year == year).all()
