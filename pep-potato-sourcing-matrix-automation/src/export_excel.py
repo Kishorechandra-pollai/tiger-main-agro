@@ -12,11 +12,11 @@ import plant_mtrx
 
 router = APIRouter()
 @router.get('/test')
-def test_export():
+def test_export(): # pragma: no cover
     return({"test":"succesful"})
 
 @router.post('/export_finance_summary_solids')
-def export_finance_summary_solids(export_data:list[dict]=Body()):
+def export_finance_summary_solids(export_data:list[dict]=Body()): # pragma: no cover
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame(export_data)

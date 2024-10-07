@@ -4,7 +4,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
-                    freight_cost_period_week_table, rate_growing_area_table, FileUploadTemplate)
+                    freight_cost_period_week_table, rate_growing_area_table, FileUploadTemplate,Plant)
 from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -222,17 +222,19 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
     return {"status": "success", "Records added": update_count, "for Year": year}
 
 def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db: Session = Depends(get_db)): # pragma: no cover
-    country_records = db.query(growing_area.growing_area_id, growing_area.country).join(
-        FreightCostRate, growing_area.growing_area_id == FreightCostRate.growing_area_id
+    country_records = db.query(Plant.plant_id, Plant.company_name).join(
+        FreightCostRate, Plant.plant_id == FreightCostRate.plant_id
     ).filter(
         FreightCostRate.freight_cost_id == freight_cost_id
     ).first()
     if not country_records:
         raise HTTPException(status_code=404, detail=f"No growing area found for freight_cost_id: {freight_cost_id}")
-    growing_area_id, country = country_records
+    plant_id, country = country_records
 
-    if country == 'USA':
+    if country == 'US-CORE' | country == 'CO-MAN':
         country = 'US'
+    elif country == 'CANADA-CORE':
+        country = 'Canada'
     for period in range(1, 14):
         new_record = FreightCostMapping(
             freight_cost_id=freight_cost_id,
