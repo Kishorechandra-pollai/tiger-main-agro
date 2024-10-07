@@ -23,7 +23,6 @@ class ExPlantSchemaDummy(BaseModel):  # pragma: no cover
 
 
 class UpdatePlantSchema(BaseModel):  # pragma: no cover
-    # plant_id: int
     plant_code: str
     plant_name: str
     company_name: Optional[str] = None
@@ -34,12 +33,10 @@ class UpdatePlantSchema(BaseModel):  # pragma: no cover
 
 
 class PlantSchemaDummy(BaseModel):  # pragma: no cover
-    # plant_id: int
     plant_code: str
     plant_name: str
     company_name: Optional[str] = None
     region_id: int
-    # status: str
     crop_category_id: Optional[int] = None
     pgt_plant_name: str
 
@@ -53,10 +50,6 @@ class PlantSiteGrowingAreaMappingDummy(BaseModel):  # pragma: no cover
     plant_name: str
     growing_area: str
     Vendor_Site_Code: str
-
-    # plant_id: int
-    # vendor_site_id: int
-    # growing_area_id: int
 
     class Config:
         orm_mode = True
@@ -95,7 +88,6 @@ class MastersMappingExPlant(BaseModel):
 
 
 class UpdateGrowingAreaSchema(BaseModel):
-    # growing_area_id: int
     growing_area_name: str
     region: int
     country: str
@@ -115,11 +107,9 @@ class UpdateGrowingAreaSchema(BaseModel):
 
 
 class GrowingAreaSchemaMasters(BaseModel):
-    # growing_area_id: int
     growing_area_name: str
     region: int
     country: str
-    # status: str
     growing_area_desc: Optional[str] = None
     fresh_period_start: Optional[int] = None
     fresh_week_start: Optional[int] = None
@@ -128,10 +118,6 @@ class GrowingAreaSchemaMasters(BaseModel):
     storage_period_start: Optional[int] = None
     storage_week_start: Optional[int] = None
     pgt_growing_area: str
-    # created_time: Optional[datetime] = None
-    # updated_time: Optional[datetime] = None
-    # created_by: Optional[str] = None
-    # updated_by: Optional[str] = None
 
 
 class GrowingAreaSchema(BaseModel):
@@ -458,11 +444,6 @@ class plantMtrx_template(BaseModel):
 
 class VendorSiteCodeSchemaMasters(BaseModel):
     VENDOR_SITE_CODE: Optional[str] = None
-    # created_by: Optional[str] = None
-    # created_time: Optional[datetime] = None
-    # status: Optional[str] = None
-    # updated_by: Optional[str] = None
-    # updated_time: Optional[datetime] = None
     region_id: Optional[int] = None
     pgt_vsc: str
 
