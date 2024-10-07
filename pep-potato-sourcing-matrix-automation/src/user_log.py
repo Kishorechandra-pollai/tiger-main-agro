@@ -22,13 +22,15 @@ def user_log(payload: schemas.UserlogSchema, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post('/get_last_30_days_log')  # pragma: no cover
+@router.get('/get_last_30_days_log')
 def get_user_log(db: Session = Depends(get_db)):
     try:
         thirty_days_ago = datetime.now() - timedelta(days=30)
 
         records = db.query(models.user_log) \
             .filter(models.user_log.date >= thirty_days_ago.date()).all()
+        if not records:
+            return {"status": "success", "user_log": "no user log present"}
         return {"status": "success", "user_log": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

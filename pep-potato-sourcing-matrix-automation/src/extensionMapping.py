@@ -34,6 +34,49 @@ def filtered_extension(year: int, db: Session = Depends(get_db)):
     return {"status": "success", "extensionMapping": filtered_ext}
 
 
+def update_ownership_extension_overlap(growing_area_id: int, crop_year, db):  # pragma: no cover
+    if '-' in crop_year:
+        get_max_period = db.query(func.max(models.ExtensionOwnershipMapping.period)) \
+            .filter(models.ExtensionOwnershipMapping.growing_area_id == growing_area_id,
+                    models.ExtensionOwnershipMapping.status == 'ACTIVE',
+                    models.ExtensionOwnershipMapping.crop_year == crop_year).scalar()
+        if get_max_period:
+            get_max_week = db.query(func.max(models.ExtensionOwnershipMapping.week)) \
+                .filter(models.ExtensionOwnershipMapping.growing_area_id == growing_area_id,
+                        models.ExtensionOwnershipMapping.status == 'ACTIVE',
+                        models.ExtensionOwnershipMapping.crop_year == crop_year,
+                        models.ExtensionOwnershipMapping.period == get_max_period).scalar()
+            final_extension_limit = get_max_period * 100 + get_max_week
+            print("final_extension_limit:", final_extension_limit)
+            ga_fresh = db.query(models.growing_area.fresh_period_start,
+                                models.growing_area.fresh_week_start) \
+                .filter(models.growing_area.growing_area_id == growing_area_id).first()
+
+            fresh_start = ga_fresh[0] * 100 + ga_fresh[1]
+            print("fresh_start:", fresh_start)
+
+            if final_extension_limit >= fresh_start:
+                """Update the ownership table with final_extension."""
+                new_final_extension = db.query(func.sum(models.ExtensionOwnershipMapping.total_value)
+                                               .label('total_value_sum')) \
+                    .filter(models.ExtensionOwnershipMapping.growing_area_id == growing_area_id,
+                            models.ExtensionOwnershipMapping.crop_year == crop_year,
+                            models.ExtensionOwnershipMapping.period * 100 +
+                            models.ExtensionOwnershipMapping.week >= fresh_start) \
+                    .group_by(models.ExtensionOwnershipMapping.growing_area_id,
+                              models.ExtensionOwnershipMapping.crop_year).first()
+                if new_final_extension:
+                    db.query(models.Ownership).filter(models.Ownership.growing_area_id == growing_area_id,
+                                                      models.Ownership.crop_year == crop_year) \
+                        .update({models.Ownership.final_extension: new_final_extension[0]}, synchronize_session=False)
+                db.commit()
+        else:
+            db.query(models.Ownership).filter(models.Ownership.growing_area_id == growing_area_id,
+                                              models.Ownership.crop_year == crop_year) \
+                .update({models.Ownership.final_extension: 0}, synchronize_session=False)
+            db.commit()
+
+
 def update_final_extension_value(input_growing_Area_id, input_crop_year,
                                  db: Session = Depends(get_db)):
     """Update the total extension value in Ownership table."""
@@ -48,6 +91,7 @@ def update_final_extension_value(input_growing_Area_id, input_crop_year,
                                       models.Ownership.crop_year == input_crop_year) \
         .update({models.Ownership.extension: final_extension_value[0]}, synchronize_session=False)
     db.commit()
+    update_ownership_extension_overlap(input_growing_Area_id, input_crop_year, db)
 
 
 @router.post('/extension_mapping')
@@ -85,7 +129,6 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                                  models.ExtensionOwnershipMapping.split: item.split},
                                 synchronize_session=False)
                 else:  # pragma: no cover
-                    print("--------new input--------")
                     payload = {
                         "extension_id": item.extension_id,
                         "growing_area_id": item.growing_area_id,
@@ -95,11 +138,11 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                         "week": item.week,
                         "total_value": item.total_value,
                         "split": item.split,
+                        "year": item.year,
                         "status": "ACTIVE"}
                     new_records = models.ExtensionOwnershipMapping(**payload)
                     db.add(new_records)
                 db.commit()
-                print("--------items added --------")
         # Setting status based on the maximum period and week combined value
         db.query(models.ExtensionOwnershipMapping) \
             .filter(models.ExtensionOwnershipMapping.growing_area_id == input_growing_Area_id,

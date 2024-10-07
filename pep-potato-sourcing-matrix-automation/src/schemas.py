@@ -413,6 +413,7 @@ class OwnershipSchema(BaseModel):
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
+    final_extension: Optional[float] = None
 
     class Config:
         orm_mode = True
@@ -653,6 +654,7 @@ class ExtensionMappingSchema(BaseModel):
     crop_year: Optional[str] = None
     total_value: Optional[float] = None
     split: str
+    year: int
     status: Optional[str] = None
 
     class Config:
