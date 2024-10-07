@@ -72,6 +72,27 @@ class growers(Base):
     grower_abbreviation_code = Column(String, nullable=True)
     pgt_grower_name = Column(String, nullable=False)
 
+# class growers_dummy(Base):
+#     __tablename__ = 'growers_dummy'
+
+#     grower_id = Column(Integer(), primary_key=True, autoincrement=True)
+#     grower_name = Column(String, nullable=False)
+#     owner = Column(String, nullable=True)
+#     region = Column(Integer(), nullable=True)
+#     country = Column(String, nullable=True)
+#     created_by = Column(String, nullable=True)
+#     updated_by = Column(String, nullable=True)
+#     status = Column(String, nullable=True)
+#     volume = Column(String, nullable=True)
+
+#     created_time = Column(TIMESTAMP(timezone=False),
+#                           nullable=False, server_default=func.now())
+#     updated_time = Column(TIMESTAMP(timezone=False),
+#                           default=None, onupdate=func.now())
+#     grower_abbreviation_code = Column(String, nullable=True)
+#     pgt_grower_name = Column(String, nullable=False)
+#     is_parent = Column(String, nullable=False)
+#     master_id = Column(Integer(),nullable=False
 
 class preferred_grower(Base):
     __tablename__ = 'grower_growing_area_mapping'
@@ -183,6 +204,7 @@ class FreightCostRate(Base):
     plant_id = Column(Integer(), ForeignKey("plant_site_growing_area_mapping.plant_id"))
     growing_area_id = Column(Integer(), ForeignKey("plant_site_growing_area_mapping.growing_area_id"))
     vendor_site_id = Column(Integer(), ForeignKey("plant_site_growing_area_mapping.vendor_site_id"))
+    year = Column(Integer, index=True, nullable=False)
     created_by = Column(String, nullable=True)
     updated_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False),
