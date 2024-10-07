@@ -37,6 +37,7 @@ import masters_mapping_new
 import page_info
 import user_info
 import user_log
+import export_excel
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -86,7 +87,7 @@ app.include_router(page_info.router, tags=['page_info'], prefix='/api/page_info'
 app.include_router(plant_mtrx_templt.router, tags=['plant_mtrx_templt'], prefix='/api/plant_mtrx_templt')
 app.include_router(masters_mapping.router, tags=['masters_mapping'], prefix='/api/masters_mapping')
 app.include_router(masters_mapping_new.router, tags=['masters_mapping_latest'], prefix='/api/masters_mapping_latest')
-
+app.include_router(export_excel.router,tags=['export_excel'],prefix='/api/export_excel')
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
