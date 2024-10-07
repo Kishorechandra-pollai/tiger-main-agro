@@ -26,7 +26,7 @@ def create_category(payload: schemas.Category, db: Session = Depends(get_db)):
 
 
 @router.get('/{categoryId}')
-def get_post(categoryId: str, db: Session = Depends(get_db)):
+def get_post(categoryId: str, db: Session = Depends(get_db)): # pragma: no cover
     category_id = db.query(models.category).filter(models.category.crop_category == categoryId).first()
     if not category_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

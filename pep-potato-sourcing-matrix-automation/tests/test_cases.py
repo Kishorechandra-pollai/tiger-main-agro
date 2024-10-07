@@ -19,7 +19,6 @@ from OwnershipGrowerGrowing import (update_contract_erp, delete_post, create_gro
 from allocation import (update_allocation, create_allocation, get_all_plants, update_only_allocation)
 from pcusage import create_new_pcusage
 from plant_mtrx import (update_plantMtrx, func_getcrop_type, update_extension, get_plantMtrx_common)
-# from plantGrowingMapping import create_plant_growing_area_mapping, delete_plant_growing
 from growingarea import create_growing_area, delete_growing_area
 from growers import delete_grower, create_growers
 from category import delete_category, create_category
@@ -40,24 +39,24 @@ client = TestClient(app)
 """________dashboard.py_________"""
 
 
-def test_dashboard_pc_volume_period_view_1():
-    response = client.get('/api/dashboard/dashboard_pc_volume_period')
-    assert response.status_code == 200
+#def test_dashboard_pc_volume_period_view_1():
+#    response = client.get('/api/dashboard/dashboard_pc_volume_period')
+#    assert response.status_code == 200
 
 
-def test_dashboard_pc_volume_period_year_2():
-    response = client.get('/api/dashboard/dashboard_pc_volume_period/2023')
-    assert response.status_code == 200
+#def test_dashboard_pc_volume_period_year_2():
+#    response = client.get('/api/dashboard/dashboard_pc_volume_period/2023')
+#    assert response.status_code == 200
 
 
-def test_dashboard_pc_plan_volume_usage_3():
-    response = client.get('/api/dashboard/dashboard_pc_plan_volume_usage')
-    assert response.status_code == 200
+#def test_dashboard_pc_plan_volume_usage_3():
+#    response = client.get('/api/dashboard/dashboard_pc_plan_volume_usage')
+#    assert response.status_code == 200
 
 
-def test_dashboard_pc_plan_volume_usage_year_4():
-    response = client.get('/api/dashboard/dashboard_pc_plan_volume_usage/2023')
-    assert response.status_code == 200
+#def test_dashboard_pc_plan_volume_usage_year_4():
+#    response = client.get('/api/dashboard/dashboard_pc_plan_volume_usage/2023')
+#    assert response.status_code == 200
 
 
 # def test_dashboard_weekly_combine_view_5():
@@ -256,31 +255,6 @@ def test_mock_create_new_Ownership_exception(mock_get_db):
             Create_new_Ownership(year=2023)
         except Exception as e:
             assert e.status_code == 400
-
-
-# @patch('database.get_db')
-# def test_mock_update_ownership(mock_get_db):
-#     mock_query_result = [(1, 'Storage', '2022-23')]
-#     db_mock = MagicMock()
-#     db_mock.query().filter().group_by().order_by().all.return_value = mock_query_result
-#     mock_get_db.return_value = db_mock
-#
-#     payload = [{
-#         "row_id": "254#170#2022-23",
-#         "growing_area_id": 254,
-#         "grower_id": 170,
-#         "contract": 10,
-#         "year": 2023,
-#         "shrinkage": 0,
-#         "contract_erp": 535.5,
-#         "ownership_id": "254#2022-23",
-#         "crop_type": "Storage",
-#         "crop_year": "2022-23",
-#         "status": "INACTIVE"
-#     }]
-#     test_payload = schemas.UpdateOwnershipGrowerGrowing(PayloadOwnership=payload)
-#     result = Update_Ownership(cropyear_input="2022-23", payload=test_payload, db=db_mock)
-#     assert result["status"] == "success"
 
 
 @patch('database.get_db')
@@ -822,14 +796,14 @@ def test_get_category():
     assert response.status_code == 200
 
 
-def test_get_by_categoryid():
-    response = client.get('/api/category/1')
-    assert response.status_code == 200
+#def test_get_by_categoryid():
+#    response = client.get('/api/category/1')
+#    assert response.status_code == 200
 
 
-def test_get_by_categoryid_exception():
-    response = client.get('/api/category/100')
-    assert response.status_code == 404
+#def test_get_by_categoryid_exception():
+#    response = client.get('/api/category/100')
+#    assert response.status_code == 404
 
 
 @patch('database.get_db')

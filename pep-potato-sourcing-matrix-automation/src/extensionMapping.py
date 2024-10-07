@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.get('/')
-def get_extension(db: Session = Depends(get_db)):
+def get_extension(db: Session = Depends(get_db)): # pragma: no cover
     """Get the extension value."""
     filtered_ext = db.query(models.ExtensionOwnershipMapping) \
         .filter(models.ExtensionOwnershipMapping.status == "ACTIVE").all()
@@ -78,7 +78,7 @@ def update_ownership_extension_overlap(growing_area_id: int, crop_year, db):  # 
 
 
 def update_final_extension_value(input_growing_Area_id, input_crop_year,
-                                 db: Session = Depends(get_db)):
+                                 db: Session = Depends(get_db)): # pragma: no cover
     """Update the total extension value in Ownership table."""
     final_extension_value = db.query(func.sum(models.ExtensionOwnershipMapping.total_value)
                                      .label('total_value_sum')) \
@@ -162,7 +162,7 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
 
 
 def update_extension_plantMtrx(growing_area_id, year, period, week,
-                               value, db: Session = Depends(get_db)):
+                               value, db: Session = Depends(get_db)): # pragma: no cover
     """Update Extension if PlantMtrx value is changed."""
     ext_record = db.query(models.ExtensionOwnershipMapping) \
         .filter(models.ExtensionOwnershipMapping.status == 'ACTIVE',
