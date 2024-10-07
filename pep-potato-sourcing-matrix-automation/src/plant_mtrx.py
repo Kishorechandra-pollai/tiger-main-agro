@@ -14,7 +14,7 @@ import period_week_calc
 router = APIRouter()
 
 
-def get_plantMtrx_common(filter_conditions, name_or_id, year, db): # pragma: no cover
+def get_plantMtrx_common(filter_conditions, name_or_id, year, db):
     try:
         position_data = db.query(models.View_PlantMtrx_position) \
             .filter(models.View_PlantMtrx_position.columns.year == year).all()
@@ -43,7 +43,7 @@ def get_plantMtrx_common(filter_conditions, name_or_id, year, db): # pragma: no 
 
 
 @router.get('/plant/region_id/{region_id}/year/{year}')
-def get_plantMtrx_by_region(region_id: int, year: int, db: Session = Depends(get_db)):# pragma: no cover
+def get_plantMtrx_by_region(region_id: int, year: int, db: Session = Depends(get_db)):
     """Get plantMtrx data based on region_id input."""
     filter_conditions = [
         View_PlantMtrx_table.columns.region_id == region_id
@@ -52,7 +52,7 @@ def get_plantMtrx_by_region(region_id: int, year: int, db: Session = Depends(get
 
 
 @router.get('/plant/company_name/{name}/year/{year}')
-def get_plantMtrx_by_company(name: str, year: int, db: Session = Depends(get_db)): # pragma: no cover
+def get_plantMtrx_by_company(name: str, year: int, db: Session = Depends(get_db)):
     """Get plantMtrx data based on company_name/country input."""
     filter_dict = {
         'US': 'US',
@@ -70,7 +70,7 @@ def get_plantMtrx_by_company(name: str, year: int, db: Session = Depends(get_db)
     return get_plantMtrx_common(filter_conditions, name, year, db)
 
 
-def get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db): # pragma: no cover
+def get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db):
     try:
         data = db.query(func.concat(View_PlantMtrx_table.columns.growing_area_name, " | ",
                                     View_PlantMtrx_table.columns.growing_area_desc).label("growing_area_name"),
@@ -99,21 +99,21 @@ def get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, d
 
 
 @router.get('/growing_area/region/{region_id}/year/{year}')
-def getplantmtrx_growingarea_by_region(region_id: int, year: int, db: Session = Depends(get_db)): # pragma: no cover
+def getplantmtrx_growingarea_by_region(region_id: int, year: int, db: Session = Depends(get_db)):
     filter_conditions = [View_PlantMtrx_table.columns.ga_region_id == region_id]
     detail_message = f"Plant Mtrx data not found for region: {region_id}"
     return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/country/{name}/year/{year}')
-def getplantmtrx_growingarea_by_country(name: str, year: int, db: Session = Depends(get_db)): # pragma: no cover
+def getplantmtrx_growingarea_by_country(name: str, year: int, db: Session = Depends(get_db)):
     filter_conditions = [View_PlantMtrx_table.columns.ga_country == name]
     detail_message = f"Plant Mtrx data not found for country: {name}"
     return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
 
 
 @router.get('/growing_area/all_data/year/{year}')
-def getplantmtrx_growingarea_all(year: int, db: Session = Depends(get_db)):# pragma: no cover
+def getplantmtrx_growingarea_all(year: int, db: Session = Depends(get_db)):
     filter_conditions = []
     detail_message = "Plant Mtrx data not found."
     return get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, db)
@@ -225,7 +225,7 @@ def getplantmtrx_region_period(year: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-def func_getcrop_type(period, week, year, growing_area_id, db: Session = Depends(get_db)): # pragma: no cover
+def func_getcrop_type(period, week, year, growing_area_id, db: Session = Depends(get_db)):
     fresh_arr = db.query(models.growing_area.fresh_period_start,
                          models.growing_area.fresh_week_start,
                          models.growing_area.fresh_period_end,
@@ -254,7 +254,7 @@ def func_getcrop_type(period, week, year, growing_area_id, db: Session = Depends
     return crop_type, crop_year
 
 
-def update_extension(growing_area_id, year, period, week, db: Session = Depends(get_db)): # pragma: no cover
+def update_extension(growing_area_id, year, period, week, db: Session = Depends(get_db)):
     """Update the extension value if actual volume is changed."""
     matrix_data = db.query(models.View_Matrix_growingarea.columns.value) \
         .filter(models.View_Matrix_growingarea.columns.growing_area_id == growing_area_id,
@@ -273,7 +273,7 @@ def update_extension(growing_area_id, year, period, week, db: Session = Depends(
 
 
 @router.post('/update_plantMtrx')
-def update_plantMtrx(payload: schemas.PlantMtrxPayload, db: Session = Depends(get_db)): # pragma: no cover
+def update_plantMtrx(payload: schemas.PlantMtrxPayload, db: Session = Depends(get_db)):
     data = payload.data
     update_count = 0
     try:
@@ -375,7 +375,7 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):  # pragma: 
 
 
 def update_first_period_data(current_period, current_week, current_year,
-                             new_record_count, db: Session = Depends(get_db)): # pragma: no cover
+                             new_record_count, db: Session = Depends(get_db)):
     """Load actual values in Plant Matrix for first period."""
     if current_week == -1:
         if period_week_calc.calculate_week_num(current_year, current_period):
