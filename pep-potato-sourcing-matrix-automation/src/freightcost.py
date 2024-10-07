@@ -192,12 +192,9 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
     update_count = 0
     if distinct_freight_ids.count == 0:
         raise HTTPException(status_code=404, detail="No records found in the database")
-    dict_existing_record = []
     existingRecord = db.query(FreightCostMapping)\
         .filter(FreightCostMapping.year == year).all()
     for ex in existingRecord:
-        # key = str(ex.freight_cost_id)+"-"+ex.company_name+"-"+str(ex.period)
-        # dict_existing_record.append(key)
         db.delete(ex)
     db.commit()
     for freight_cost_id_tuple in distinct_freight_ids:
@@ -207,10 +204,6 @@ def create_freight_cost_mapping_records_for_next_year(year: int, db: Session = D
                 .filter(FreightCostMapping.year == (year-1),
                         FreightCostMapping.freight_cost_id == freight_cost_id,
                         FreightCostMapping.period == period).first()
-            # isKey = str(freight_cost_id)+"-"+old_rates.company_name+"-"+str(period)
-            # if isKey in dict_existing_record:
-            #     return {"status": "error", "Records already exists for Year": year}
-            # else:
             if old_rates is not None:  # Ensure old_rates is not None
                 new_record = FreightCostMapping(freight_cost_id=freight_cost_id,
                                                 period=period, year=year,
@@ -335,8 +328,6 @@ async def fetch_records(
                     "Vendor_Site_Code": Vendor_Site_Code,
                 }
             )
-        # count= len(consolidated_data)
-        # print(count)
 
         return {"status": "success", "data": consolidated_data}
 
