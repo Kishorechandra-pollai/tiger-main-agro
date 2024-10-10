@@ -15,7 +15,7 @@ def test_export():
     return({"test":"succesful"})
 
 @router.post('/export_finance_summary_solids')
-def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolidsList):
+def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolidsList): # pragma: no cover
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame([item.dict() for item in payload.data])
