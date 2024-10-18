@@ -23,7 +23,7 @@ class ExPlantSchemaDummy(BaseModel):  # pragma: no cover
 
 
 class UpdatePlantSchema(BaseModel):  # pragma: no cover
-    #plant_id: int
+    # plant_id: int
     plant_code: str
     plant_name: str
     company_name: Optional[str] = None
@@ -53,11 +53,11 @@ class PlantSiteGrowingAreaMappingDummy(BaseModel):  # pragma: no cover
     plant_name: str
     growing_area: str
     Vendor_Site_Code: str
-    
-     # plant_id: int
+
+    # plant_id: int
     # vendor_site_id: int
     # growing_area_id: int
-    
+
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
@@ -933,3 +933,26 @@ class UserlogSchema(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
+
+class ExportExcelFinanceSummarySolids(BaseModel): # pragma: no cover
+    solids:str
+    P1:Optional[float] = None
+    P2:Optional[float] = None
+    P3:Optional[float] = None
+    P4:Optional[float] = None
+    P5:Optional[float] = None
+    P6:Optional[float] = None
+    P7:Optional[float] = None
+    P8:Optional[float] = None
+    P9:Optional[float] = None
+    P10:Optional[float] = None
+    P11:Optional[float] = None
+    P12:Optional[float] = None
+    P13:Optional[float] = None
+    Total:str
+
+   
+
+class ExportExcelFinanceSummarySolidsList(BaseModel): # pragma: no cover
+    data: List[ExportExcelFinanceSummarySolids]

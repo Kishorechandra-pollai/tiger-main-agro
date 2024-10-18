@@ -92,7 +92,7 @@ class growers(Base):
 #     grower_abbreviation_code = Column(String, nullable=True)
 #     pgt_grower_name = Column(String, nullable=False)
 #     is_parent = Column(String, nullable=False)
-#     master_id = Column(Integer(),nullable=False
+#     master_id = Column(Integer(),nullable=False)
 
 class preferred_grower(Base):
     __tablename__ = 'grower_growing_area_mapping'
@@ -204,7 +204,7 @@ class FreightCostRate(Base):
     plant_id = Column(Integer(), ForeignKey("plant_site_growing_area_mapping.plant_id"))
     growing_area_id = Column(Integer(), ForeignKey("plant_site_growing_area_mapping.growing_area_id"))
     vendor_site_id = Column(Integer(), ForeignKey("plant_site_growing_area_mapping.vendor_site_id"))
-    year = Column(Integer, index=True, nullable=False)
+    #year = Column(Integer, index=True, nullable=False)
     created_by = Column(String, nullable=True)
     updated_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False),
