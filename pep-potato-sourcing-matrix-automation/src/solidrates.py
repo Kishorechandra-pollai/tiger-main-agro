@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from models import (growing_area, solid_rate_mapping, solids_rate_table_period,
+from models import (growing_area, solid_rate_mapping, solids_rate_table_period,solids_rate_plant_period,
                     solids_rates,region)
 from schemas import solidRateMappingPayload,SolidRatesSchema
 from pydantic import BaseModel
@@ -174,3 +174,16 @@ async def update_solids_rates_with_default_value(solids_rate_id:int, year:int, d
     if result is None:
         raise HTTPException(status_code=404, detail="No records found in the database")
     return {"status": "success"}
+
+@router.get('/solid_rate_period_year_plant/{year}/{country}')
+def solid_rate_period_year_plant(year:int,country:str, db: Session = Depends(get_db)):# pragma: no cover
+    """Function to fetch all records from Solids-plant period view table """
+    try:
+        records = db.query(solids_rate_plant_period).filter(
+            solids_rate_plant_period.columns.p_year == year,
+            solids_rate_plant_period.columns.country == country
+            ).order_by(solids_rate_plant_period.columns.plant_id,solids_rate_plant_period.columns.period).all()
+        return {"solids_plant_period_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
