@@ -21,10 +21,17 @@ def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolid
     df = pd.DataFrame([item.dict() for item in payload.data])
     file_name = f"finance_summary_solids_{str_date}.xlsx"
     df.to_excel(file_name,index=False)
+    download_link = f"https://<server_url>/api/download_finance_summary_solids/"
+    return {"download_link":download_link,"file_name":file_name}
+
+@router.get('/download_finance_summary_solids/{file_name}') # pragma: no cover
+def download_finance_summary_solids(file_name:str):
     return FileResponse(
         path=file_name,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
     )
+
+
 
 
