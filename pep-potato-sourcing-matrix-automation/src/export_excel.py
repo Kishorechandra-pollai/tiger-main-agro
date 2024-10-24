@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Body,HTTPException
+from fastapi import APIRouter,Body
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from database import get_db
@@ -7,14 +7,10 @@ import pandas as pd
 from pathlib import Path
 import os
 import schemas
-import logging
+import models
 
-
-SAVE_DIRECTORY = "./saved_files"
+SAVE_DIRECTORY = "saved_files"
 Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 router = APIRouter()
@@ -36,9 +32,6 @@ def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolid
 @router.get('/download_finance_summary_solids/{file_name}') # pragma: no cover
 def download_finance_summary_solids(file_name:str):
     file_path = os.path.join(SAVE_DIRECTORY, file_name)
-    if not os.path.exists(file_path):
-        logger.error(f"File not found: {file_path}")
-        raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(
         path=file_path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
