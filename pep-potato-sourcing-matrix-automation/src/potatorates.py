@@ -239,7 +239,7 @@ def potato_rate_plant_period_view(year:int,country:str, db: Session = Depends(ge
             potato_rate_plant_period.columns.p_year == year,
             potato_rate_plant_period.columns.country == country
             ).order_by(potato_rate_plant_period.columns.period).all()
-        return {"freight_cost_period_view": records}
+        return {"potato_rates_plant_period_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     
@@ -252,6 +252,6 @@ def potato_rate_plant_week_view(year: int,country:str,db: Session = Depends(get_
             potato_rate_plant_weekly.columns.country == country
             ).order_by(potato_rate_plant_weekly.columns.period,
                       potato_rate_plant_weekly.columns.week_no).all()
-        return {"freight_cost_period_week_view": records}
+        return {"potato_rates_plant_week_view": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
