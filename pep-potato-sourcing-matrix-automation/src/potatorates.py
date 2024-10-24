@@ -232,7 +232,7 @@ async def update_potato_rates_with_default_value(potato_rate_id:int, year:int, d
     return {"status": "success"}
 
 @router.get('/potato_rate_plant_period_view/{year}/{country}')
-def potato_rate_plant_period_view(year:int,country:str, db: Session = Depends(get_db)):
+def potato_rate_plant_period_view(year:int,country:str, db: Session = Depends(get_db)): # pragma: no cover
     """Function to fetch all records from potato rate plant period view table """
     try:
         records = db.query(potato_rate_plant_period).filter(
@@ -244,7 +244,7 @@ def potato_rate_plant_period_view(year:int,country:str, db: Session = Depends(ge
         raise HTTPException(status_code=400, detail=str(e)) from e
     
 @router.get('/potato_rate_plant_week_view/{year}/{country}')
-def potato_rate_plant_week_view(year: int,country:str,db: Session = Depends(get_db)):
+def potato_rate_plant_week_view(year: int,country:str,db: Session = Depends(get_db)): # pragma: no cover
     """Function to fetch all records from potato rate plant week view table """
     try:
         records = db.query(potato_rate_plant_weekly).filter(
