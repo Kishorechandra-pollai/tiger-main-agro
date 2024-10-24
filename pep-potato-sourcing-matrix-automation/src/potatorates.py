@@ -4,7 +4,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from models import (growing_area, potato_rate_mapping,
                     potato_rate_table_period, potato_rate_table_weekly,
-                    potato_rates,region)
+                    potato_rates,region,potato_rate_plant_weekly,potato_rate_plant_period)
 from schemas import potatoRateMappingPayload,PotatoRatesSchema
 from pydantic import BaseModel
 from sqlalchemy import and_
@@ -230,3 +230,28 @@ async def update_potato_rates_with_default_value(potato_rate_id:int, year:int, d
     if result is None:
         raise HTTPException(status_code=404, detail="No records found in the database")
     return {"status": "success"}
+
+@router.get('/potato_rate_plant_period_view/{year}/{country}')
+def potato_rate_plant_period_view(year:int,country:str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from potato rate plant period view table """
+    try:
+        records = db.query(potato_rate_plant_period).filter(
+            potato_rate_plant_period.columns.p_year == year,
+            potato_rate_plant_period.columns.country == country
+            ).order_by(potato_rate_plant_period.columns.period).all()
+        return {"freight_cost_period_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/potato_rate_plant_week_view/{year}/{country}')
+def potato_rate_plant_week_view(year: int,country:str,db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from potato rate plant week view table """
+    try:
+        records = db.query(potato_rate_plant_weekly).filter(
+            potato_rate_plant_weekly.columns.p_year == year,
+            potato_rate_plant_weekly.columns.country == country
+            ).order_by(potato_rate_plant_weekly.columns.period,
+                      potato_rate_plant_weekly.columns.week_no).all()
+        return {"freight_cost_period_week_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e

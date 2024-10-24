@@ -535,6 +535,10 @@ summary_total_exp_wo_solids_yag = db.Table('view_summary_TOTAL_EXP_Without_Solid
 inflation_deflation = db.Table('view_inflation_deflation_summary_main',metadata, autoload=True, autoload_with=engine)
 user_page_mapping_table = db.Table('View_user_information',metadata, autoload=True, autoload_with=engine)
 user_information_mapping_view = db.Table('View_user_infomartion',metadata, autoload=True, autoload_with=engine)
+solids_rate_plant_period = db.Table('View_solid_cost_period_combine', metadata, autoload=True, autoload_with=engine)
+potato_rate_plant_period = db.Table('View_potato_cost_period_combine', metadata, autoload=True, autoload_with=engine)
+potato_rate_plant_weekly = db.Table('View_potato_cost_week_view_combine', metadata, autoload=True, autoload_with=engine)
+
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
     row_id = Column(String, nullable=False, primary_key=True)

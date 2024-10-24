@@ -761,6 +761,7 @@ class SolidTaskMasterSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
+    position: Optional[int] = None
 
     class Config:
         orm_mode = True
