@@ -16,7 +16,7 @@ Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
 router = APIRouter()
 @router.get('/test')
 def test_export(): # pragma: no cover
-    return({"test":"succesful"})
+    return({"test":"succesful_passed"})
 
 @router.post('/export_finance_summary_solids')
 def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolidsList): # pragma: no cover
