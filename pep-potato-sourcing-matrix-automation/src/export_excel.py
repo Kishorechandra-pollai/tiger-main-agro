@@ -36,8 +36,6 @@ def download_finance_summary_solids_new(payload:schemas.ExportExcelFinanceSummar
 
 @router.get('/export_finance_summary_solids_new/{file_name}')
 def export_finance_summary_solids_new(file_name:str): # pragma: no cover
-     if file_name not in files_in_memory:
-        raise HTTPException(status_code=404, detail="File not found")
      file_content = files_in_memory[file_name]
      output = BytesIO(file_content)
      return StreamingResponse(
