@@ -30,7 +30,9 @@ def download_finance_summary_solids_new(payload:schemas.ExportExcelFinanceSummar
             df.to_excel(writer, index=False, sheet_name='Sheet1')
      output.seek(0)
      files_in_memory[file_name] = output.getvalue()
-     return {"download_url": f"<base_url>/api/export_excel/export_finance_summary_solids_new/{file_name}"}
+     return {"download_url": f"<base_url>/api/export_excel/export_finance_summary_solids_new/{file_name}",
+             "file name":file_name,
+             "current_files": {k: len(v) for k, v in files_in_memory.items()}}
 
 @router.get('/export_finance_summary_solids_new/{file_name}')
 def export_finance_summary_solids_new(file_name:str): # pragma: no cover
