@@ -12,29 +12,36 @@ from io import BytesIO
 
 SAVE_DIRECTORY = "saved_files"
 Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
-
+files_in_memory = {}
 
 router = APIRouter()
 @router.get('/test')
 def test_export(): # pragma: no cover
     return({"test":"succesful_passed"})
 
-@router.get('/download_finance_summary_solids_new') # pragma: no cover
-def download_finance_summary_solids_new():
-      data = {
-        "Name": ["Alice", "Bob", "Charlie"],
-        "Age": [25, 30, 35],
-        "City": ["New York", "Los Angeles", "Chicago"]
-        }
-      df = pd.DataFrame(data)
-      output = BytesIO()
-      with pd.ExcelWriter(output, engine='openpyxl') as writer:
+@router.post('/download_finance_summary_solids_new') 
+def download_finance_summary_solids_new(payload:schemas.ExportExcelFinanceSummarySolidsList):# pragma: no cover
+     dt = datetime.now()
+     str_date = dt.strftime("%d%m%y%H%M%S")
+     df = pd.DataFrame([item.dict() for item in payload.data])
+     file_name = f"finance_summary_solids_{str_date}.xlsx"
+     output = BytesIO()
+     with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Sheet1')
-      output.seek(0)
-      return StreamingResponse(
+     output.seek(0)
+     files_in_memory[file_name] = output.getvalue()
+     return {"download_url": f"<base_url>/api/export_excel/export_finance_summary_solids_new/{file_name}"}
+
+@router.get('/export_finance_summary_solids_new/{file_name}')
+def export_finance_summary_solids_new(file_name:str): # pragma: no cover
+     if file_name not in files_in_memory:
+        raise HTTPException(status_code=404, detail="File not found")
+     file_content = files_in_memory[file_name]
+     output = BytesIO(file_content)
+     return StreamingResponse(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=example.xlsx"}
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
     )
 
 
