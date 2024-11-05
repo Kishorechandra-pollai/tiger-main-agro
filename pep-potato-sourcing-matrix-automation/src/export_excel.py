@@ -77,7 +77,22 @@ def export_finance_summary_solids_two(payload:schemas.ExportExcelFinanceSummaryS
      file_json["data"] = payload.data
      return{"file_json":file_json}
 
-
+@router.get('/download_finance_summary_solids_two')
+def download_finance_summary_solids_two(): # pragma: no cover
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    file_name = f"finance_summary_solids_{str_date}.xlsx"
+    df = pd.DataFrame(file_json["data"])
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+                output,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                headers={"Content-Disposition": f"attachment; filename={file_name}"}
+            )
+        
 
 
 
