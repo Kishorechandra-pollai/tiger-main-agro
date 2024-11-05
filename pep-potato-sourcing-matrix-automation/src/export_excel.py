@@ -13,7 +13,7 @@ from io import BytesIO
 SAVE_DIRECTORY = "saved_files"
 Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
 files_in_memory = {}
-
+file_json = {}
 router = APIRouter()
 @router.get('/test')
 def test_export(): # pragma: no cover
@@ -33,6 +33,7 @@ def download_finance_summary_solids_new(payload:schemas.ExportExcelFinanceSummar
      return {"download_url": f"<base_url>/api/export_excel/export_finance_summary_solids_new/{file_name}",
              "file name":file_name,
              "current_files": {k: len(v) for k, v in files_in_memory.items()}}
+
 
 @router.get('/export_finance_summary_solids_new/{file_name}')
 def export_finance_summary_solids_new(file_name:str): # pragma: no cover
@@ -69,24 +70,29 @@ def download_finance_summary_solids(file_name:str):
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.post('/export_finance_summary_solids_two')
+def export_finance_summary_solids_two(payload:schemas.ExportExcelFinanceSummarySolidsList): # pragma: no cover
+     file_json["data"] = payload.data
+     return{"file_json":file_json}
 
-@router.get('/download_finance_summary_solids_new') # pragma: no cover
-def download_finance_summary_solids_new():
-      data = {
-        "Name": ["Alice", "Bob", "Charlie"],
-        "Age": [25, 30, 35],
-        "City": ["New York", "Los Angeles", "Chicago"]
-        }
-      df = pd.DataFrame(data)
-      output = BytesIO()
-      with pd.ExcelWriter(output, engine='openpyxl') as writer:
+@router.get('/download_finance_summary_solids_two')
+def download_finance_summary_solids_two(): # pragma: no cover
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    file_name = f"finance_summary_solids_{str_date}.xlsx"
+    df = pd.DataFrame(file_json["data"])
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Sheet1')
-      output.seek(0)
-      return StreamingResponse(
-        output,
+    output.seek(0)
+    return StreamingResponse(
+         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=example.xlsx"}
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
     )
+
+
 
 
 
