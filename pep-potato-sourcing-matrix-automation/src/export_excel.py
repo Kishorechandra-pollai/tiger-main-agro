@@ -37,14 +37,21 @@ def download_finance_summary_solids_new(payload:schemas.ExportExcelFinanceSummar
 
 
 @router.get('/export_finance_summary_solids_new/{file_name}')
-def export_finance_summary_solids_new(file_name:str): # pragma: no cover
-     file_content = files_in_memory[file_name]
-     output = BytesIO(file_content)
-     return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename={file_name}"}
-    )
+async def export_finance_summary_solids_new(file_name:str,retry:int=0): # pragma: no cover
+     file_content = files_in_memory.get(file_name)
+     file_new_temp=file_name
+     retry_temp=retry
+    
+     if file_content:
+        output = BytesIO(file_content)
+        return StreamingResponse(
+                output,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                headers={"Content-Disposition": f"attachment; filename={file_new_temp}"}
+            )
+     if(retry_temp<10):
+          await asyncio.sleep(1)
+          return await export_finance_summary_solids_new(file_new_temp,retry_temp+1)
 
 
 @router.post('/export_finance_summary_solids')
