@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Body,HTTPException, status
+from fastapi import APIRouter,Body,HTTPException, status, Depends
 from fastapi.responses import FileResponse,StreamingResponse
 from sqlalchemy.orm import Session
 from database import get_db
@@ -10,6 +10,7 @@ import schemas
 import models
 from io import BytesIO
 import asyncio
+import json
 
 SAVE_DIRECTORY = "saved_files"
 Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
@@ -80,16 +81,25 @@ def download_finance_summary_solids(file_name:str):
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.post('/export_finance_summary_solids_two')
-def export_finance_summary_solids_two(payload:schemas.ExportExcelFinanceSummarySolidsList): # pragma: no cover
-     file_json["data"] = payload.data
-     return{"file_json":file_json}
+def export_finance_summary_solids_two(payload_export:schemas.ExportExcelFinanceSummarySolidsList,db: Session = Depends(get_db)): # pragma: no cover
+     payload_str = json.dumps(payload_export.dict())
+     dt = datetime.now()
+     str_date = dt.strftime("%d%m%y%H%M%S")
+     new_export_excel_payload = models.export_excel_payload(Payload=payload_str,Payload_ID=str_date)
+     db.add(new_export_excel_payload)
+     db.commit()
+     db.refresh(new_export_excel_payload)
+     return(new_export_excel_payload)
+        
 
 @router.get('/download_finance_summary_solids_two')
-def download_finance_summary_solids_two(): # pragma: no cover
+def download_finance_summary_solids_two(db: Session = Depends(get_db)): # pragma: no cover
+    json_payload = db.query(models.export_excel_payload).order_by(models.export_excel_payload.Payload_ID.desc()).first()
+    payload_data = json.loads(json_payload.Payload)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     file_name = f"finance_summary_solids_{str_date}.xlsx"
-    df = pd.DataFrame(file_json["data"])
+    df = pd.DataFrame(payload_data['data'])
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')

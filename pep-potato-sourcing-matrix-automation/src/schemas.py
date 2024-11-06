@@ -935,6 +935,15 @@ class UserlogSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+class ExportExcelPayloadSchema(BaseModel): # pragma: no cover
+    Payload_ID: int
+    Payload: str
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+    
 
 class ExportExcelFinanceSummarySolids(BaseModel): # pragma: no cover
     solids:str
