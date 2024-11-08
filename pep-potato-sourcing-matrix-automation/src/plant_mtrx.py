@@ -473,8 +473,10 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
                     if not actual_data_current_week:
                         week_value += 1
                         continue
+                    active_growing_area_id = set()
                     for item in actual_data_current_week:
                         new_record_count += 1
+                        active_growing_area_id.add(item.growing_area_id)
                         crop_type, crop_year = func_getcrop_type(item.period_num,
                                                                  item.week_num,
                                                                  today_date.year,
@@ -490,14 +492,16 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
                         plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
                         db.add(plantMtrx_record)
                         db.commit()
-                        if 6 < item.period_num < 9:
-                            update_extension(item.growing_area_id, int(item.p_year),
-                                             int(item.period_num), int(item.week_num), db)
-                        elif 10 < item.period_num < 13:
-                            update_extension(item.growing_area_id, int(item.p_year),
-                                             int(item.period_num), int(item.week_num), db)
+                    # Update Extension Section
+                    for unique_growing_area_id in active_growing_area_id:
+                        if 6 < period_value < 9:
+                            update_extension(unique_growing_area_id, current_year,
+                                            period_value, week_value, db)
+                        elif 10 < period_value < 13:
+                            update_extension(unique_growing_area_id, current_year,
+                                            period_value, week_value, db)
                     week_value += 1
-                period_value += 1
+                period_value += 1       
         return {"status": "success", "record_updated": new_record_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
