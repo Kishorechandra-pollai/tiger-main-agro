@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Body,HTTPException, status, Depends
+from fastapi import APIRouter,Body,HTTPException, status, Depends, Query
 from fastapi.responses import FileResponse,StreamingResponse
 from sqlalchemy.orm import Session
 from database import get_db
@@ -10,6 +10,7 @@ import schemas
 import models
 from io import BytesIO
 import asyncio
+from fastapi.security import HTTPBearer
 import json
 
 SAVE_DIRECTORY = "saved_files"
@@ -18,7 +19,7 @@ files_in_memory = {}
 file_json = {}
 router = APIRouter()
 @router.get('/test')
-def test_export(): # pragma: no cover
+def test_export(token: str = None): # pragma: no cover
     return({"test":"succesful_passed"})
 
 @router.post('/download_finance_summary_solids_new') 
@@ -110,7 +111,16 @@ def download_finance_summary_solids_two(db: Session = Depends(get_db)): # pragma
                 headers={"Content-Disposition": f"attachment; filename={file_name}"}
             )
         
-
+@router.post('/export_excel_BigJSON')
+def export_excel_BigJSON(payload_export:schemas.ExportExcelBigJSONList,db: Session = Depends(get_db)): # pragma: no cover
+     payload_str = json.dumps(payload_export.dict())
+     dt = datetime.now()
+     str_date = dt.strftime("%d%m%y%H%M%S")
+     new_export_excel_payload = models.export_excel_payload(Payload=payload_str,Payload_ID=str_date)
+     db.add(new_export_excel_payload)
+     db.commit()
+     db.refresh(new_export_excel_payload)
+     return(new_export_excel_payload)
 
 
 

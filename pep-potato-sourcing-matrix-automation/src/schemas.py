@@ -966,3 +966,15 @@ class ExportExcelFinanceSummarySolids(BaseModel): # pragma: no cover
 
 class ExportExcelFinanceSummarySolidsList(BaseModel): # pragma: no cover
     data: List[ExportExcelFinanceSummarySolids]
+
+class ExportExcelBigJSON(BaseModel): # pragma: no cover
+    growing_area_name: str
+    growing_area_id: int
+    period: int
+    period_with_P: str
+    week: int
+    year: int
+    total_value: float
+
+class ExportExcelBigJSONList(BaseModel): # pragma: no cover
+    data: List[ExportExcelBigJSON]
