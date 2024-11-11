@@ -12,14 +12,20 @@ from io import BytesIO
 import asyncio
 from fastapi.security import HTTPBearer
 import json
+from typing import Optional
 
 SAVE_DIRECTORY = "saved_files"
 Path(SAVE_DIRECTORY).mkdir(parents=True, exist_ok=True)
 files_in_memory = {}
 file_json = {}
 router = APIRouter()
+def get_token(token: Optional[str] = None):
+    if not token:
+        raise HTTPException(status_code=403, detail="Authorization token is missing")
+    return token
+
 @router.get('/test')
-def test_export(token: str = None): # pragma: no cover
+def test_export(token: str = Depends(get_token)): # pragma: no cover
     return({"test":"succesful_passed"})
 
 @router.post('/download_finance_summary_solids_new') 
