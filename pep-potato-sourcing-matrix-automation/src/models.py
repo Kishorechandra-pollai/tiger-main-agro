@@ -398,6 +398,27 @@ class freight_task_mappings(Base):
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
 
+class freight_task_plan_info(Base):
+    __tablename__ = "freight_task_plan_info"
+    freight_task_plan_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class freight_task_plan_mappings(Base):
+    __tablename__ = "freight_task_plan_mappings"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    freight_task_plan_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+
 
 class general_administrative_task(Base):
     __tablename__ = "general_administrative_task"
@@ -416,6 +437,27 @@ class general_administrative_mappings(Base):
     row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     period = Column(Integer, nullable=True)
     general_administrative_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+    
+class general_administrative_plan_task(Base):
+    __tablename__ = "general_administrative_plan_task"
+    general_administrative_plan_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class general_administrative_plan_mappings(Base):
+    __tablename__ = "general_administrative_plan_mappings"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    general_administrative_plan_id = Column(Integer, nullable=True)
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
@@ -538,6 +580,8 @@ user_information_mapping_view = db.Table('View_user_infomartion',metadata, autol
 solids_rate_plant_period = db.Table('View_solid_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 potato_rate_plant_period = db.Table('View_potato_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 potato_rate_plant_weekly = db.Table('View_potato_cost_week_view_combine', metadata, autoload=True, autoload_with=engine)
+freight_rates_period_totals = db.Table('View_freight_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
+freight_rates_week_totals = db.Table('View_freight_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'

@@ -4,7 +4,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
-                    freight_cost_period_week_table, rate_growing_area_table, FileUploadTemplate,Plant)
+                    freight_cost_period_week_table, rate_growing_area_table,freight_rates_period_totals,freight_rates_week_totals, FileUploadTemplate,Plant)
 from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -145,6 +145,32 @@ def freight_cost_period_week_view_year(year: int,country:str,db: Session = Depen
             ).order_by(freight_cost_period_week_table.columns.period,
                       freight_cost_period_week_table.columns.week_no).all()
         return {"freight_cost_period_week_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/freight_cost_period_total/{year}/{country}')
+def freight_cost_period_year_total(year:int,country:str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from freight period total table """
+    try:
+        records = db.query(freight_rates_period_totals).filter(
+            freight_rates_period_totals.columns.p_year == year,
+            freight_rates_period_totals.columns.country == country
+            ).order_by(freight_rates_period_totals.columns.period).all()
+        return {"freight_cost_period_totals": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.get('/freight_cost_period_week_totals/{year}/{country}')
+def freight_cost_period_week_view_totals(year: int,country:str,db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from freight period week view totals table """
+    try:
+        records = db.query(freight_rates_week_totals).filter(
+            freight_rates_week_totals.columns.p_year == year,
+            freight_rates_week_totals.columns.country == country
+            ).order_by(freight_rates_week_totals.columns.period,
+                      freight_rates_week_totals.columns.week_no).all()
+        return {"freight_cost_period_week_totals": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
