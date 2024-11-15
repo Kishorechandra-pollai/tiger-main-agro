@@ -583,6 +583,7 @@ potato_rate_plant_weekly = db.Table('View_potato_cost_week_view_combine', metada
 freight_rates_period_totals = db.Table('View_freight_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
 freight_rates_week_totals = db.Table('View_freight_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
 potato_rates_plant_week_totals = db.Table('View_potato_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
+potato_rates_plant_period_totals = db.Table('View_potato_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
 solids_period_totals = db.Table('View_solid_period_combine_code', metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
