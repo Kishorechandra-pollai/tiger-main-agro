@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from models import (growing_area, solid_rate_mapping, solids_rate_table_period,solids_rate_plant_period,
+from models import (growing_area, solid_rate_mapping, solids_rate_table_period,solids_rate_plant_period,solids_period_totals,
                     solids_rates,region)
 from schemas import solidRateMappingPayload,SolidRatesSchema
 from pydantic import BaseModel
@@ -184,6 +184,18 @@ def solid_rate_period_year_plant(year:int,country:str, db: Session = Depends(get
             solids_rate_plant_period.columns.country == country
             ).order_by(solids_rate_plant_period.columns.plant_id,solids_rate_plant_period.columns.period).all()
         return {"solids_plant_period_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/solid_rate_period_plant_totals/{year}/{country}')
+def solid_rate_period_plant_totals(year:int,country:str, db: Session = Depends(get_db)):# pragma: no cover
+    """Function to fetch all records from Solids-plant period view totals table """
+    try:
+        records = db.query(solids_period_totals).filter(
+            solids_period_totals.columns.p_year == year,
+            solids_period_totals.columns.country == country
+            ).order_by(solids_period_totals.columns.period).all()
+        return {"solids_plant_period_totals": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 

@@ -4,7 +4,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from models import (growing_area, potato_rate_mapping,
                     potato_rate_table_period, potato_rate_table_weekly,
-                    potato_rates,region,potato_rate_plant_weekly,potato_rate_plant_period)
+                    potato_rates,region,potato_rate_plant_weekly,potato_rate_plant_period,potato_rates_plant_week_totals)
 from schemas import potatoRateMappingPayload,PotatoRatesSchema
 from pydantic import BaseModel
 from sqlalchemy import and_
@@ -253,5 +253,18 @@ def potato_rate_plant_week_view(year: int,country:str,db: Session = Depends(get_
             ).order_by(potato_rate_plant_weekly.columns.period,
                       potato_rate_plant_weekly.columns.week_no).all()
         return {"potato_rates_plant_week_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/potato_rate_plant_week_totals/{year}/{country}')
+def potato_rate_plant_week_totals(year: int,country:str,db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from potato rate plant week view totals table """
+    try:
+        records = db.query(potato_rates_plant_week_totals).filter(
+            potato_rates_plant_week_totals.columns.p_year == year,
+            potato_rates_plant_week_totals.columns.country == country
+            ).order_by(potato_rates_plant_week_totals.columns.period,
+                      potato_rates_plant_week_totals.columns.week_no).all()
+        return {"potato_rates_plant_week_totals": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
