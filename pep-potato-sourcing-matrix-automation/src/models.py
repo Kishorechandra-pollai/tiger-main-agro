@@ -727,7 +727,7 @@ class FileUploadTemplate(Base):
     file_process_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
 
-# class export_excel_payload(Base):
-#     __tablename__ = "export_excel_payload"
-#     Payload_ID = Column(Integer, primary_key=True, autoincrement=False)
-#     Payload = Column(String, nullable=True)
+class export_excel_payload(Base):
+    __tablename__ = "export_excel_payload"
+    Payload_ID = Column(Integer, primary_key=True, autoincrement=False)
+    Payload = Column(String, nullable=True)
