@@ -42,7 +42,7 @@ resources:
     - repository: templates
       type: git
       name: EIAP_DevOps/pep-eiap-potato-sourcing-matrix-pipeline-templates
-      ref: psma
+      ref: auto-approval
 
 variables:
   - template: variables.yaml@templates
