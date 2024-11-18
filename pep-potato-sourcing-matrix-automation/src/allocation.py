@@ -126,7 +126,7 @@ def update_allocation(payload: schemas.AllocationPayload, db: Session = Depends(
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
                 """Below function updates forecast and plantMtrx volume."""
-                update_volume(False, item, db)
+                update_volume(True, item, db)
             elif year_data == int(item.year) and current_period < item.period:
                 update_only_allocation(item.allocation_id, item.value, db)
                 update_count += 1
