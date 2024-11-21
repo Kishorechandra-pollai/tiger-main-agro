@@ -21,7 +21,9 @@ import potatorates
 import solidrates
 import offcontractinfo
 import generaladministrative
+import generaladministrative_plan
 import freighttaskinfo
+import freighttaskplaninfo
 import extensionMapping
 import MarketFlexMapping
 import period_week_calc
@@ -75,7 +77,9 @@ app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freig
 app.include_router(solidrates.router, tags=['solid-rates'], prefix='/api/solid_rates')
 app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
 app.include_router(generaladministrative.router, tags=['general-administrative'], prefix='/api/general_administrative')
+app.include_router(generaladministrative_plan.router, tags=['general-administrative_plan'], prefix='/api/general_administrative_plan')
 app.include_router(freighttaskinfo.router, tags=['freight-task-info'], prefix='/api/freight_task_info')
+app.include_router(freighttaskplaninfo.router, tags=['freight-task-plan-info'], prefix='/api/freight_task_plan_info')
 app.include_router(p4p_master_info.router, tags=['p4p-master-info'], prefix='/api/p4p-master-info')
 
 app.include_router(summary_price_variance.router, tags=['summary_price_variance'], prefix='/api/summary_price_variance')
