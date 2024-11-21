@@ -68,10 +68,16 @@ def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolid
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame([item.dict() for item in payload.data])
     file_name = f"finance_summary_solids_{str_date}.xlsx"
-    file_path = os.path.join(SAVE_DIRECTORY, file_name)
-    df.to_excel(file_path,index=False)
-    download_link = f"https://<server_url>/api/export_excel/download_finance_summary_solids/{file_name}"
-    return {"download_link":download_link,"file_name":file_name}
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+    
 
 @router.get('/download_finance_summary_solids/{file_name}') # pragma: no cover
 def download_finance_summary_solids(file_name:str):
