@@ -203,7 +203,7 @@ def solid_rate_period_plant_totals(year:int,country:str, db: Session = Depends(g
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     
-    
+   
 def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db: Session):# pragma: no cover
     # Capture file upload start time
     file_uploaded_time = datetime.now()
@@ -252,7 +252,7 @@ def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
         
         # Delete records for the specific freight_cost_id values for the given year
         db.query(solid_rate_mapping).filter(
-            solid_rate_mapping.period_yearyear == uploaded_year
+            solid_rate_mapping.period_year == uploaded_year
         ).delete()
         db.commit()
         
