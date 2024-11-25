@@ -202,9 +202,9 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
                         filter_conditions = [View_forecast_pcusage.columns.plant_id==item[0],View_forecast_pcusage.columns.country
                                              ==trim(country[0])]
                         non_zero_values= get_average_forecast_value(filter_conditions,
-                                                                                  previous_year,db)[0]
+                                                                                  previous_year,db)[0]["count_zero_values"]
                         average_actual_value_prev_year = total_actual_volume_func(filter_conditions,
-                                                                                  previous_year,db)[0]/non_zero_values
+                                                                                  previous_year,db)[0]["total_actual_volume"]/non_zero_values
                         forecasted_value=average_actual_value_prev_year
                     
                     # Calculate the forecast value
@@ -257,6 +257,16 @@ def create_new_plant_forecast(plant_id : int, db: Session = Depends(get_db)):  #
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
+@router.get('/average_value/{year}')
+def total_actual_volume_func( year=int, db:Session = Depends(get_db)):
+    filter_cond=[View_forecast_pcusage.columns.plant_id==14,View_forecast_pcusage.columns.country
+                                             =="US"]
+    total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
+                                   .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
+        .filter(View_forecast_pcusage.columns.year == year,
+                *filter_cond) \
+        .group_by(View_forecast_pcusage.columns.year).all()
+    return total_actual_volume
 
 
 
