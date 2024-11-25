@@ -202,9 +202,9 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
                         filter_conditions = [View_forecast_pcusage.columns.plant_id==item[0],View_forecast_pcusage.columns.country
                                              ==trim(country[0])]
                         non_zero_values= get_average_forecast_value(filter_conditions,
-                                                                                  previous_year,db)
+                                                                                  previous_year,db)[0]
                         average_actual_value_prev_year = total_actual_volume_func(filter_conditions,
-                                                                                  previous_year,db)/non_zero_values
+                                                                                  previous_year,db)[0]/non_zero_values
                         forecasted_value=average_actual_value_prev_year
                     
                     # Calculate the forecast value
