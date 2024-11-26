@@ -202,11 +202,12 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
                         if item[0] and trim(country[0]):
                             filter_conditions = [View_forecast_pcusage.columns.plant_id== item[0],View_forecast_pcusage.columns.country
                                              ==trim(country[0])]
-                            non_zero_values= get_average_forecast_value(filter_conditions,
-                                                                                  previous_year,db)[0].count_zero_values
-                            average_actual_value_prev_year = total_actual_volume_func(filter_conditions,
-                                                                                  previous_year,db)[0].total_actual_volume/non_zero_values
-                            forecasted_value=average_actual_value_prev_year
+                            if len(get_average_forecast_value(filter_conditions, previous_year,db))>0 and len(total_actual_volume_func(filter_conditions, previous_year,db))>0:
+                                non_zero_values= get_average_forecast_value(filter_conditions,
+                                                                                    previous_year,db)[0].count_zero_values
+                                average_actual_value_prev_year = total_actual_volume_func(filter_conditions,
+                                                                                    previous_year,db)[0].total_actual_volume/non_zero_values
+                                forecasted_value=average_actual_value_prev_year
                     
                     # Calculate the forecast value
                     pc_usage_id = str(item[0]) + "#" + str(year) + "#" + str(period_value) + "#" + str(week_value)
