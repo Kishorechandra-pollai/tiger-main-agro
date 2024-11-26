@@ -52,6 +52,14 @@ def get_filtered_usage_week_common(db, filter_conditions, year, detail_message=N
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e) or detail_message or "Error processing request")
 
+def get_average_forecast_value(filter_cond, year, db):
+     average_non_zero_volume = db.query(func.count(View_forecast_pcusage.columns.total_actual_value)
+                                   .label('count_zero_values'), View_forecast_pcusage.columns.year) \
+        .filter(View_forecast_pcusage.columns.year == year, View_forecast_pcusage.columns.total_actual_value!=0,
+                *filter_cond) \
+        .group_by(View_forecast_pcusage.columns.year).all()
+     return average_non_zero_volume
+
 
 @router.get('/company_name/{name}/year/{year}')
 def get_filtered_usage_by_company_name(name: str, year: int, db: Session = Depends(get_db)):
@@ -190,6 +198,17 @@ def create_new_pcusage(year: int, db: Session = Depends(get_db)):  # pragma: no 
                         forecasted_value = (previous_actual_dict[week_value - 1] * index_dict[period_value]) / 100
                     else:
                         forecasted_value = (previous_actual_dict[week_value] * index_dict[period_value]) / 100
+                    if forecasted_value==0:
+                        if item[0] and trim(country[0]):
+                            filter_conditions = [View_forecast_pcusage.columns.plant_id== item[0],View_forecast_pcusage.columns.country
+                                             ==trim(country[0])]
+                            if len(get_average_forecast_value(filter_conditions, previous_year,db))>0 and len(total_actual_volume_func(filter_conditions, previous_year,db))>0:
+                                non_zero_values= get_average_forecast_value(filter_conditions,
+                                                                                    previous_year,db)[0].count_zero_values
+                                average_actual_value_prev_year = total_actual_volume_func(filter_conditions,
+                                                                                    previous_year,db)[0].total_actual_volume/non_zero_values
+                                forecasted_value=average_actual_value_prev_year
+                    
                     # Calculate the forecast value
                     pc_usage_id = str(item[0]) + "#" + str(year) + "#" + str(period_value) + "#" + str(week_value)
                     payload = {"pcusage_id": pc_usage_id, "year": year, "period": period_value, "plant_id": item[0],
@@ -239,4 +258,23 @@ def create_new_plant_forecast(plant_id : int, db: Session = Depends(get_db)):  #
         return {"status": "success", "message": "Forecast data for new plant is generated for current year."}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get('/average_value/{year}')
+def total_actual_volume_func_new( year=int, db:Session = Depends(get_db)):
+    filter_cond=[View_forecast_pcusage.columns.plant_id==14,View_forecast_pcusage.columns.country
+                                             =="US"]
+    total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
+                                   .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
+        .filter(View_forecast_pcusage.columns.year == year,
+                *filter_cond) \
+        .group_by(View_forecast_pcusage.columns.year).all()
+    return total_actual_volume[0].total_actual_volume
+
+@router.get('/average_value_count/{year}')
+def total_actual_count_func( year=int, db:Session = Depends(get_db)):
+    filter_cond=[View_forecast_pcusage.columns.plant_id==14,View_forecast_pcusage.columns.country
+                                             =="US"]
+    return get_average_forecast_value(filter_cond,year,db)[0].count_zero_values
+
+
 
