@@ -204,7 +204,7 @@ def solid_rate_period_plant_totals(year:int,country:str, db: Session = Depends(g
         raise HTTPException(status_code=400, detail=str(e)) from e
     
    
-def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db: Session):# pragma: no cover
+def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db: Session):  # pragma: no cover
     # Capture file upload start time
     file_uploaded_time = datetime.now()
 
@@ -219,38 +219,53 @@ def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
         # Read file content based on file format
         contents = file.file.read()
         data = BytesIO(contents)
+        
         # Read all sheets from the Excel file
         df_dict = pd.read_excel(data, sheet_name=None)
+        
         # Check number of sheets
         if len(df_dict.keys()) != 1:
             raise HTTPException(status_code=400, detail="Multiple sheets detected. Please upload a file with only one sheet.")
+        
         # Extract the DataFrame from the dictionary
         df = next(iter(df_dict.values()))
+        
         # Drop unnecessary columns
         df = df.drop(['growing_area_id', 'growing_area_name'], axis=1, errors='ignore')
+        
         # Melt DataFrame
-        melted_df = df.melt(id_vars=['solids_rate_id', 'country_code', 'period_year'], var_name='period', value_name='rate')
-        melted_df['period'] = melted_df['period'].str.extract('(\d+)').astype(int)
+        melted_df = df.melt(id_vars=['solids_rate_id', 'country', 'year'], var_name='period', value_name='rate')
+        melted_df['period'] = melted_df['period'].str.extract(r'(\d+)').astype(int)
+        
         # Replace null values in the rate column with 0
         melted_df['rate'] = melted_df['rate'].fillna(0)
-        # Ensure 'year' column exists and is not empty
+        
+        # Rename columns to match database schema
+        melted_df.rename(columns={'year': 'period_year', 'country': 'country_code'}, inplace=True)
+        
+        # Ensure 'period_year' column exists and is not empty
         if 'period_year' not in melted_df.columns or melted_df['period_year'].isnull().all():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Year data is missing in the uploaded excel template.")
-        # Check if the 'year' column has multiple distinct values
+        
+        # Check if the 'period_year' column has multiple distinct values
         if len(melted_df['period_year'].unique()) != 1:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Year column in the uploaded file has multiple year values.Please check it once and then re-upload.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Year column in the uploaded file has multiple year values. Please check it once and then re-upload."
+            )
+        
         file_year = melted_df['period_year'].iloc[0]
-
+        
         # Check if the uploaded_year matches the year value in the Excel file
         if uploaded_year != file_year:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Dropdown year value {uploaded_year} does not match the year value {file_year} in the uploaded Excel file.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Dropdown year value {uploaded_year} does not match the year value {file_year} in the uploaded Excel file."
+            )
         
         uploaded_year = int(uploaded_year)
         
-        # Get distinct freight_cost_id values from the DataFrame
-        #freight_cost_ids = melted_df['freight_cost_id'].unique()
-        
-        # Delete records for the specific freight_cost_id values for the given year
+        # Delete records for the specific year
         db.query(solid_rate_mapping).filter(
             solid_rate_mapping.period_year == uploaded_year
         ).delete()
@@ -264,12 +279,13 @@ def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
         # Capture file process time
         file_process_time = datetime.now()
         
+        # Get sheet name for logging
         sheet_name = next(iter(df_dict.keys()))
         file_name_without_ext = os.path.splitext(file.filename)[0]
         file_name = f"{file_name_without_ext}_{sheet_name}"
         file_type = file_extension
         file_process_status = True
-        message = " Solids uploaded successfully"
+        message = "Solids uploaded successfully"
 
         file_upload_data = FileUploadTemplate(
             file_name=file_name,
@@ -277,13 +293,14 @@ def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
             file_type=file_type,
             file_process_status=file_process_status,
             file_process_time=file_process_time,
-            file_uploaded_user=user_email,  
-            message=message  
+            file_uploaded_user=user_email,
+            message=message
         )
         db.add(file_upload_data)
         db.commit()
     except HTTPException as he:
         db.rollback()
+        
         # File details
         file_name = file.filename
         file_type = file_extension
@@ -297,8 +314,8 @@ def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
             file_type=file_type,
             file_process_status=file_process_status,
             file_process_time=file_process_time,
-            file_uploaded_user=user_email, 
-            message=message  
+            file_uploaded_user=user_email,
+            message=message
         )
         db.add(file_upload_data)
         db.commit()
@@ -306,6 +323,7 @@ def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
         raise he
     except Exception as e:
         db.rollback()
+        
         # File details
         file_name = file.filename
         file_type = file_extension
@@ -319,15 +337,16 @@ def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
             file_type=file_type,
             file_process_status=file_process_status,
             file_process_time=file_process_time,
-            file_uploaded_user=user_email, 
-            message=message  
+            file_uploaded_user=user_email,
+            message=message
         )
         db.add(file_upload_data)
         db.commit()
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return {"detail": f" rates successfully uploaded for the year: {uploaded_year}"}
+    return {"detail": f"Solids successfully uploaded for the year: {uploaded_year}"}
+
 
 # FastAPI route for file upload
 @router.post("/upload_file_solids", status_code=status.HTTP_201_CREATED)
