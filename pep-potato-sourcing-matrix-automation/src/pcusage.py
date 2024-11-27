@@ -259,22 +259,22 @@ def create_new_plant_forecast(plant_id : int, db: Session = Depends(get_db)):  #
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-@router.get('/average_value/{year}')
-def total_actual_volume_func_new( year=int, db:Session = Depends(get_db)):
-    filter_cond=[View_forecast_pcusage.columns.plant_id==14,View_forecast_pcusage.columns.country
-                                             =="US"]
-    total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
-                                   .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
-        .filter(View_forecast_pcusage.columns.year == year,
-                *filter_cond) \
-        .group_by(View_forecast_pcusage.columns.year).all()
-    return total_actual_volume[0].total_actual_volume
+# @router.get('/average_value/{year}')
+# def total_actual_volume_func_new( year=int, db:Session = Depends(get_db)): 
+#     filter_cond=[View_forecast_pcusage.columns.plant_id==14,View_forecast_pcusage.columns.country
+#                                              =="US"]
+#     total_actual_volume = db.query(func.sum(View_forecast_pcusage.columns.total_actual_value)
+#                                    .label('total_actual_volume'), View_forecast_pcusage.columns.year) \
+#         .filter(View_forecast_pcusage.columns.year == year,
+#                 *filter_cond) \
+#         .group_by(View_forecast_pcusage.columns.year).all()
+#     return total_actual_volume[0].total_actual_volume
 
-@router.get('/average_value_count/{year}')
-def total_actual_count_func( year=int, db:Session = Depends(get_db)):
-    filter_cond=[View_forecast_pcusage.columns.plant_id==14,View_forecast_pcusage.columns.country
-                                             =="US"]
-    return get_average_forecast_value(filter_cond,year,db)[0].count_zero_values
+# @router.get('/average_value_count/{year}')
+# def total_actual_count_func( year=int, db:Session = Depends(get_db)):
+#     filter_cond=[View_forecast_pcusage.columns.plant_id==14,View_forecast_pcusage.columns.country
+#                                              =="US"]
+#     return get_average_forecast_value(filter_cond,year,db)[0].count_zero_values
 
 
 
