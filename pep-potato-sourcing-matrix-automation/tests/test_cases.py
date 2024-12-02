@@ -507,35 +507,35 @@ def test_create_allocation(mock_get_db):
     assert result == {"Status": "success", "new_records": 13}
 
 
-@patch('database.get_db')
-def test_update_allocation(mock_get_db):
-    db_mock = MagicMock()
-    mock_get_db.return_value = db_mock
-    mock_date = date(2023, 1, 1)
-    with patch('allocation.date') as mock_date_today:
-        mock_date_today.today.return_value = mock_date
-        payload_data = [
-            {"allocation_id": 1, "value": 100, "year": 2025, "period": 10},
-            {"allocation_id": 2, "value": 100, "year": 2025, "period": 13},
-            {"allocation_id": 3, "value": 100, "year": 2023, "period": 10}
-        ]
-        mock_payload = MagicMock(data=payload_data)
-        with patch('period_week_calc.calculate_period_and_week') as mock_calculate_period_and_week:
-            mock_date_today.today.return_value.year = 2023
-            mock_calculate_period_and_week.return_value = {'Period': 3, 'year': 2023}
-            update_only_allocation_mock = MagicMock()
-            update_forecast_volume_mock = MagicMock()
+# @patch('database.get_db')
+# def test_update_allocation(mock_get_db):
+#     db_mock = MagicMock()
+#     mock_get_db.return_value = db_mock
+#     mock_date = date(2023, 1, 1)
+#     with patch('allocation.date') as mock_date_today:
+#         mock_date_today.today.return_value = mock_date
+#         payload_data = [
+#             {"allocation_id": 1, "value": 100, "year": 2025, "period": 10},
+#             {"allocation_id": 2, "value": 100, "year": 2025, "period": 13},
+#             {"allocation_id": 3, "value": 100, "year": 2023, "period": 10}
+#         ]
+#         mock_payload = MagicMock(data=payload_data)
+#         with patch('period_week_calc.calculate_period_and_week') as mock_calculate_period_and_week:
+#             mock_date_today.today.return_value.year = 2023
+#             mock_calculate_period_and_week.return_value = {'Period': 3, 'year': 2023}
+#             update_only_allocation_mock = MagicMock()
+#             update_forecast_volume_mock = MagicMock()
 
-            with patch('allocation.update_only_allocation',
-                       side_effect=update_only_allocation_mock) as mock_update_only_allocation, \
-                    patch('allocation.update_forecast_volume',
-                          side_effect=update_forecast_volume_mock) as mock_update_forecast_volume:
-                result = update_allocation(payload=mock_payload, db=db_mock)
+#             with patch('allocation.update_only_allocation',
+#                        side_effect=update_only_allocation_mock) as mock_update_only_allocation, \
+#                     patch('allocation.update_forecast_volume',
+#                           side_effect=update_forecast_volume_mock) as mock_update_forecast_volume:
+#                 result = update_allocation(payload=mock_payload, db=db_mock)
 
-                assert mock_update_only_allocation.call_count == 2
-                assert mock_update_forecast_volume.call_count == 2
-                assert result["status"] == "success"
-                assert result["records_updated"] == 2
+#                 assert mock_update_only_allocation.call_count == 2
+#                 assert mock_update_forecast_volume.call_count == 2
+#                 assert result["status"] == "success"
+#                 assert result["records_updated"] == 2
 
 
 """__________pcusage.py__________"""

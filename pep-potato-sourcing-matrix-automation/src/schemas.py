@@ -610,6 +610,38 @@ class FreightTaskMappingsSchema(BaseModel):
 
 class FreightTaskMappingsPayload(BaseModel):
     data: List[FreightTaskMappingsSchema]
+    
+
+class FreightTaskPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class FreightTaskPlanMappingsSchema(BaseModel):
+    period: Optional[int] = None
+    freight_task_plan_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class FreightTaskPlanMappingsPayload(BaseModel):
+    data: List[FreightTaskPlanMappingsSchema]
 
 
 class GeneralAdministrativeTaskSchema(BaseModel):
@@ -642,6 +674,37 @@ class GeneralAdministrativeMappingsSchema(BaseModel):
 
 class GeneralAdministrativeMappingsPayload(BaseModel):
     data: List[GeneralAdministrativeMappingsSchema]
+    
+class GeneralAdministrativePlanTaskSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class GeneralAdministrativePlanMappingsSchema(BaseModel):
+    period: Optional[int] = None
+    general_administrative_plan_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class GeneralAdministrativePlanMappingsPayload(BaseModel):
+    data: List[GeneralAdministrativePlanMappingsSchema]
 
 
 class ExtensionMappingSchema(BaseModel):
@@ -918,6 +981,7 @@ class PageInfoSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
+    is_read_only:Optional[bool] = None
 
     class Config:
         orm_mode = True

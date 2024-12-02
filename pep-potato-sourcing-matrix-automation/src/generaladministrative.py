@@ -58,7 +58,7 @@ async def update_general_administrative_mappings(year: int, db: Session = Depend
     existingTaskNames = []
     for record in all_records:
         existingRecord = db.query(general_administrative_mappings).filter(general_administrative_mappings.year == year,
-                                                                          general_administrative_mappings.general_administrative_id == record.general_administrative_id).first();
+                                                                          general_administrative_mappings.general_administrative_id == record.general_administrative_id).first()
         if existingRecord:
             existingTaskNames.append(record.task_name)
             continue
