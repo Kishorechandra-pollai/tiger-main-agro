@@ -1042,3 +1042,27 @@ class ExportExcelBigJSON(BaseModel): # pragma: no cover
 
 class ExportExcelBigJSONList(BaseModel): # pragma: no cover
     data: List[ExportExcelBigJSON]
+
+class JournalEntrySchema(BaseModel):  # pragma: no cover
+    comments: str
+    email : str
+    page_name : Optional[str] = None
+    is_parent : bool
+    parent_id : Optional[int] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class JournalEntryOwnerSchema(BaseModel):  # pragma: no cover
+    comments: str
+    email : str
+    is_parent : bool
+    parent_id : Optional[int] = None
+    ownership_id : str
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
