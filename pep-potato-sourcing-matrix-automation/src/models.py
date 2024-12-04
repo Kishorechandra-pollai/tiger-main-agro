@@ -732,8 +732,8 @@ class export_excel_payload(Base):
     Payload_ID = Column(Integer, primary_key=True, autoincrement=False)
     Payload = Column(String, nullable=True)
 
-class journal_entry(Base):
-	__tablename__ = "journal_entry"
+class journal_all(Base):
+	__tablename__ = "journal_all"
 	
 	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
 	comments = Column(String, nullable=False)
@@ -745,11 +745,12 @@ class journal_entry(Base):
 	user_id = Column(Integer(), nullable=False)
 	created_time = Column(DateTime, nullable=False,
                        default=datetime.now().strftime("%Y-%m-%d %H:%M"))
+	img_url = Column(String, nullable=True)
 	is_parent = Column(Boolean, nullable=False)
 	parent_id = Column(Integer(),nullable=True)
 
-class journal_entry_owner(Base):
-	__tablename__ = "journal_entry_owner"
+class journal_ownership(Base):
+	__tablename__ = "journal_ownership"
 	
 	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
 	comments = Column(String, nullable=False)
@@ -760,5 +761,5 @@ class journal_entry_owner(Base):
 	created_time = Column(DateTime, nullable=False,
                        default=datetime.now().strftime("%Y-%m-%d %H:%M"))
 	ownership_id = Column(String, nullable = False)
-	is_parent = Column(Boolean, nullable = False)
-	parent_id = Column(Integer(), nullable = True)
+	growing_area_name = Column(String, nullable = False)
+	growing_area_desc = Column(String, nullable = False)
