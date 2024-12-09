@@ -1047,8 +1047,6 @@ class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
     email : str
     page_name : Optional[str] = None
-    is_parent : bool
-    parent_id : Optional[int] = None
     img_url : Optional[str] = None
 
     class Config:
@@ -1062,6 +1060,7 @@ class JournalEntryOwnerSchema(BaseModel):  # pragma: no cover
     ownership_id : str
     growing_area_name : Optional[str] = None
     growing_area_desc : Optional[str] = None
+    img_url : Optional[str] = None
 
     class Config:
         orm_mode = True
