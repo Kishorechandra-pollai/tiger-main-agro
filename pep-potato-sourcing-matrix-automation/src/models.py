@@ -746,8 +746,6 @@ class journal_all(Base):
 	created_time = Column(DateTime, nullable=False,
                        default=datetime.now().strftime("%Y-%m-%d %H:%M"))
 	img_url = Column(String, nullable=True)
-	is_parent = Column(Boolean, nullable=False)
-	parent_id = Column(Integer(),nullable=True)
 
 class journal_ownership(Base):
 	__tablename__ = "journal_ownership"
@@ -763,3 +761,4 @@ class journal_ownership(Base):
 	ownership_id = Column(String, nullable = False)
 	growing_area_name = Column(String, nullable = False)
 	growing_area_desc = Column(String, nullable = False)
+	img_url = Column(String, nullable=True)

@@ -17,16 +17,10 @@ async def create_journal(payload: JournalEntrySchema, db: Session = Depends(get_
 		raise HTTPException(status_code = 404, detail = "User not found")
 	
 	#Fetching page info
-	if payload.is_parent == True:
-		try:
-			page = db.query(page_information).filter(page_information.page_name == payload.page_name).first()
-		except Exception as e:
-			raise HTTPException(status_code = 404, detail = "Page not found")
-	else:
-		try:
-			page = db.query(journal_all).filter(journal_all.journal_id == payload.parent_id).first()
-		except Exception as e:
-			raise HTTPException(status_code = 404, detail = "Journal not found")
+	try:
+		page = db.query(page_information).filter(page_information.page_name == payload.page_name).first()
+	except Exception as e:
+		raise HTTPException(status_code = 404, detail = "Page not found")
 
 	new_journal_entry = journal_all(
 						comments = payload.comments,
@@ -36,9 +30,7 @@ async def create_journal(payload: JournalEntrySchema, db: Session = Depends(get_
 						user_last_name = str.title(user.last_name),
 						email = payload.email,
 						user_id = user.user_id,
-						img_url = payload.img_url,
-						is_parent = payload.is_parent,
-						parent_id = payload.parent_id
+						img_url = payload.img_url
 	)
 	
 	db.add(new_journal_entry)
@@ -81,7 +73,8 @@ async def create_journal_owner(payload: JournalEntryOwnerSchema, db: Session = D
 										user_id = user.user_id,
 										ownership_id = payload.ownership_id,
 										growing_area_name = area.growing_area_name,
-										growing_area_desc = area.growing_area_desc
+										growing_area_desc = area.growing_area_desc,
+										img_url = payload.img_url
 	)
 	
 	db.add(new_journal_entry_owner)
