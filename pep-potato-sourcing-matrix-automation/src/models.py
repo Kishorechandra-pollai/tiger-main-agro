@@ -731,3 +731,34 @@ class export_excel_payload(Base):
     __tablename__ = "export_excel_payload"
     Payload_ID = Column(Integer, primary_key=True, autoincrement=False)
     Payload = Column(String, nullable=True)
+
+class journal_all(Base):
+	__tablename__ = "journal_all"
+	
+	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+	comments = Column(String, nullable=False)
+	page_name = Column(String, nullable=True)
+	page_id = Column(Integer(),nullable = True)
+	user_first_name = Column(String, nullable=False)
+	user_last_name = Column(String, nullable=False)
+	email = Column(String, nullable=False)
+	user_id = Column(Integer(), nullable=False)
+	created_time = Column(DateTime, nullable=False,
+                       default=datetime.now().strftime("%Y-%m-%d %H:%M"))
+	img_url = Column(String, nullable=True)
+
+class journal_ownership(Base):
+	__tablename__ = "journal_ownership"
+	
+	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+	comments = Column(String, nullable=False)
+	user_first_name = Column(String, nullable=False)
+	user_last_name = Column(String, nullable=False)
+	email = Column(String, nullable=False)
+	user_id = Column(Integer(), nullable=False)
+	created_time = Column(DateTime, nullable=False,
+                       default=datetime.now().strftime("%Y-%m-%d %H:%M"))
+	ownership_id = Column(String, nullable = False)
+	growing_area_name = Column(String, nullable = False)
+	growing_area_desc = Column(String, nullable = False)
+	img_url = Column(String, nullable=True)
