@@ -20,8 +20,13 @@ import vendor_site_code
 import potatorates
 import solidrates
 import offcontractinfo
+import offcontractplaninfo
 import generaladministrative
 import generaladministrative_plan
+import btl
+import btlplan
+import productivity
+import productivityplan
 import freighttaskinfo
 import freighttaskplaninfo
 import extensionMapping
@@ -74,9 +79,13 @@ app.include_router(dashboard.router, tags=['dashboard'], prefix='/api/dashboard'
 app.include_router(potatorates.router, tags=['potato-rates'], prefix='/api/potato_rates')
 
 app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
-# app.include_router(freightcost.router, tags=['freight-cost'], prefix='/api/freight-cost')
 app.include_router(solidrates.router, tags=['solid-rates'], prefix='/api/solid_rates')
 app.include_router(offcontractinfo.router, tags=['off-contract-info'], prefix='/api/off_contract_info')
+app.include_router(offcontractplaninfo.router, tags=['off-contract-plan-info'], prefix='/api/off_contract_plan_info')
+app.include_router(btl.router, tags=['btl'], prefix='/api/btl')
+app.include_router(btlplan.router, tags=['btl-plan'], prefix='/api/btl_plan')
+app.include_router(productivity.router, tags=['productivity'], prefix='/api/productivity')
+app.include_router(productivityplan.router, tags=['productivity-plan'], prefix='/api/productivity_plan')
 app.include_router(generaladministrative.router, tags=['general-administrative'], prefix='/api/general_administrative')
 app.include_router(generaladministrative_plan.router, tags=['general-administrative_plan'], prefix='/api/general_administrative_plan')
 app.include_router(freighttaskinfo.router, tags=['freight-task-info'], prefix='/api/freight_task_info')
