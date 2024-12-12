@@ -578,6 +578,37 @@ class OffContractTaskMappingSchema(BaseModel):
 
 class OffContractTaskMappingPayload(BaseModel):
     data: List[OffContractTaskMappingSchema]
+    
+class OffContractPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class OffContractPlanTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    off_contract_plan_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class OffContractPlanTaskMappingPayload(BaseModel):
+    data: List[OffContractPlanTaskMappingSchema]
 
 
 class FreightTaskInfoSchema(BaseModel):
@@ -1066,3 +1097,124 @@ class JournalEntryOwnerSchema(BaseModel):  # pragma: no cover
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+
+class BTLInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True    
+class BTLTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    btl_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class BTLTaskMappingPayload(BaseModel):
+    data: List[BTLTaskMappingSchema]
+    
+class BTLPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class BTLPlanTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    btl_plan_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class BTLPlanTaskMappingPayload(BaseModel):
+    data: List[BTLPlanTaskMappingSchema]
+    
+class ProductivityInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True    
+class ProductivityTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    btl_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class ProductivityTaskMappingPayload(BaseModel):
+    data: List[ProductivityTaskMappingSchema]
+    
+class ProductivityPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class ProductivityPlanTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    btl_plan_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class ProductivityPlanTaskMappingPayload(BaseModel):
+    data: List[ProductivityPlanTaskMappingSchema]
+    

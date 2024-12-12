@@ -375,6 +375,27 @@ class off_contract_task_mapping(Base):
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
+    
+class off_contract_plan_info(Base):
+    __tablename__ = "off_contract_plan_info"
+    off_contract_plan_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class off_contract_plan_task_mapping(Base):
+    __tablename__ = "off_contract_plan_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    off_contract_plan_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
 
 
 class freight_task_info(Base):
@@ -762,3 +783,87 @@ class journal_ownership(Base):
 	growing_area_name = Column(String, nullable = False)
 	growing_area_desc = Column(String, nullable = False)
 	img_url = Column(String, nullable=True)
+    
+class btl_task_info(Base):
+    __tablename__ = "btl_task_info"
+    btl_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class btl_task_mappings(Base):
+    __tablename__ = "btl_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    btl_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+
+class btl_plan_task_info(Base):
+    __tablename__ = "btl_plan_task_info"
+    btl_plan_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class btl_plan_task_mapping(Base):
+    __tablename__ = "btl_plan_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    btl_plan_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+    
+class productivity_task_info(Base):
+    __tablename__ = "productivity_task_info"
+    productivity_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class productivity_task_mapping(Base):
+    __tablename__ = "productivity_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    productivity_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+
+class productivity_plan_task_info(Base):
+    __tablename__ = "productivity_plan_task_info"
+    productivity_plan_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class productivity_plan_task_mapping(Base):
+    __tablename__ = "productivity_plan_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    productivity_plan_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
