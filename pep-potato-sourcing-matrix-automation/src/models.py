@@ -606,6 +606,7 @@ freight_rates_week_totals = db.Table('View_freight_cost_week_view_combine_countr
 potato_rates_plant_week_totals = db.Table('View_potato_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
 potato_rates_plant_period_totals = db.Table('View_potato_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
 solids_period_totals = db.Table('View_solid_period_combine_code', metadata, autoload=True, autoload_with=engine)
+View_ownership_journal_info = db.Table('View_ownership_journal_info', metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
@@ -764,8 +765,7 @@ class journal_all(Base):
 	user_last_name = Column(String, nullable=False)
 	email = Column(String, nullable=False)
 	user_id = Column(Integer(), nullable=False)
-	created_time = Column(DateTime, nullable=False,
-                       default=datetime.now().strftime("%Y-%m-%d %H:%M"))
+	created_time = Column(DateTime, nullable=False)
 	img_url = Column(String, nullable=True)
 
 class journal_ownership(Base):
@@ -777,12 +777,15 @@ class journal_ownership(Base):
 	user_last_name = Column(String, nullable=False)
 	email = Column(String, nullable=False)
 	user_id = Column(Integer(), nullable=False)
-	created_time = Column(DateTime, nullable=False,
-                       default=datetime.now().strftime("%Y-%m-%d %H:%M"))
+	created_time = Column(DateTime, nullable=False)
 	ownership_id = Column(String, nullable = False)
 	growing_area_name = Column(String, nullable = False)
 	growing_area_desc = Column(String, nullable = False)
 	img_url = Column(String, nullable=True)
+	region = Column(String, nullable=True)
+	year = Column(Integer(), nullable=True)
+	crop_type = Column(String, nullable = True)
+	crop_year = Column(String, nullable = True)
     
 class btl_task_info(Base):
     __tablename__ = "btl_task_info"
