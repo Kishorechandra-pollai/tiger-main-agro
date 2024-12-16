@@ -1,52 +1,52 @@
-"""Home - Dashboard API"""
-from schemas import planVolumeUsagePayload
+"""Home - Dashboard Plan API"""
+from schemas import pcVolumePlanUsagePayload
 from sqlalchemy import func
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 import models
-from models import pc_plan_volume_usage
+from models import pc_volume_usage_plan
 import period_week_calc
 from sqlalchemy.orm import Session
 
 router = APIRouter()
 
 
-@router.get('/dashboard_pc_plan_volume_usage/{year}')
-def dashboard_pc_plan_volume_usage_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
-    """Function to fetch all records from pc_plan_volume_usage table for a particular year."""
+@router.get('/dashboard_pc_volume_usage_plan/{year}')
+def dashboard_pc_volume_usage_plan_year(year: int, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to fetch all records from pc_volume_usage_plan table for a particular year."""
     try:
-        records = db.query(pc_plan_volume_usage.plan_volume_id,
-                           pc_plan_volume_usage.crop_type,
+        records = db.query(pc_volume_usage_plan.pc_volume_plan_id,
+                           pc_volume_usage_plan.crop_type,
                            models.category.category_name,
-                           pc_plan_volume_usage.period,
-                           func.concat('P', pc_plan_volume_usage.period).label("period_with_P"),
-                           func.concat('p', pc_plan_volume_usage.period, "W",
-                                       pc_plan_volume_usage.week).label("PxW"),
-                           pc_plan_volume_usage.week,
-                           pc_plan_volume_usage.year,
-                           pc_plan_volume_usage.volume) \
-            .join(models.category, models.category.crop_category == pc_plan_volume_usage.crop_type) \
-            .filter(pc_plan_volume_usage.year == year) \
-            .order_by(pc_plan_volume_usage.crop_type,
-                      pc_plan_volume_usage.period,
-                      pc_plan_volume_usage.week).all()
-        return {"status": "success", "pc_plan_volume_usage_year": records}
+                           pc_volume_usage_plan.period,
+                           func.concat('P', pc_volume_usage_plan.period).label("period_with_P"),
+                           func.concat('p', pc_volume_usage_plan.period, "W",
+                                       pc_volume_usage_plan.week).label("PxW"),
+                           pc_volume_usage_plan.week,
+                           pc_volume_usage_plan.year,
+                           pc_volume_usage_plan.volume) \
+            .join(models.category, models.category.crop_category == pc_volume_usage_plan.crop_type) \
+            .filter(pc_volume_usage_plan.year == year) \
+            .order_by(pc_volume_usage_plan.crop_type,
+                      pc_volume_usage_plan.period,
+                      pc_volume_usage_plan.week).all()
+        return {"status": "success", "pc_volume_usage_plan_year": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/update_plan_volume_usage")
-def update_plan_volume_usage(payload: planVolumeUsagePayload, db: Session = Depends(get_db)):  # pragma: no cover
-    """Function to update already existing records in dashboard_pc_plan_volume_usage table """
+def update_plan_volume_usage(payload: pcVolumePlanUsagePayload, db: Session = Depends(get_db)):  # pragma: no cover
+    """Function to update already existing records in dashboard_pc_volume_usage_plan table """
     data = payload.data
     update_count = 0
     try:
         for item in data:
-            result = db.query(pc_plan_volume_usage) \
-                .filter(pc_plan_volume_usage.plan_volume_id == item.plan_volume_id) \
-                .update({pc_plan_volume_usage.volume: item.volume}, synchronize_session=False)
+            result = db.query(pc_volume_usage_plan) \
+                .filter(pc_volume_usage_plan.pc_volume_plan_id == item.pc_volume_plan_id) \
+                .update({pc_volume_usage_plan.volume: item.volume}, synchronize_session=False)
             if result == 0:
-                raise HTTPException(status_code=404, detail=f"No records found: {item.plan_volume_id}")
+                raise HTTPException(status_code=404, detail=f"No records found: {item.pc_volume_plan_id}")
             update_count += 1
         db.commit()
         return {"status": "success", "records_updated": update_count}
@@ -59,7 +59,7 @@ def create_new_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # p
     """Function to next year data from previous year values."""
     new_records = 0
     try:
-        existing_records = db.query(pc_plan_volume_usage).filter(pc_plan_volume_usage.year == year).all()
+        existing_records = db.query(pc_volume_usage_plan).filter(pc_volume_usage_plan.year == year).all()
         if len(existing_records) != 0:
             for record in existing_records:
                 db.delete(record)
@@ -84,21 +84,21 @@ def create_new_plan_volume_usage(year: int, db: Session = Depends(get_db)):  # p
                     compare_week = week
                     if week == 5:
                         compare_week = week - 1
-                    last_year_volume = db.query(pc_plan_volume_usage.volume) \
-                        .filter(pc_plan_volume_usage.year == year - 1,
-                                pc_plan_volume_usage.crop_type == crop_category[0],
-                                pc_plan_volume_usage.period == period,
-                                pc_plan_volume_usage.week == compare_week).first()
+                    last_year_volume = db.query(pc_volume_usage_plan.volume) \
+                        .filter(pc_volume_usage_plan.year == year - 1,
+                                pc_volume_usage_plan.crop_type == crop_category[0],
+                                pc_volume_usage_plan.period == period,
+                                pc_volume_usage_plan.week == compare_week).first()
                     # Creating next year indexed plan volume
                     new_volume = (last_year_volume[0] * index.value) / 100
 
-                    plan_volume_id = str(crop_category[0]) + "#" + str(period) + "#" + str(week) \
+                    pc_volume_plan_id = str(crop_category[0]) + "#" + str(period) + "#" + str(week) \
                                      + "#" + str(year)
-                    payload = {"plan_volume_id": plan_volume_id, "year": year,
+                    payload = {"pc_volume_plan_id": pc_volume_plan_id, "year": year,
                                "crop_type": crop_category[0],
                                "period": period, "week": week,
                                "volume": new_volume}
-                    new_pc_volume = pc_plan_volume_usage(**payload)
+                    new_pc_volume = pc_volume_usage_plan(**payload)
                     db.add(new_pc_volume)
                     new_records += 1
                     week += 1

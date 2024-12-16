@@ -669,6 +669,18 @@ class pc_plan_volume_usage(Base):
     created_by = Column(String, nullable=True)
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
 
+class pc_volume_usage_plan(Base):
+    """Class representing pc_volume_usage_plan table"""
+    __tablename__ = "pc_volume_usage_plan"
+    pc_volume_plan_id = Column(String, nullable=False, primary_key=True)
+    crop_type = Column(Integer, nullable=True)
+    period = Column(Integer, nullable=True)
+    week = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    volume = Column(Integer, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
 class erp_logs_table(Base):
     __tablename__ = "erp_logs"
     id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)

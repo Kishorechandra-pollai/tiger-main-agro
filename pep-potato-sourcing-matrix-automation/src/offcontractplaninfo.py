@@ -77,8 +77,8 @@ def create_off_contract_plan_task_mapping(payload: OffContractPlanTaskMappingSch
     db.refresh(new_record)
     return {"status": "success", "row_id": new_record.row_id}
 
-@router.post("/update_freight_task_plan_mapping_records/")
-def update_freight_task_plan_mapping_records(payload: OffContractPlanTaskMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
+@router.post("/update_off_contract_plan_mapping_records/")
+def update_off_contract_plan_mapping_records(payload: OffContractPlanTaskMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update already existing records in off_contract_plan_task_mapping table """
     data = payload.data
     update_count = 0
