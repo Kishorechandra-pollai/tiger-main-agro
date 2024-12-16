@@ -967,6 +967,22 @@ class ExportExcelFinanceSummarySolids(BaseModel): # pragma: no cover
 class ExportExcelFinanceSummarySolidsList(BaseModel): # pragma: no cover
     data: List[ExportExcelFinanceSummarySolids]
 
+class ExportExcelPlantMatrixAllocation(BaseModel): # pragma: no cover
+    growing_area_id: int
+    growing_area_name: str
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_matrix_id: str
+    plant_name: str
+    value: Optional[float] = None
+    week: int
+    year: int
+
+class ExportExcelPlantMatrixAllocationList(BaseModel): # pragma: no cover
+    data: List[ExportExcelPlantMatrixAllocation]
+
+
 class ExportExcelBigJSON(BaseModel): # pragma: no cover
     growing_area_name: str
     growing_area_id: int
