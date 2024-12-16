@@ -919,6 +919,24 @@ class planVolumeUsageSchema(BaseModel):
 class planVolumeUsagePayload(BaseModel):
     data: List[planVolumeUsageSchema]
 
+class pcVolumePlanUsageSchema(BaseModel):
+    __tablename__ = "pc_volume_usage_plan"
+    pc_volume_plan_id: str
+    crop_type: Optional[int] = None
+    period: Optional[int] = None
+    week: Optional[int] = None
+    year: Optional[int] = None
+    volume: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class pcVolumePlanUsagePayload(BaseModel):
+    data: List[pcVolumePlanUsageSchema]
+
 
 class UserInfoSchema(BaseModel):
     email: Optional[str] = None
@@ -1173,7 +1191,7 @@ class ProductivityInfoSchema(BaseModel):
         arbitrary_types_allowed = True    
 class ProductivityTaskMappingSchema(BaseModel):
     period: Optional[int] = None
-    btl_task_id: Optional[int] = None
+    productivity_task_id: Optional[int] = None
     year: Optional[int] = None
     value: Optional[float] = None
     company_name: Optional[str] = None
@@ -1204,7 +1222,7 @@ class ProductivityPlanInfoSchema(BaseModel):
 
 class ProductivityPlanTaskMappingSchema(BaseModel):
     period: Optional[int] = None
-    btl_plan_task_id: Optional[int] = None
+    productivity_plan_task_id: Optional[int] = None
     year: Optional[int] = None
     value: Optional[float] = None
     company_name: Optional[str] = None

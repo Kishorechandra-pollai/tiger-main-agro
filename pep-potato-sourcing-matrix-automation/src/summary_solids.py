@@ -17,15 +17,15 @@ def get_solid_task_master(db: Session = Depends(get_db)): # pragma: no cover
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get('/solids_task_mapping_by_year/{year}')
-def solids_task_mapping_by_year(year: str, db: Session = Depends(get_db)): # pragma: no cover
-    """Function to get all records from solids_task_mapping based on year."""
-    try:
-        records = db.query(solids_task_mapping
-                           ).filter(solids_task_mapping.year==year).all()
-        return {"details": records}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+# @router.get('/solids_task_mapping_by_year/{year}')
+# def solids_task_mapping_by_year(year: str, db: Session = Depends(get_db)): # pragma: no cover
+#     """Function to get all records from solids_task_mapping based on year."""
+#     try:
+#         records = db.query(solids_task_mapping
+#                            ).filter(solids_task_mapping.year==year).all()
+#         return {"details": records}
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get('/get_solid_task_mapping')
 def get_solid_task_mapping(db: Session = Depends(get_db)): # pragma: no cover

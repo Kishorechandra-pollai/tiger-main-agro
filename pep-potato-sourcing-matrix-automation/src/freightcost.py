@@ -205,10 +205,10 @@ def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = D
     new_record = create_freight_rates_in_db(payload, db)
     return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
 
-@router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
-def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)): # pragma: no cover
-    new_record = create_freight_rates_in_db(payload, db)
-    return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
+# @router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
+# def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)): # pragma: no cover
+#     new_record = create_freight_rates_in_db(payload, db)
+#     return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
 
 
 @router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
