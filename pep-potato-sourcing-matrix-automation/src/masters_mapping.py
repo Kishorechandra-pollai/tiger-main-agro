@@ -367,8 +367,7 @@ def psga_freight_update(payload,row_id,plant_id,vendor_site_id,growing_area_id,d
                                 "updated_time":current_time,
                                 "updated_by":"SYSTEM",
                                 "currency":"USD",
-                                "growing_area_id":growing_area_id,
-                                "miles": 0}
+                                "growing_area_id":growing_area_id}
     create_freight_rates_in_db(freight_cost_rate_payload, db)
 
     ## Freight Cost mappings
