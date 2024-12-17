@@ -211,6 +211,7 @@ class FreightCostRate(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
+    miles = Column(Integer(), nullable=True)
 
 class FreightCostMapping(Base):
     """Class representing freight_cost_mapping table"""
@@ -221,6 +222,7 @@ class FreightCostMapping(Base):
     period = Column(Integer, nullable=False)
     rate = Column(Float, nullable=False)
     company_name = Column(String, nullable=True)
+    round_trip = Column(Integer, nullable=False)
 
 
 class Ownership(Base):
@@ -365,6 +367,7 @@ class off_contract_info(Base):
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     updated_by = Column(String, nullable=True)
     updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    order_position = Column(Integer, nullable=True)
 
 
 class off_contract_task_mapping(Base):
