@@ -370,7 +370,6 @@ class FreightCostMappingSchema(BaseModel):
     """Class representing schema for freight_cost_mapping table"""
     year: Optional[int] = None
     rate: Optional[float] = None
-    miles: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -389,7 +388,6 @@ class FreightCostRatesSchema(BaseModel):
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
-    miles: Optional[int] = None
 
     class Config:
         orm_mode = True

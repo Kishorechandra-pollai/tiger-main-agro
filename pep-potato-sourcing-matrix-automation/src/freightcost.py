@@ -101,42 +101,24 @@ def update_freight_mapping(
     freight_cost_id: int,
     year: int,
     period: int,
-    country: str,
+    country:str,
     new_rate: float,
-    round_trip: int,
     db: Session = Depends(get_db)
 ): # pragma: no cover
-    # Query to fetch records for the given year with period >= the provided period
-    records_to_update_current_year = db.query(FreightCostMapping).filter(
+    """Function to update already existing records in freight_cost_mapping table by
+    filtering through freight cost id, year and period column"""
+    records_to_update = db.query(FreightCostMapping).filter(
         FreightCostMapping.freight_cost_id == freight_cost_id,
         FreightCostMapping.year == year,
         FreightCostMapping.company_name == country,
         FreightCostMapping.period >= period
     ).all()
-
-    # Query to fetch all records for the next year (year + 1)
-    records_to_update_next_year = db.query(FreightCostMapping).filter(
-        FreightCostMapping.freight_cost_id == freight_cost_id,
-        FreightCostMapping.year == year + 1,
-        FreightCostMapping.company_name == country
-    ).all()
-
-    # Combine records from the current year and next year
-    records_to_update = records_to_update_current_year + records_to_update_next_year
-
     if not records_to_update:
         raise HTTPException(status_code=404, detail="No records found for the given filter")
-
-    # Update the rate and round_trip for each record
     for record in records_to_update:
         record.rate = new_rate
-        record.round_trip = round_trip
-
-    # Commit the changes to the database
-    db.commit()
-
-    return {"updated_records_count": len(records_to_update), "details": records_to_update}
-
+        db.commit()
+    return records_to_update
 
 
 
