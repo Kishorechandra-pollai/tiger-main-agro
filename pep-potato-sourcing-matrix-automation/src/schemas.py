@@ -355,6 +355,7 @@ class FreightCostRateSchema(BaseModel):
     currency: Optional[str] = None
     comment: Optional[str] = None
     year: Optional[int] = None
+    miles: Optional[int] = None
     created_time: Optional[datetime] = None
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
@@ -370,6 +371,7 @@ class FreightCostMappingSchema(BaseModel):
     """Class representing schema for freight_cost_mapping table"""
     year: Optional[int] = None
     rate: Optional[float] = None
+    round_trip: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -384,6 +386,7 @@ class FreightCostRatesSchema(BaseModel):
     vendor_site_id: Optional[int] = None
     currency: Optional[str] = None
     comment: Optional[str] = None
+    miles: Optional[int] = None
     created_time: Optional[datetime] = None
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
@@ -556,6 +559,7 @@ class OffContractInfoSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
+    order_position: Optional[int] = None
 
     class Config:
         orm_mode = True
