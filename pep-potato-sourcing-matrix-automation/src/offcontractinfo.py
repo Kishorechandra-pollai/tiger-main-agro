@@ -9,7 +9,7 @@ router = APIRouter()
 @router.get('/')
 def get_off_contract_info(db: Session = Depends(get_db)):
     """Function to get all records from off_contract_info."""
-    query = db.query(off_contract_info).all()
+    query = db.query(off_contract_info).order_by(off_contract_info.order_position).all()
     if not query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="No off_contract_info found")
