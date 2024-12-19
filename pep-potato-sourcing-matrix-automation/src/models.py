@@ -223,6 +223,7 @@ class FreightCostMapping(Base):
     rate = Column(Float, nullable=False)
     company_name = Column(String, nullable=True)
     round_trip = Column(Integer, nullable=True)
+    fuel_cf = Column(Integer, nullable=True)
 
 
 class Ownership(Base):
