@@ -354,7 +354,6 @@ class FreightCostRateSchema(BaseModel):
     """Class representing schema for freight_cost_rate table"""
     currency: Optional[str] = None
     comment: Optional[str] = None
-    year: Optional[int] = None
     miles: Optional[int] = None
     created_time: Optional[datetime] = None
     updated_time: Optional[datetime] = None
@@ -378,6 +377,17 @@ class FreightCostMappingSchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+class FreightMilesSchema(BaseModel):
+    """Class representing schema for freight_cost_mapping table"""
+    period: Optional[float] = None
+    year: Optional[int] = None
+    country: Optional[str] = None
+    fuel_cf: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
 
 class FreightCostRatesSchema(BaseModel):
     """Class representing schema for freight_cost_rates table"""
@@ -391,6 +401,18 @@ class FreightCostRatesSchema(BaseModel):
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class FreightMiles(BaseModel):
+    """Class representing schema for freight_cost_rates table"""
+    plant_id: Optional[int] = None
+    growing_area_id: Optional[int] = None
+    vendor_site_id: Optional[int] = None
+    miles: Optional[int] = None
 
     class Config:
         orm_mode = True
