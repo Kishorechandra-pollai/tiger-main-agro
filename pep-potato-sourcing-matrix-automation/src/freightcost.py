@@ -62,8 +62,9 @@ def view_freight_mapping_by_year(year:int, db: Session = Depends(get_db)):
     try:
         records = db.query(FreightCostMapping.freight_cost_id,
                            FreightCostMapping.period,
+                           FreightCostMapping.company_name,
                            func.concat("P", FreightCostMapping.period).label("period_with_P"),
-                           FreightCostMapping.rate).filter(FreightCostMapping.year == year).all()
+                           FreightCostMapping.rate,FreightCostMapping.fuel_cf,FreightCostMapping.round_trip).filter(FreightCostMapping.year == year).all()
         return {"status": "success", "freight_cost_mapping": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -314,6 +315,9 @@ async def fetch_records(
                 func.concat("P", FreightCostMapping.period).label("period_with_P"),
                 FreightCostMapping.rate,
                 FreightCostMapping.company_name,
+                FreightCostMapping.fuel_cf,
+                FreightCostMapping.round_trip,
+                FreightCostRate.miles,
                 PlantSiteGrowingAreaMapping.growing_area_id,
                 PlantSiteGrowingAreaMapping.vendor_site_id,
                 PlantSiteGrowingAreaMapping.plant_id,
@@ -352,6 +356,9 @@ async def fetch_records(
                 period_with_P,
                 rate,
                 company_name,
+                fuel_cf,
+                round_trip,
+                miles,
                 growing_area_id,
                 vendor_site_id,
                 plant_id,
@@ -368,6 +375,9 @@ async def fetch_records(
                     "period_with_P":period_with_P,
                     "rate": rate,
                     "company_name": company_name,
+                    "fuel_cf": fuel_cf,
+                    "round_trip": round_trip,
+                    "miles": miles,
                     "growing_area_id": growing_area_id,
                     "vendor_site_id": vendor_site_id,
                     "plant_id": plant_id,
