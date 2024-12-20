@@ -533,7 +533,7 @@ async def get_file_details(db: Session = Depends(get_db)):# pragma: no cover
 async def update_miles(payload: schemas.FreightMiles, db: Session = Depends(get_db)): # pragma: no cover
     """Function to update freight miles for plant,vendor site code and growing area combination"""
     try:
-        records = db.query(FreightCostRate).Filter(FreightCostRate.plant_id == payload.plant_id,
+        records = db.query(FreightCostRate).filter(FreightCostRate.plant_id == payload.plant_id,
                                                    FreightCostRate.growing_area_id == payload.growing_area_id,
                                                    FreightCostRate.vendor_site_id == payload.vendor_site_id).all()
         if not records:
