@@ -383,7 +383,7 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):  # pragma: 
         plt_matx_NY = db.query(plantMtrx).filter(plantMtrx.year == year-1).all()
         for plant in plt_matx_NY:
             plant_id = plant.plant_id
-            year = year
+            #year = year
             period = plant.period
             week = plant.week
             region_id = plant.region_id
