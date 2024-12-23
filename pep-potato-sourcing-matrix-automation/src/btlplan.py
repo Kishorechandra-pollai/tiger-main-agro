@@ -77,8 +77,8 @@ def create_btl_plan_task_mapping(payload: BTLPlanTaskMappingSchema, db: Session 
     db.refresh(new_record)
     return {"status": "success", "row_id": new_record.row_id}
 
-@router.post("/update_freight_task_mapping_records/")
-def update_freight_task_mapping_records(payload: BTLPlanTaskMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
+@router.post("/update_btl_plan_mapping_records/")
+def update_btl_plan_mapping_records(payload: BTLPlanTaskMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update already existing records in btl_plan_task_mapping table """
     data = payload.data
     update_count = 0

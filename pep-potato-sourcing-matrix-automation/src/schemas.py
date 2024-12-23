@@ -354,7 +354,7 @@ class FreightCostRateSchema(BaseModel):
     """Class representing schema for freight_cost_rate table"""
     currency: Optional[str] = None
     comment: Optional[str] = None
-    year: Optional[int] = None
+    miles: Optional[int] = None
     created_time: Optional[datetime] = None
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
@@ -370,12 +370,24 @@ class FreightCostMappingSchema(BaseModel):
     """Class representing schema for freight_cost_mapping table"""
     year: Optional[int] = None
     rate: Optional[float] = None
+    round_trip: Optional[int] = None
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+class FreightMilesSchema(BaseModel):
+    """Class representing schema for freight_cost_mapping table"""
+    period: Optional[int] = None
+    year: Optional[int] = None
+    country: Optional[str] = None
+    fuel_cf: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
 
 class FreightCostRatesSchema(BaseModel):
     """Class representing schema for freight_cost_rates table"""
@@ -384,10 +396,23 @@ class FreightCostRatesSchema(BaseModel):
     vendor_site_id: Optional[int] = None
     currency: Optional[str] = None
     comment: Optional[str] = None
+    miles: Optional[int] = None
     created_time: Optional[datetime] = None
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class FreightMiles(BaseModel):
+    """Class representing schema for freight_cost_rates table"""
+    plant_id: Optional[int] = None
+    growing_area_id: Optional[int] = None
+    vendor_site_id: Optional[int] = None
+    miles: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -556,6 +581,7 @@ class OffContractInfoSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
+    order_position: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -919,6 +945,24 @@ class planVolumeUsageSchema(BaseModel):
 class planVolumeUsagePayload(BaseModel):
     data: List[planVolumeUsageSchema]
 
+class pcVolumePlanUsageSchema(BaseModel):
+    __tablename__ = "pc_volume_usage_plan"
+    pc_volume_plan_id: str
+    crop_type: Optional[int] = None
+    period: Optional[int] = None
+    week: Optional[int] = None
+    year: Optional[int] = None
+    volume: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class pcVolumePlanUsagePayload(BaseModel):
+    data: List[pcVolumePlanUsageSchema]
+
 
 class UserInfoSchema(BaseModel):
     email: Optional[str] = None
@@ -1173,7 +1217,7 @@ class ProductivityInfoSchema(BaseModel):
         arbitrary_types_allowed = True    
 class ProductivityTaskMappingSchema(BaseModel):
     period: Optional[int] = None
-    btl_task_id: Optional[int] = None
+    productivity_task_id: Optional[int] = None
     year: Optional[int] = None
     value: Optional[float] = None
     company_name: Optional[str] = None
@@ -1204,7 +1248,7 @@ class ProductivityPlanInfoSchema(BaseModel):
 
 class ProductivityPlanTaskMappingSchema(BaseModel):
     period: Optional[int] = None
-    btl_plan_task_id: Optional[int] = None
+    productivity_plan_task_id: Optional[int] = None
     year: Optional[int] = None
     value: Optional[float] = None
     company_name: Optional[str] = None

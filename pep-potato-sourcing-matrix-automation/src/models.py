@@ -211,6 +211,7 @@ class FreightCostRate(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
+    miles = Column(Integer, nullable=True)
 
 class FreightCostMapping(Base):
     """Class representing freight_cost_mapping table"""
@@ -221,6 +222,8 @@ class FreightCostMapping(Base):
     period = Column(Integer, nullable=False)
     rate = Column(Float, nullable=False)
     company_name = Column(String, nullable=True)
+    round_trip = Column(Integer, nullable=True)
+    fuel_cf = Column(Float, nullable=True)
 
 
 class Ownership(Base):
@@ -365,6 +368,7 @@ class off_contract_info(Base):
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     updated_by = Column(String, nullable=True)
     updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    order_position = Column(Integer, nullable=True)
 
 
 class off_contract_task_mapping(Base):
@@ -661,6 +665,18 @@ class pc_plan_volume_usage(Base):
     """Class representing plan_volume_usage table"""
     __tablename__ = "plan_volume_usage"
     plan_volume_id = Column(String, nullable=False, primary_key=True)
+    crop_type = Column(Integer, nullable=True)
+    period = Column(Integer, nullable=True)
+    week = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    volume = Column(Integer, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+class pc_volume_usage_plan(Base):
+    """Class representing pc_volume_usage_plan table"""
+    __tablename__ = "pc_volume_usage_plan"
+    pc_volume_plan_id = Column(String, nullable=False, primary_key=True)
     crop_type = Column(Integer, nullable=True)
     period = Column(Integer, nullable=True)
     week = Column(Integer, nullable=True)

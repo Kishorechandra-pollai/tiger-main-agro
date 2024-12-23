@@ -77,8 +77,8 @@ def create_productivity_task_mapping(payload: ProductivityTaskMappingSchema, db:
     db.refresh(new_record)
     return {"status": "success", "row_id": new_record.row_id}
 
-@router.post("/update_freight_task_mapping_records/")
-def update_freight_task_mapping_records(payload: ProductivityTaskMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
+@router.post("/update_productivity_mapping_records/")
+def update_productivity_mapping_records(payload: ProductivityTaskMappingPayload, db: Session = Depends(get_db)):  # pragma: no cover
     """Function to update already existing records in productivity_task_mapping table """
     data = payload.data
     update_count = 0
