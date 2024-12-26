@@ -609,8 +609,10 @@ def temp_insert_week_wise(period: int, week: int, year: int,
                     models.View_plant_matrix_actual.columns.week_num == current_week,
                     models.View_plant_matrix_actual.columns.p_year == year,
                     models.View_plant_matrix_actual.columns.region_id != 14).all()
+        active_growing_area_id = set()
         for item in actual_data_current_week:
             new_record_count += 1
+            active_growing_area_id.add(item.growing_area_id)
             # crop_type, crop_year = func_getcrop_type(period_value, current_week, year,
             #                                          item.growing_area_id, db)
 
@@ -625,11 +627,12 @@ def temp_insert_week_wise(period: int, week: int, year: int,
             newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
             db.add(newplantMtrx_record)
             db.commit()
+        for unique_growing_area_id in active_growing_area_id:
             if 6 < item.period_num < 9:
-                update_extension(item.growing_area_id, int(item.p_year),
+                update_extension(unique_growing_area_id, int(item.p_year),
                                  int(item.period_num), int(item.week_num), db)
             elif 10 < item.period_num < 13:
-                update_extension(item.growing_area_id, int(item.p_year),
+                update_extension(unique_growing_area_id, int(item.p_year),
                                  int(item.period_num), int(item.week_num), db)
         return {"status": "success", "record_updated": new_record_count}
     except Exception as e:
