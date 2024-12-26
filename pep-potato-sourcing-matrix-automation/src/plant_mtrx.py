@@ -424,7 +424,8 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):  # pragma: 
                                  "crop_type": crop_type,
                                  "crop_year": crop_year,
                                  "value": final_value,
-                                 "status": status}
+                                 "status": status,
+                                 "type": 'forecast'}
 
             newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
             db.add(newplantMtrx_record)
@@ -436,16 +437,17 @@ def createnew_plantmatrix(year: int, db: Session = Depends(get_db)):  # pragma: 
                     plantMtrx_id = str(plant_id) + "#" + str(region_id) + "#" + str(year) + "#" + \
                            str(period) + "#" + str(week) + "#" + str(growing_area_id)
                     PlantMtrx_payload = {"plant_matrix_id": plantMtrx_id,
-                                 "region_id": region_id, 
-                                 "plant_id": plant_id,
-                                 "growing_area_id": growing_area_id,
-                                 "period": period, 
-                                 "week": week,
-                                 "year": year, 
-                                 "crop_type": crop_type,
-                                 "crop_year": crop_year,
-                                 "value": final_value,
-                                 "status": status}
+                                         "region_id": region_id, 
+                                         "plant_id": plant_id,
+                                         "growing_area_id": growing_area_id,
+                                         "period": period, 
+                                         "week": week,
+                                         "year": year, 
+                                         "crop_type": crop_type,
+                                         "crop_year": crop_year,
+                                         "value": final_value,
+                                         "status": status,
+                                         "type": 'forecast'}
                     newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
                     db.add(newplantMtrx_record)
                     record_count+=1
@@ -504,7 +506,7 @@ def update_first_period_data(current_period, current_week, current_year,
                                  "period": item.period_num,
                                  "week": item.week_num, "year": item.p_year,
                                  "crop_type": item.crop_type, "crop_year": item.storage_period,
-                                 "value": item.sumof_rec_potato, "status": 'active'}
+                                 "value": item.sumof_rec_potato, "status": 'active', "type" : 'actual'}
             plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
             db.add(plantMtrx_record)
             db.commit()
@@ -570,7 +572,8 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
                                              "period": item.period_num,
                                              "week": item.week_num, "year": item.p_year,
                                              "crop_type": item.crop_type, "crop_year": item.storage_period,
-                                             "value": item.sumof_rec_potato, "status": 'active'}
+                                             "value": item.sumof_rec_potato, "status": 'active',
+                                             "type": 'actual'}
                         plantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
                         db.add(plantMtrx_record)
                         db.commit()
@@ -623,7 +626,7 @@ def temp_insert_week_wise(period: int, week: int, year: int,
                                  "period": item.period_num,
                                  "week": item.week_num, "year": item.p_year,
                                  "crop_type": item.crop_type, "crop_year": item.storage_period,
-                                 "value": item.sumof_rec_potato, "status": 'active'}
+                                 "value": item.sumof_rec_potato, "status": 'active', "type": 'actual'}
             newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
             db.add(newplantMtrx_record)
             db.commit()
@@ -672,7 +675,8 @@ def prev_year_insert(year: int, db: Session = Depends(get_db)):  # pragma: no co
                                          "region_id": item.region_id, "plant_id": item.Plant_Id,
                                          "growing_area_id": item.growing_area_id, "period": item.period_num,
                                          "week": item.week_num, "year": item.p_year, "crop_type": item.crop_type,
-                                         "crop_year": item.storage_period, "value": item.sumof_rec_potato, "status": 'active'}
+                                         "crop_year": item.storage_period, "value": item.sumof_rec_potato,
+                                         "status": 'active', "type": 'actual'}
                     newplantMtrx_record = models.plantMtrx(**PlantMtrx_payload)
                     db.add(newplantMtrx_record)
 

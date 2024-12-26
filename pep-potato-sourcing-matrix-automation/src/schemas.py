@@ -458,6 +458,7 @@ class PlantMatrix(BaseModel):
     crop_type: Optional[str] = None
     crop_year: Optional[str] = None
     status: Optional[str] = None
+    type : Optional[str] = None
 
     class Config:
         orm_mode = True

@@ -310,6 +310,7 @@ class plantMtrx(Base):
     crop_type = Column(String, nullable=True)
     crop_year = Column(String, nullable=True)
     status = Column(String, nullable=True)
+    type = Column(String, nullable=True)
 
 
 View_PlantMtrx_table = db.Table('View_PlantMtrx_table', metadata, autoload=True, autoload_with=engine)
