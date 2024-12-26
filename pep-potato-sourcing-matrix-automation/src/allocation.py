@@ -93,12 +93,15 @@ def update_volume(is_actual_update, item, db: Session = Depends(get_db)):  # pra
                     .filter(models.plantMtrx.plant_id == plant_id,
                             models.plantMtrx.year == current_year,
                             models.plantMtrx.period == period_value,
-                            models.plantMtrx.week == week_value).first()
+                            models.plantMtrx.week == week_value).all()
                 if plant_matrix is None:
-                    week_value += 1
+                    week_value+=1
                     continue
-                plant_matrix.value = new_forecast_value
-                db.commit()
+                for items in plant_matrix:
+                    current_value = items.value
+                    new_value = (current_value * new_index) / 100
+                    items.value = new_value
+                    db.commit()
                 """Update Extension values if present."""
                 if 6 < period_value < 9:
                     plant_mtrx.update_extension(plant_matrix.growing_area_id,
