@@ -412,7 +412,7 @@ class FreightMiles(BaseModel):
     plant_id: Optional[int] = None
     growing_area_id: Optional[int] = None
     vendor_site_id: Optional[int] = None
-    miles: Optional[int] = None
+    miles: Optional[float] = None
 
     class Config:
         orm_mode = True

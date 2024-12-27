@@ -211,7 +211,7 @@ class FreightCostRate(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
-    miles = Column(Integer, nullable=True)
+    miles = Column(Float, nullable=True)
 
 class FreightCostMapping(Base):
     """Class representing freight_cost_mapping table"""
