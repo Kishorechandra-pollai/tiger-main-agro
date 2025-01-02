@@ -34,7 +34,7 @@ def dynamicPeriodSchemaCreator(periods:List[str]):
 
 @router.post('/export_plant_matrix_allocation')
 def export_plant_matrix_allocation(periods:List[str],payload:schemas.ExportExcelPlantMatrixAllocationList): # pragma: no cover
-    unique_plants =  list(set([entry.plant_name for entry in payload.data]))
+    unique_plants =  sorted(list(set([entry.plant_name for entry in payload.data])))
     period_list = dynamicPeriodSchemaCreator(periods)
     output_export_json = []
     for up in unique_plants:
