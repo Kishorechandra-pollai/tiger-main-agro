@@ -26,6 +26,8 @@ def get_plantMtrx_common(filter_conditions, name_or_id, year, db):
                         View_PlantMtrx_table.columns.period_with_P,
                         View_PlantMtrx_table.columns.week,
                         View_PlantMtrx_table.columns.year,
+                        View_PlantMtrx_table.columns.crop_year,
+                        View_PlantMtrx_table.columns.crop_type,
                         View_PlantMtrx_table.columns.value,
                         View_PlantMtrx_table.columns.growing_area_id,
                         View_PlantMtrx_table.columns.growing_area_name) \
@@ -79,10 +81,14 @@ def get_plant_mtrx_growingarea_common(filter_conditions, year, detail_message, d
                         View_PlantMtrx_table.columns.period_with_P,
                         View_PlantMtrx_table.columns.week,
                         View_PlantMtrx_table.columns.year,
+                        View_PlantMtrx_table.columns.crop_year,
+                        View_PlantMtrx_table.columns.crop_type,
                         func.sum(View_PlantMtrx_table.columns.value).label('total_value')) \
             .filter(View_PlantMtrx_table.columns.year == year,
                     *filter_conditions) \
             .group_by(View_PlantMtrx_table.columns.year,
+                      View_PlantMtrx_table.columns.crop_year,
+                      View_PlantMtrx_table.columns.crop_type,
                       View_PlantMtrx_table.columns.growing_area_desc,
                       View_PlantMtrx_table.columns.growing_area_id,
                       View_PlantMtrx_table.columns.growing_area_name,
@@ -127,11 +133,15 @@ def get_plant_mtrx_growingarea_period_common(filter_conditions, year, detail_mes
                         View_PlantMtrx_table.columns.period,
                         View_PlantMtrx_table.columns.period_with_P,
                         View_PlantMtrx_table.columns.year,
+                        View_PlantMtrx_table.columns.crop_year,
+                        View_PlantMtrx_table.columns.crop_type,
                         View_PlantMtrx_table.columns.year.label("week"),
                         func.sum(View_PlantMtrx_table.columns.value).label('total_value')) \
             .filter(View_PlantMtrx_table.columns.year == year,
                     *filter_conditions) \
             .group_by(View_PlantMtrx_table.columns.year,
+                      View_PlantMtrx_table.columns.crop_year,
+                      View_PlantMtrx_table.columns.crop_type,
                       View_PlantMtrx_table.columns.growing_area_desc,
                       View_PlantMtrx_table.columns.growing_area_id,
                       View_PlantMtrx_table.columns.growing_area_name,
@@ -254,22 +264,30 @@ def func_getcrop_type(period, week, year, growing_area_id, db: Session = Depends
     return crop_type, crop_year
 
 
-def update_extension(growing_area_id, year, period, week, db: Session = Depends(get_db)):
+def update_extension(growing_area_id, year, period, week,crop_year, db: Session = Depends(get_db)):
     """Update the extension value if actual volume is changed."""
-    matrix_data = db.query(models.View_Matrix_growingarea.columns.value) \
+    matrix_data_fresh = db.query(models.View_Matrix_growingarea.columns.value) \
         .filter(models.View_Matrix_growingarea.columns.growing_area_id == growing_area_id,
                 models.View_Matrix_growingarea.columns.year == year,
                 models.View_Matrix_growingarea.columns.period == period,
-                models.View_Matrix_growingarea.columns.week == week) \
+                models.View_Matrix_growingarea.columns.week == week,
+                models.View_Matrix_growingarea.columns.crop_year == crop_year) \
+        .first()
+    matrix_data_storage = db.query(models.View_Matrix_growingarea.columns.value) \
+        .filter(models.View_Matrix_growingarea.columns.growing_area_id == growing_area_id,
+                models.View_Matrix_growingarea.columns.year == year,
+                models.View_Matrix_growingarea.columns.period == period,
+                models.View_Matrix_growingarea.columns.week == week,
+                models.View_Matrix_growingarea.columns.crop_year == crop_year) \
         .first()
     if 6 < period < 9:
         extensionMapping.update_extension_plantMtrx(growing_area_id, year - 1,
                                                     period, week,
-                                                    matrix_data[0], db)
+                                                    matrix_data_storage[0], db)
     elif 10 < period < 13:
         extensionMapping.update_extension_plantMtrx(growing_area_id, year,
                                                     period, week,
-                                                    matrix_data[0], db)
+                                                    matrix_data_fresh[0], db)
 
 
 @router.post('/update_plantMtrx')
@@ -581,10 +599,10 @@ def load_actual_value(db: Session = Depends(get_db)):  # pragma: no cover
                     for unique_growing_area_id in active_growing_area_id:
                         if 6 < period_value < 9:
                             update_extension(unique_growing_area_id, current_year,
-                                            period_value, week_value, db)
+                                            period_value, week_value,item.crop_year, db)
                         elif 10 < period_value < 13:
                             update_extension(unique_growing_area_id, current_year,
-                                            period_value, week_value, db)
+                                            period_value, week_value,item.crop_year, db)
                     week_value += 1
                 period_value += 1       
         return {"status": "success", "record_updated": new_record_count}
@@ -633,10 +651,10 @@ def temp_insert_week_wise(period: int, week: int, year: int,
         for unique_growing_area_id in active_growing_area_id:
             if 6 < item.period_num < 9:
                 update_extension(unique_growing_area_id, int(item.p_year),
-                                 int(item.period_num), int(item.week_num), db)
+                                 int(item.period_num), int(item.week_num),item.crop_year, db)
             elif 10 < item.period_num < 13:
                 update_extension(unique_growing_area_id, int(item.p_year),
-                                 int(item.period_num), int(item.week_num), db)
+                                 int(item.period_num), int(item.week_num),item.crop_year, db)
         return {"status": "success", "record_updated": new_record_count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
