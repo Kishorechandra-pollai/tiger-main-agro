@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, status, APIRouter, Response
 from database import get_db
 from datetime import datetime
 import pytz
+from sqlalchemy import or_
 
 router = APIRouter()
 
@@ -87,6 +88,16 @@ async def create_journal_owner(payload: JournalEntryOwnerSchema, db: Session = D
     cst = pytz.timezone("US/Central")
     cst_time = datetime.now(cst).strftime("%Y-%m-%d %H:%M")
 
+    #Filter_year
+    CY = owner.crop_year
+    years = CY.split("-")
+    if len(CY)>4:
+        filter_year_1 = years[0]
+        filter_year_2 = int("20"+years[1])
+    else:
+        filter_year_1 = years[0]
+        filter_year_2 = None
+
     new_journal_entry_owner = journal_ownership(
                                         comments = payload.comments,
                                         user_first_name = user.first_name,
@@ -101,7 +112,9 @@ async def create_journal_owner(payload: JournalEntryOwnerSchema, db: Session = D
                                         year = owner.year,
                                         crop_type = owner.crop_type,
                                         crop_year = owner.crop_year,
-                                        created_time = cst_time
+                                        created_time = cst_time,
+                                        filter_year_1 = filter_year_1,
+                                        filter_year_2 = filter_year_2
     )
 
     db.add(new_journal_entry_owner)
@@ -115,14 +128,14 @@ async def get_journal_owner(region:str,year:int ,db: Session = Depends(get_db)):
     try:
         if region =="US":
             records = db.query(journal_ownership).filter(journal_ownership.region.in_(['East - US','Central - US','West - US']),
-                                                     journal_ownership.year == year).all()
+                                            or_(journal_ownership.filter_year_1 == year, journal_ownership.filter_year_2 == year)).all()
             return {"data": records}
         elif region == "All Data":
-            records = db.query(journal_ownership).filter(journal_ownership.year == year).all()
+            records = db.query(journal_ownership).filter(or_(journal_ownership.filter_year_1 == year, journal_ownership.filter_year_2 == year)).all()
             return {"data":records}
         else:
             records = db.query(journal_ownership).filter(journal_ownership.region==region,
-                                                     journal_ownership.year == year).all()
+                                                     or_(journal_ownership.filter_year_1 == year, journal_ownership.filter_year_2 == year)).all()
             return {"data": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

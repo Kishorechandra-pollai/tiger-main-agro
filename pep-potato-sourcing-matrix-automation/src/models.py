@@ -772,37 +772,39 @@ class export_excel_payload(Base):
     Payload = Column(String, nullable=True)
 
 class journal_all(Base):
-	__tablename__ = "journal_all"
-	
-	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
-	comments = Column(String, nullable=False)
-	page_name = Column(String, nullable=True)
-	page_id = Column(Integer(),nullable = True)
-	user_first_name = Column(String, nullable=False)
-	user_last_name = Column(String, nullable=False)
-	email = Column(String, nullable=False)
-	user_id = Column(Integer(), nullable=False)
-	created_time = Column(DateTime, nullable=False)
-	img_url = Column(String, nullable=True)
+    __tablename__ = "journal_all"
+    
+    journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+    comments = Column(String, nullable=False)
+    page_name = Column(String, nullable=True)
+    page_id = Column(Integer(),nullable = True)
+    user_first_name = Column(String, nullable=False)
+    user_last_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    user_id = Column(Integer(), nullable=False)
+    created_time = Column(DateTime, nullable=False)
+    img_url = Column(String, nullable=True)
 
 class journal_ownership(Base):
-	__tablename__ = "journal_ownership"
-	
-	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
-	comments = Column(String, nullable=False)
-	user_first_name = Column(String, nullable=False)
-	user_last_name = Column(String, nullable=False)
-	email = Column(String, nullable=False)
-	user_id = Column(Integer(), nullable=False)
-	created_time = Column(DateTime, nullable=False)
-	ownership_id = Column(String, nullable = False)
-	growing_area_name = Column(String, nullable = False)
-	growing_area_desc = Column(String, nullable = False)
-	img_url = Column(String, nullable=True)
-	region = Column(String, nullable=True)
-	year = Column(Integer(), nullable=True)
-	crop_type = Column(String, nullable = True)
-	crop_year = Column(String, nullable = True)
+    __tablename__ = "journal_ownership"
+    
+    journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+    comments = Column(String, nullable=False)
+    user_first_name = Column(String, nullable=False)
+    user_last_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    user_id = Column(Integer(), nullable=False)
+    created_time = Column(DateTime, nullable=False)
+    ownership_id = Column(String, nullable = False)
+    growing_area_name = Column(String, nullable = False)
+    growing_area_desc = Column(String, nullable = False)
+    img_url = Column(String, nullable=True)
+    region = Column(String, nullable=True)
+    year = Column(Integer(), nullable=True)
+    crop_type = Column(String, nullable = True)
+    crop_year = Column(String, nullable = True)
+    filter_year_1 = Column(Integer(), nullable = True)
+    filter_year_2 = Column(Integer(), nullable = True)
     
 class btl_task_info(Base):
     __tablename__ = "btl_task_info"
