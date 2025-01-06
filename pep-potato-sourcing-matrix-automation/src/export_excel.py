@@ -37,7 +37,7 @@ def export_plant_matrix_allocation(periods:List[str],payload:schemas.ExportExcel
     unique_plants =  sorted(list(set([entry.plant_name for entry in payload.data])))
     period_list = dynamicPeriodSchemaCreator(periods)
     output_export_json = []
-    for up in unique_plants:
+    for up in unique_plants: 
         export_object={"plant_name":up}
         total_value=0
         filtered_payload = [item for item in payload.data if item.plant_name==up]
@@ -71,6 +71,25 @@ def export_plant_matrix_allocation(periods:List[str],payload:schemas.ExportExcel
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
+
+@router.post('/export_excel_ownership')
+def export_excel_ownership(payload:schemas.ExportExcelOwnershipList): # pragma: no cover
+    key_order =["Growing_Area","Contract","Shrinkage","To_Ship","Market","Flex","A2S","Extension","Demand","Position"]
+    reordered_payload = [{key: item.dict().get(key) for key in key_order} for item in payload.data]
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(reordered_payload)
+    file_name = f"ownership_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
 
 
 

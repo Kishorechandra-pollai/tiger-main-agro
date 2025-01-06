@@ -982,6 +982,20 @@ class ExportExcelPlantMatrixAllocation(BaseModel): # pragma: no cover
 class ExportExcelPlantMatrixAllocationList(BaseModel): # pragma: no cover
     data: List[ExportExcelPlantMatrixAllocation]
 
+class ExportExcelOwnership(BaseModel): # pragma: no cover
+    A2S: str
+    Contract: str
+    Demand: str
+    Extension: str
+    Flex: str
+    Growing_Area: str
+    Market: str
+    Position: str
+    Shrinkage: str
+    To_Ship: str
+
+class ExportExcelOwnershipList(BaseModel): # pragma: no cover
+    data:List[ExportExcelOwnership]
 
 class ExportExcelBigJSON(BaseModel): # pragma: no cover
     growing_area_name: str
