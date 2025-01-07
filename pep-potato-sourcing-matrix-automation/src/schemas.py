@@ -997,6 +997,17 @@ class ExportExcelOwnership(BaseModel): # pragma: no cover
 class ExportExcelOwnershipList(BaseModel): # pragma: no cover
     data:List[ExportExcelOwnership]
 
+class ExportExcelplantmatrixregionweek(BaseModel): # pragma: no cover
+    period: int
+    period_with_P: str
+    region_name: str
+    totalValue_regionWise: Optional[float] = None
+    week: int
+    year: int
+
+class ExportExcelplantmatrixregionweekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelplantmatrixregionweek]
+
 class ExportExcelBigJSON(BaseModel): # pragma: no cover
     growing_area_name: str
     growing_area_id: int
