@@ -1148,17 +1148,20 @@ class ExportExcelplantmatrixregionweek(BaseModel): # pragma: no cover
 class ExportExcelplantmatrixregionweekList(BaseModel): # pragma: no cover
     data:List[ExportExcelplantmatrixregionweek]
 
-class ExportExcelBigJSON(BaseModel): # pragma: no cover
-    growing_area_name: str
+class ExportExcelplantmatrixgrowerweek(BaseModel): # pragma: no cover
+    crop_type: str
+    crop_year: str
     growing_area_id: int
+    growing_area_name: str
     period: int
     period_with_P: str
+    total_value: Optional[float] = None
     week: int
     year: int
-    total_value: float
 
-class ExportExcelBigJSONList(BaseModel): # pragma: no cover
-    data: List[ExportExcelBigJSON]
+class ExportExcelplantmatrixgrowerweekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelplantmatrixgrowerweek]
+
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str

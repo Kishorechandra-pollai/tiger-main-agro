@@ -209,8 +209,77 @@ def export_plant_matrix_region_period(periods:List[str],payload:schemas.ExportEx
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
 
+@router.post('/export_plant_matrix_grower_week')
+def export_plant_matrix_grower_week(periods:List[str],payload:schemas.ExportExcelplantmatrixgrowerweekList): # pragma: no cover
+    unique_growers = sorted(list(set([entry.growing_area_name for entry in payload.data])))
+    period_list = dynamicPeriodSchemaCreator(periods) 
+    output_export_json = []
+    for ug in unique_growers:
+        export_object={"Growing_Area":ug}
+        filtered_payload = [item for item in payload.data if item.growing_area_name==ug]
+        total=0
+        for pl in period_list:
+             filtered_payload_period =  [
+                item for item in filtered_payload
+                if str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"])
+            ]
+             if len(filtered_payload_period)>0:
+                 export_object[pl["dynamic_period_with_P"]]=round(filtered_payload_period[0].total_value)
+                 total+=round(filtered_payload_period[0].total_value)
+             else:
+                 export_object[pl["dynamic_period_with_P"]]=0
+        export_object["total"]=total
+        output_export_json.append(export_object)
+    
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"plant_matrix_grower_week_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
 
-
+@router.post('/export_plant_matrix_grower_period')
+def export_plant_matrix_grower_period(periods:List[str],payload:schemas.ExportExcelplantmatrixgrowerweekList): # pragma: no cover
+    unique_growers = sorted(list(set([entry.growing_area_name for entry in payload.data])))
+    period_list = dynamicPeriodOnlySchemaCreator(periods) 
+    output_export_json = []
+    for ug in unique_growers:
+        export_object={"Growing_Area":ug}
+        filtered_payload = [item for item in payload.data if item.growing_area_name==ug]
+        total=0
+        for pl in period_list:
+             filtered_payload_period =  [
+                item for item in filtered_payload
+                if str(item.period) == str(pl["dynamic_period"]) 
+            ]
+             if len(filtered_payload_period)>0:
+                 export_object[pl["dynamic_period_with_P"]]=round(filtered_payload_period[0].total_value)
+                 total+=round(filtered_payload_period[0].total_value)
+             else:
+                 export_object[pl["dynamic_period_with_P"]]=0
+        export_object["total"]=total
+        output_export_json.append(export_object)
+    
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"plant_matrix_grower_week_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
 
 
 
