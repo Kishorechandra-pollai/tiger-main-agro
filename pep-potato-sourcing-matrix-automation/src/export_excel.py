@@ -32,6 +32,15 @@ def dynamicPeriodSchemaCreator(periods:List[str]):
             dynamic_period_list.append(dynamic_period_object)
     return dynamic_period_list
 
+def dynamicPeriodOnlySchemaCreator(periods:List[str]):
+    dynamic_period_list=[]
+    for items in periods:
+        dynamic_period_with_P = f"P{items}"
+        dynamic_period_object = {"dynamic_period_with_P":dynamic_period_with_P,"dynamic_period":items}
+        dynamic_period_list.append(dynamic_period_object)
+    return dynamic_period_list
+
+
 @router.post('/export_plant_matrix_allocation')
 def export_plant_matrix_allocation(periods:List[str],payload:schemas.ExportExcelPlantMatrixAllocationList): # pragma: no cover
     unique_plants =  sorted(list(set([entry.plant_name for entry in payload.data])))
@@ -145,6 +154,60 @@ def export_plant_matrix_region_week(periods:List[str],payload:schemas.ExportExce
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
 
+@router.post('/export_plant_matrix_region_period')
+def export_plant_matrix_region_period(periods:List[str],payload:schemas.ExportExcelplantmatrixregionweekList): # pragma: no cover
+    unique_region = ["East - US","Central - US","West - US","Canada"]
+    period_list = dynamicPeriodOnlySchemaCreator(periods) 
+    output_export_json = []
+    for ur in unique_region:
+        export_object = {"Region":ur}
+        filtered_payload = [item for item in payload.data if item.region_name==ur]
+        total=0
+        for pl in period_list:
+           filtered_payload_period =  [
+                item for item in filtered_payload
+                if str(item.period) == str(pl["dynamic_period"])
+            ]
+           export_object[pl["dynamic_period_with_P"]]=round(filtered_payload_period[0].totalValue_regionWise)
+           total+=round(filtered_payload_period[0].totalValue_regionWise)
+        export_object["Total"]=total
+        output_export_json.append(export_object)
+    export_object_FLUS={"Region":"FLUS Total"}
+    export_object_FLNA ={"Region":"FLNA Total"}
+    total_FLUS=0
+    total_FLNA =0
+    for pl in period_list:
+        filtered_payload_East_US=[item for item in payload.data if item.region_name=="East - US" and str(item.period) == str(pl["dynamic_period"])]
+        filtered_payload_West_US=[item for item in payload.data if item.region_name=="West - US" and str(item.period) == str(pl["dynamic_period"])]
+        filtered_payload_Central_US=[item for item in payload.data if item.region_name=="Central - US" and str(item.period) == str(pl["dynamic_period"])]
+        filtered_payload_Canada=[item for item in payload.data if item.region_name=="Canada" and str(item.period) == str(pl["dynamic_period"])]
+
+        export_object_FLUS[pl["dynamic_period_with_P"]]=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise)
+
+        export_object_FLNA[pl["dynamic_period_with_P"]]=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise+filtered_payload_Canada[0].totalValue_regionWise)
+
+        total_FLUS +=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise)
+
+        total_FLNA+=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise+filtered_payload_Canada[0].totalValue_regionWise)
+
+        export_object_FLUS["Total"]=total_FLUS
+        export_object_FLNA["Total"]=total_FLNA
+    output_export_json.append(export_object_FLUS)
+    output_export_json.append(export_object_FLNA)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"plant_matrix_region_period_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
 
 
 
