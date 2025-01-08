@@ -4,7 +4,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
-                    freight_cost_period_week_table, rate_growing_area_table, FileUploadTemplate,Plant)
+                    freight_cost_period_week_table, rate_growing_area_table,freight_rates_period_totals,freight_rates_week_totals, FileUploadTemplate,Plant)
 from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -44,7 +44,6 @@ def create_freight_cost(payload: schemas.FreightCostRateSchema, db: Session = De
             plant_id=mapping.plant_id,
             vendor_site_id=mapping.vendor_site_id,
             growing_area_id=mapping.growing_area_id,
-            year=payload.year,
             created_by=payload.created_by,
             created_time=payload.created_time,
             updated_time=payload.updated_time,
@@ -63,8 +62,9 @@ def view_freight_mapping_by_year(year:int, db: Session = Depends(get_db)):
     try:
         records = db.query(FreightCostMapping.freight_cost_id,
                            FreightCostMapping.period,
+                           FreightCostMapping.company_name,
                            func.concat("P", FreightCostMapping.period).label("period_with_P"),
-                           FreightCostMapping.rate).filter(FreightCostMapping.year == year).all()
+                           FreightCostMapping.rate,FreightCostMapping.fuel_cf,FreightCostMapping.round_trip).filter(FreightCostMapping.year == year).all()
         return {"status": "success", "freight_cost_mapping": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -101,25 +101,41 @@ def update_freight_mapping(
     freight_cost_id: int,
     year: int,
     period: int,
-    country:str,
+    country: str,
     new_rate: float,
+    round_trip: int,
     db: Session = Depends(get_db)
-): # pragma: no cover
-    """Function to update already existing records in freight_cost_mapping table by
-    filtering through freight cost id, year and period column"""
-    records_to_update = db.query(FreightCostMapping).filter(
+):
+    # Query to fetch records for the given year with period >= the provided period
+    records_to_update_current_year = db.query(FreightCostMapping).filter(
         FreightCostMapping.freight_cost_id == freight_cost_id,
         FreightCostMapping.year == year,
         FreightCostMapping.company_name == country,
         FreightCostMapping.period >= period
     ).all()
+
+    # Query to fetch all records for the next year (year + 1)
+    records_to_update_next_year = db.query(FreightCostMapping).filter(
+        FreightCostMapping.freight_cost_id == freight_cost_id,
+        FreightCostMapping.year == year + 1,
+        FreightCostMapping.company_name == country
+    ).all()
+
+    # Combine records from the current year and next year
+    records_to_update = records_to_update_current_year + records_to_update_next_year
+
     if not records_to_update:
         raise HTTPException(status_code=404, detail="No records found for the given filter")
+
+    # Update the rate and round_trip for each record
     for record in records_to_update:
         record.rate = new_rate
-        db.commit()
-    return records_to_update
+        record.round_trip = round_trip
 
+    # Commit the changes to the database
+    db.commit()
+
+    return {"updated_records_count": len(records_to_update), "details": records_to_update}
 
 
 @router.get('/freight_cost_period_view/{year}/{country}')
@@ -145,6 +161,32 @@ def freight_cost_period_week_view_year(year: int,country:str,db: Session = Depen
             ).order_by(freight_cost_period_week_table.columns.period,
                       freight_cost_period_week_table.columns.week_no).all()
         return {"freight_cost_period_week_view": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.get('/freight_cost_period_total/{year}/{country}')
+def freight_cost_period_year_total(year:int,country:str, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from freight period total table """
+    try:
+        records = db.query(freight_rates_period_totals).filter(
+            freight_rates_period_totals.columns.p_year == year,
+            freight_rates_period_totals.columns.country == country
+            ).order_by(freight_rates_period_totals.columns.period).all()
+        return {"freight_cost_period_totals": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.get('/freight_cost_period_week_totals/{year}/{country}')
+def freight_cost_period_week_view_totals(year: int,country:str,db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from freight period week view totals table """
+    try:
+        records = db.query(freight_rates_week_totals).filter(
+            freight_rates_week_totals.columns.p_year == year,
+            freight_rates_week_totals.columns.country == country
+            ).order_by(freight_rates_week_totals.columns.period,
+                      freight_rates_week_totals.columns.week_no).all()
+        return {"freight_cost_period_week_totals": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -179,10 +221,10 @@ def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = D
     new_record = create_freight_rates_in_db(payload, db)
     return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
 
-@router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
-def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)): # pragma: no cover
-    new_record = create_freight_rates_in_db(payload, db)
-    return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
+# @router.post('/create_freight_rates', status_code=status.HTTP_201_CREATED)
+# def create_potato_rates(payload: schemas.FreightCostRatesSchema, db: Session = Depends(get_db)): # pragma: no cover
+#     new_record = create_freight_rates_in_db(payload, db)
+#     return {"status": "success", "freight_cost_id": new_record.freight_cost_id}
 
 
 @router.post("/create_freight_cost_mapping_records_for_next_year/{year}")
@@ -273,6 +315,9 @@ async def fetch_records(
                 func.concat("P", FreightCostMapping.period).label("period_with_P"),
                 FreightCostMapping.rate,
                 FreightCostMapping.company_name,
+                FreightCostMapping.fuel_cf,
+                FreightCostMapping.round_trip,
+                FreightCostRate.miles,
                 PlantSiteGrowingAreaMapping.growing_area_id,
                 PlantSiteGrowingAreaMapping.vendor_site_id,
                 PlantSiteGrowingAreaMapping.plant_id,
@@ -311,6 +356,9 @@ async def fetch_records(
                 period_with_P,
                 rate,
                 company_name,
+                fuel_cf,
+                round_trip,
+                miles,
                 growing_area_id,
                 vendor_site_id,
                 plant_id,
@@ -327,6 +375,9 @@ async def fetch_records(
                     "period_with_P":period_with_P,
                     "rate": rate,
                     "company_name": company_name,
+                    "fuel_cf": fuel_cf,
+                    "round_trip": round_trip,
+                    "miles": miles,
                     "growing_area_id": growing_area_id,
                     "vendor_site_id": vendor_site_id,
                     "plant_id": plant_id,
@@ -342,6 +393,7 @@ async def fetch_records(
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
 
 def handle_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db: Session):# pragma: no cover
     # Capture file upload start time
@@ -370,6 +422,8 @@ def handle_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
         # Melt DataFrame
         melted_df = df.melt(id_vars=['freight_cost_id', 'company_name', 'year'], var_name='period', value_name='rate')
         melted_df['period'] = melted_df['period'].str.extract('(\d+)').astype(int)
+        # Replace null values in the rate column with 0
+        melted_df['rate'] = melted_df['rate'].fillna(0)
         # Ensure 'year' column exists and is not empty
         if 'year' not in melted_df.columns or melted_df['year'].isnull().all():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Year data is missing in the uploaded excel template.")
@@ -383,13 +437,26 @@ def handle_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Dropdown year value {uploaded_year} does not match the year value {file_year} in the uploaded Excel file.")
         
         uploaded_year = int(uploaded_year)
-        # Delete existing records for the year
-        db.query(FreightCostMapping).filter(FreightCostMapping.year == uploaded_year).delete()
+        
+        # Get distinct freight_cost_id values from the DataFrame
+        #freight_cost_ids = melted_df['freight_cost_id'].unique()
+        
+        # Delete records for the specific freight_cost_id values for the given year
+        db.query(FreightCostMapping).filter(
+            FreightCostMapping.year == uploaded_year
+        ).delete()
         db.commit()
+        
+        if 'round_trip' not in melted_df.columns:
+            melted_df['round_trip'] = 1
+        if 'fuel_cf' not in melted_df.columns:
+            melted_df['fuel_cf'] = 0
+        
         # Insert new records
         records_to_insert = melted_df.to_dict(orient='records')
         db.execute(FreightCostMapping.__table__.insert(), records_to_insert)
         db.commit()
+        
         # Capture file process time
         file_process_time = datetime.now()
         
@@ -398,7 +465,7 @@ def handle_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
         file_name = f"{file_name_without_ext}_{sheet_name}"
         file_type = file_extension
         file_process_status = True
-        message = "Freight rates uploaded successfully"
+        message = " rates uploaded successfully"
 
         file_upload_data = FileUploadTemplate(
             file_name=file_name,
@@ -456,7 +523,7 @@ def handle_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return {"detail": f"Freight rates successfully uploaded for the year: {uploaded_year}"}
+    return {"detail": f" rates successfully uploaded for the year: {uploaded_year}"}
 
 # FastAPI route for file upload
 @router.post("/upload_file", status_code=status.HTTP_201_CREATED)
@@ -471,3 +538,39 @@ async def get_file_details(db: Session = Depends(get_db)):# pragma: no cover
         return {"data": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    
+@router.post("/miles")
+async def update_miles(payload: schemas.FreightMiles, db: Session = Depends(get_db)): # pragma: no cover
+    """Function to update freight miles for plant,vendor site code and growing area combination"""
+    try:
+        records = db.query(FreightCostRate).filter(FreightCostRate.plant_id == payload.plant_id,
+                                                   FreightCostRate.growing_area_id == payload.growing_area_id,
+                                                   FreightCostRate.vendor_site_id == payload.vendor_site_id).all()
+        if not records:
+            raise HTTPException(status_code=404, detail="No records found for the given filter")
+        for record in records:
+            record.miles = payload.miles
+        db.commit()
+        
+        return {"Miles updated for": payload.plant_id and payload.vendor_site_id and payload.growing_area_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.post("/fuel_conv_factor")
+def update_fuel_cf(payload: schemas.FreightMilesSchema,
+    db: Session = Depends(get_db)
+): # pragma: no cover
+    """Function to update fuel conversion factor"""
+    update_records = db.query(FreightCostMapping).filter(
+        FreightCostMapping.year == payload.year,
+        FreightCostMapping.company_name == payload.country,
+        FreightCostMapping.period == payload.period
+    ).all()
+    if not update_records:
+        raise HTTPException(status_code=404, detail="No records found for the given filter")
+    for record in update_records:
+        record.fuel_cf = payload.fuel_cf
+        db.commit()
+    return update_records
+    
+    

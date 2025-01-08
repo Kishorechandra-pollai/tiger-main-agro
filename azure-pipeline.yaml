@@ -11,17 +11,53 @@ trigger:
       - dev
       - qa
 
+parameters:
+  - name: deployOnly
+    displayName: 'deployOnly'
+    type: boolean
+    default: false
+
+  - name: ImageTag
+    displayName: 'ImageTag'
+    type: string
+    default: $(Build.BuildNumber)
+
+  - name: restartOnly
+    displayName: 'restartOnly'
+    type: boolean
+    default: false
+
+  - name: cr_number
+    displayName: 'cr_number'
+    type: string
+    default: 'null'
+
+  - name: Manual_Approval_Prod
+    displayName: 'Manual_Approval_Prod'
+    type: boolean
+    default: false
+
 resources:
   repositories:
     - repository: templates
       type: git
       name: EIAP_DevOps/pep-eiap-potato-sourcing-matrix-pipeline-templates
-      ref: psma
+      ref: auto-approval
 
 variables:
   - template: variables.yaml@templates
   - name: appname
     value: potato-sourcing-matrix-api-repo
+  - name: deployOnly
+    value: ${{ parameters.deployOnly }}
+  - name: ImageTag
+    value: ${{ parameters.ImageTag }}
+  - name: restartOnly
+    value: ${{ parameters.restartOnly }}
+  - name: cr_number
+    value: ${{ parameters.cr_number }}
+  - name: Manual_Approval_Prod
+    value: ${{ parameters.Manual_Approval_Prod }}
 
 stages:
   - template: Spring-CICD.yaml@templates
@@ -31,3 +67,5 @@ stages:
       isfortifyScanRequired: true
       isSonarScanRequired: true
       isSnykScanRequired: true
+      cr_number: ${{ parameters.cr_number }}
+      Manual_Approval_Prod: ${{ parameters.Manual_Approval_Prod }}

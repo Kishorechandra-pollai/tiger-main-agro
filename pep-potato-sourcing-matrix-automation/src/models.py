@@ -211,6 +211,7 @@ class FreightCostRate(Base):
                           nullable=False, server_default=func.now())
     updated_time = Column(TIMESTAMP(timezone=False),
                           default=None, onupdate=func.now())
+    miles = Column(Float, nullable=True)
 
 class FreightCostMapping(Base):
     """Class representing freight_cost_mapping table"""
@@ -221,6 +222,8 @@ class FreightCostMapping(Base):
     period = Column(Integer, nullable=False)
     rate = Column(Float, nullable=False)
     company_name = Column(String, nullable=True)
+    round_trip = Column(Integer, nullable=True)
+    fuel_cf = Column(Float, nullable=True)
 
 
 class Ownership(Base):
@@ -307,6 +310,7 @@ class plantMtrx(Base):
     crop_type = Column(String, nullable=True)
     crop_year = Column(String, nullable=True)
     status = Column(String, nullable=True)
+    type = Column(String, nullable=True)
 
 
 View_PlantMtrx_table = db.Table('View_PlantMtrx_table', metadata, autoload=True, autoload_with=engine)
@@ -365,6 +369,7 @@ class off_contract_info(Base):
     created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
     updated_by = Column(String, nullable=True)
     updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    order_position = Column(Integer, nullable=True)
 
 
 class off_contract_task_mapping(Base):
@@ -372,6 +377,27 @@ class off_contract_task_mapping(Base):
     row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     period = Column(Integer, nullable=True)
     off_contract_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+    
+class off_contract_plan_info(Base):
+    __tablename__ = "off_contract_plan_info"
+    off_contract_plan_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class off_contract_plan_task_mapping(Base):
+    __tablename__ = "off_contract_plan_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    off_contract_plan_task_id = Column(Integer, nullable=True)
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
@@ -398,6 +424,27 @@ class freight_task_mappings(Base):
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
 
+class freight_task_plan_info(Base):
+    __tablename__ = "freight_task_plan_info"
+    freight_task_plan_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class freight_task_plan_mappings(Base):
+    __tablename__ = "freight_task_plan_mappings"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    freight_task_plan_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+
 
 class general_administrative_task(Base):
     __tablename__ = "general_administrative_task"
@@ -416,6 +463,27 @@ class general_administrative_mappings(Base):
     row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     period = Column(Integer, nullable=True)
     general_administrative_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+    
+class general_administrative_plan_task(Base):
+    __tablename__ = "general_administrative_plan_task"
+    general_administrative_plan_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class general_administrative_plan_mappings(Base):
+    __tablename__ = "general_administrative_plan_mappings"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    general_administrative_plan_id = Column(Integer, nullable=True)
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
@@ -538,6 +606,12 @@ user_information_mapping_view = db.Table('View_user_infomartion',metadata, autol
 solids_rate_plant_period = db.Table('View_solid_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 potato_rate_plant_period = db.Table('View_potato_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 potato_rate_plant_weekly = db.Table('View_potato_cost_week_view_combine', metadata, autoload=True, autoload_with=engine)
+freight_rates_period_totals = db.Table('View_freight_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
+freight_rates_week_totals = db.Table('View_freight_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
+potato_rates_plant_week_totals = db.Table('View_potato_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
+potato_rates_plant_period_totals = db.Table('View_potato_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
+solids_period_totals = db.Table('View_solid_period_combine_code', metadata, autoload=True, autoload_with=engine)
+View_ownership_journal_info = db.Table('View_ownership_journal_info', metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
@@ -592,6 +666,18 @@ class pc_plan_volume_usage(Base):
     """Class representing plan_volume_usage table"""
     __tablename__ = "plan_volume_usage"
     plan_volume_id = Column(String, nullable=False, primary_key=True)
+    crop_type = Column(Integer, nullable=True)
+    period = Column(Integer, nullable=True)
+    week = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    volume = Column(Integer, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+class pc_volume_usage_plan(Base):
+    """Class representing pc_volume_usage_plan table"""
+    __tablename__ = "pc_volume_usage_plan"
+    pc_volume_plan_id = Column(String, nullable=False, primary_key=True)
     crop_type = Column(Integer, nullable=True)
     period = Column(Integer, nullable=True)
     week = Column(Integer, nullable=True)
@@ -684,3 +770,122 @@ class export_excel_payload(Base):
     __tablename__ = "export_excel_payload"
     Payload_ID = Column(Integer, primary_key=True, autoincrement=False)
     Payload = Column(String, nullable=True)
+
+class journal_all(Base):
+    __tablename__ = "journal_all"
+    
+    journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+    comments = Column(String, nullable=False)
+    page_name = Column(String, nullable=True)
+    page_id = Column(Integer(),nullable = True)
+    user_first_name = Column(String, nullable=False)
+    user_last_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    user_id = Column(Integer(), nullable=False)
+    created_time = Column(DateTime, nullable=False)
+    img_url = Column(String, nullable=True)
+
+class journal_ownership(Base):
+    __tablename__ = "journal_ownership"
+    
+    journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+    comments = Column(String, nullable=False)
+    user_first_name = Column(String, nullable=False)
+    user_last_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    user_id = Column(Integer(), nullable=False)
+    created_time = Column(DateTime, nullable=False)
+    ownership_id = Column(String, nullable = False)
+    growing_area_name = Column(String, nullable = False)
+    growing_area_desc = Column(String, nullable = False)
+    img_url = Column(String, nullable=True)
+    region = Column(String, nullable=True)
+    year = Column(Integer(), nullable=True)
+    crop_type = Column(String, nullable = True)
+    crop_year = Column(String, nullable = True)
+    filter_year_1 = Column(Integer(), nullable = True)
+    filter_year_2 = Column(Integer(), nullable = True)
+    
+class btl_task_info(Base):
+    __tablename__ = "btl_task_info"
+    btl_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class btl_task_mappings(Base):
+    __tablename__ = "btl_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    btl_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+
+class btl_plan_task_info(Base):
+    __tablename__ = "btl_plan_task_info"
+    btl_plan_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class btl_plan_task_mapping(Base):
+    __tablename__ = "btl_plan_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    btl_plan_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+    
+class productivity_task_info(Base):
+    __tablename__ = "productivity_task_info"
+    productivity_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class productivity_task_mapping(Base):
+    __tablename__ = "productivity_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    productivity_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)
+
+class productivity_plan_task_info(Base):
+    __tablename__ = "productivity_plan_task_info"
+    productivity_plan_task_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    task_name = Column(String, nullable=True)
+    task_desc = Column(String, nullable=True)
+    status = Column(String, nullable=True)
+    created_by = Column(String, nullable=True)
+    created_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_by = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+
+
+class productivity_plan_task_mapping(Base):
+    __tablename__ = "productivity_plan_task_mapping"
+    row_id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
+    period = Column(Integer, nullable=True)
+    productivity_plan_task_id = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+    value = Column(Float, nullable=True)
+    company_name = Column(String, nullable=True)

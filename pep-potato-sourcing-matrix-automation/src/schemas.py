@@ -354,7 +354,7 @@ class FreightCostRateSchema(BaseModel):
     """Class representing schema for freight_cost_rate table"""
     currency: Optional[str] = None
     comment: Optional[str] = None
-    year: Optional[int] = None
+    miles: Optional[int] = None
     created_time: Optional[datetime] = None
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
@@ -370,12 +370,24 @@ class FreightCostMappingSchema(BaseModel):
     """Class representing schema for freight_cost_mapping table"""
     year: Optional[int] = None
     rate: Optional[float] = None
+    round_trip: Optional[int] = None
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
 
+class FreightMilesSchema(BaseModel):
+    """Class representing schema for freight_cost_mapping table"""
+    period: Optional[int] = None
+    year: Optional[int] = None
+    country: Optional[str] = None
+    fuel_cf: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
 
 class FreightCostRatesSchema(BaseModel):
     """Class representing schema for freight_cost_rates table"""
@@ -384,10 +396,23 @@ class FreightCostRatesSchema(BaseModel):
     vendor_site_id: Optional[int] = None
     currency: Optional[str] = None
     comment: Optional[str] = None
+    miles: Optional[int] = None
     created_time: Optional[datetime] = None
     updated_time: Optional[datetime] = None
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class FreightMiles(BaseModel):
+    """Class representing schema for freight_cost_rates table"""
+    plant_id: Optional[int] = None
+    growing_area_id: Optional[int] = None
+    vendor_site_id: Optional[int] = None
+    miles: Optional[float] = None
 
     class Config:
         orm_mode = True
@@ -433,6 +458,7 @@ class PlantMatrix(BaseModel):
     crop_type: Optional[str] = None
     crop_year: Optional[str] = None
     status: Optional[str] = None
+    type : Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -556,6 +582,7 @@ class OffContractInfoSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
+    order_position: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -578,6 +605,37 @@ class OffContractTaskMappingSchema(BaseModel):
 
 class OffContractTaskMappingPayload(BaseModel):
     data: List[OffContractTaskMappingSchema]
+    
+class OffContractPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class OffContractPlanTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    off_contract_plan_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class OffContractPlanTaskMappingPayload(BaseModel):
+    data: List[OffContractPlanTaskMappingSchema]
 
 
 class FreightTaskInfoSchema(BaseModel):
@@ -610,6 +668,38 @@ class FreightTaskMappingsSchema(BaseModel):
 
 class FreightTaskMappingsPayload(BaseModel):
     data: List[FreightTaskMappingsSchema]
+    
+
+class FreightTaskPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class FreightTaskPlanMappingsSchema(BaseModel):
+    period: Optional[int] = None
+    freight_task_plan_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class FreightTaskPlanMappingsPayload(BaseModel):
+    data: List[FreightTaskPlanMappingsSchema]
 
 
 class GeneralAdministrativeTaskSchema(BaseModel):
@@ -642,6 +732,37 @@ class GeneralAdministrativeMappingsSchema(BaseModel):
 
 class GeneralAdministrativeMappingsPayload(BaseModel):
     data: List[GeneralAdministrativeMappingsSchema]
+    
+class GeneralAdministrativePlanTaskSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class GeneralAdministrativePlanMappingsSchema(BaseModel):
+    period: Optional[int] = None
+    general_administrative_plan_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class GeneralAdministrativePlanMappingsPayload(BaseModel):
+    data: List[GeneralAdministrativePlanMappingsSchema]
 
 
 class ExtensionMappingSchema(BaseModel):
@@ -761,7 +882,7 @@ class SolidTaskMasterSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
-    position: Optional[int] = None
+    order_position: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -824,6 +945,24 @@ class planVolumeUsageSchema(BaseModel):
 
 class planVolumeUsagePayload(BaseModel):
     data: List[planVolumeUsageSchema]
+
+class pcVolumePlanUsageSchema(BaseModel):
+    __tablename__ = "pc_volume_usage_plan"
+    pc_volume_plan_id: str
+    crop_type: Optional[int] = None
+    period: Optional[int] = None
+    week: Optional[int] = None
+    year: Optional[int] = None
+    volume: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class pcVolumePlanUsagePayload(BaseModel):
+    data: List[pcVolumePlanUsageSchema]
 
 
 class UserInfoSchema(BaseModel):
@@ -918,6 +1057,7 @@ class PageInfoSchema(BaseModel):
     created_time: Optional[datetime] = None
     updated_by: Optional[str] = None
     updated_time: Optional[datetime] = None
+    is_read_only:Optional[bool] = None
 
     class Config:
         orm_mode = True
@@ -1022,3 +1162,148 @@ class ExportExcelplantmatrixgrowerweek(BaseModel): # pragma: no cover
 class ExportExcelplantmatrixgrowerweekList(BaseModel): # pragma: no cover
     data:List[ExportExcelplantmatrixgrowerweek]
 
+
+class JournalEntrySchema(BaseModel):  # pragma: no cover
+    comments: str
+    email : str
+    page_name : Optional[str] = None
+    img_url : Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class JournalEntryOwnerSchema(BaseModel):  # pragma: no cover
+    comments: str
+    email : str
+    ownership_id : str
+    growing_area_name : Optional[str] = None
+    growing_area_desc : Optional[str] = None
+    img_url : Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class BTLInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True    
+class BTLTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    btl_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class BTLTaskMappingPayload(BaseModel):
+    data: List[BTLTaskMappingSchema]
+    
+class BTLPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class BTLPlanTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    btl_plan_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class BTLPlanTaskMappingPayload(BaseModel):
+    data: List[BTLPlanTaskMappingSchema]
+    
+class ProductivityInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True    
+class ProductivityTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    productivity_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class ProductivityTaskMappingPayload(BaseModel):
+    data: List[ProductivityTaskMappingSchema]
+    
+class ProductivityPlanInfoSchema(BaseModel):
+    task_name: Optional[str] = None
+    task_desc: Optional[str] = None
+    status: Optional[str] = None
+    created_by: Optional[str] = None
+    created_time: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    updated_time: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class ProductivityPlanTaskMappingSchema(BaseModel):
+    period: Optional[int] = None
+    productivity_plan_task_id: Optional[int] = None
+    year: Optional[int] = None
+    value: Optional[float] = None
+    company_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class ProductivityPlanTaskMappingPayload(BaseModel):
+    data: List[ProductivityPlanTaskMappingSchema]
+    
