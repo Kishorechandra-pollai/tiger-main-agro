@@ -1162,6 +1162,18 @@ class ExportExcelplantmatrixgrowerweek(BaseModel): # pragma: no cover
 class ExportExcelplantmatrixgrowerweekList(BaseModel): # pragma: no cover
     data:List[ExportExcelplantmatrixgrowerweek]
 
+class ExportExcelForecast(BaseModel): # pragma: no cover
+    Period_with_P: str
+    period: int
+    plant_id: int
+    plant_name: str
+    total_actual_value: Optional[float] = None
+    total_forecast_value: Optional[float] = None
+    week: int
+    year: int
+
+class ExportExcelForecastList(BaseModel): # pragma: no cover
+    data:List[ExportExcelForecast]
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
