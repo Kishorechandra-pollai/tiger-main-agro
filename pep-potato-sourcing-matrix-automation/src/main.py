@@ -47,6 +47,7 @@ import user_info
 import user_log
 import export_excel
 import journal
+import admin_alert
 from database import engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -105,6 +106,7 @@ app.include_router(masters_mapping.router, tags=['masters_mapping'], prefix='/ap
 app.include_router(masters_mapping_new.router, tags=['masters_mapping_latest'], prefix='/api/masters_mapping_latest')
 app.include_router(export_excel.router,tags=['export_excel'],prefix='/api/export_excel')
 app.include_router(journal.router, tags=['journal'], prefix='/api/journal')
+app.include_router(admin_alert.router, tags=['admin_alert'], prefix='/api/admin_alert')
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
