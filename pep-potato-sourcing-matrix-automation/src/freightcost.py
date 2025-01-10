@@ -273,7 +273,7 @@ def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db:
         raise HTTPException(status_code=404, detail=f"No growing area found for freight_cost_id: {freight_cost_id}")
     plant_id, country = country_records
 
-    if country == 'US-CORE' | country == 'CO-MAN':
+    if country == 'US-CORE' or country == 'CO-MAN':
         country = 'US'
     elif country == 'CANADA-CORE':
         country = 'Canada'
@@ -283,7 +283,9 @@ def update_freight_rates_with_default_value(freight_cost_id: int, year: int, db:
             period=period,
             year=year,
             rate=0,
-            company_name=country
+            company_name=country,
+            round_trip=1,
+            fuel_cf=0.54
         )
         db.add(new_record)
 
