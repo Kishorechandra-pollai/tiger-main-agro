@@ -612,6 +612,7 @@ potato_rates_plant_week_totals = db.Table('View_potato_cost_week_view_combine_co
 potato_rates_plant_period_totals = db.Table('View_potato_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
 solids_period_totals = db.Table('View_solid_period_combine_code', metadata, autoload=True, autoload_with=engine)
 View_ownership_journal_info = db.Table('View_ownership_journal_info', metadata, autoload=True, autoload_with=engine)
+View_erp_raw_alerts = db.Table('View_erp_raw_alerts', metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
@@ -772,37 +773,39 @@ class export_excel_payload(Base):
     Payload = Column(String, nullable=True)
 
 class journal_all(Base):
-	__tablename__ = "journal_all"
-	
-	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
-	comments = Column(String, nullable=False)
-	page_name = Column(String, nullable=True)
-	page_id = Column(Integer(),nullable = True)
-	user_first_name = Column(String, nullable=False)
-	user_last_name = Column(String, nullable=False)
-	email = Column(String, nullable=False)
-	user_id = Column(Integer(), nullable=False)
-	created_time = Column(DateTime, nullable=False)
-	img_url = Column(String, nullable=True)
+    __tablename__ = "journal_all"
+    
+    journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+    comments = Column(String, nullable=False)
+    page_name = Column(String, nullable=True)
+    page_id = Column(Integer(),nullable = True)
+    user_first_name = Column(String, nullable=False)
+    user_last_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    user_id = Column(Integer(), nullable=False)
+    created_time = Column(DateTime, nullable=False)
+    img_url = Column(String, nullable=True)
 
 class journal_ownership(Base):
-	__tablename__ = "journal_ownership"
-	
-	journal_id = Column(Integer(), primary_key=True, autoincrement=True)
-	comments = Column(String, nullable=False)
-	user_first_name = Column(String, nullable=False)
-	user_last_name = Column(String, nullable=False)
-	email = Column(String, nullable=False)
-	user_id = Column(Integer(), nullable=False)
-	created_time = Column(DateTime, nullable=False)
-	ownership_id = Column(String, nullable = False)
-	growing_area_name = Column(String, nullable = False)
-	growing_area_desc = Column(String, nullable = False)
-	img_url = Column(String, nullable=True)
-	region = Column(String, nullable=True)
-	year = Column(Integer(), nullable=True)
-	crop_type = Column(String, nullable = True)
-	crop_year = Column(String, nullable = True)
+    __tablename__ = "journal_ownership"
+    
+    journal_id = Column(Integer(), primary_key=True, autoincrement=True)
+    comments = Column(String, nullable=False)
+    user_first_name = Column(String, nullable=False)
+    user_last_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    user_id = Column(Integer(), nullable=False)
+    created_time = Column(DateTime, nullable=False)
+    ownership_id = Column(String, nullable = False)
+    growing_area_name = Column(String, nullable = False)
+    growing_area_desc = Column(String, nullable = False)
+    img_url = Column(String, nullable=True)
+    region = Column(String, nullable=True)
+    year = Column(Integer(), nullable=True)
+    crop_type = Column(String, nullable = True)
+    crop_year = Column(String, nullable = True)
+    filter_year_1 = Column(Integer(), nullable = True)
+    filter_year_2 = Column(Integer(), nullable = True)
     
 class btl_task_info(Base):
     __tablename__ = "btl_task_info"

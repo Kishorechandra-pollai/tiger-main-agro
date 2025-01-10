@@ -1107,17 +1107,73 @@ class ExportExcelFinanceSummarySolids(BaseModel): # pragma: no cover
 class ExportExcelFinanceSummarySolidsList(BaseModel): # pragma: no cover
     data: List[ExportExcelFinanceSummarySolids]
 
-class ExportExcelBigJSON(BaseModel): # pragma: no cover
-    growing_area_name: str
+class ExportExcelPlantMatrixAllocation(BaseModel): # pragma: no cover
     growing_area_id: int
+    growing_area_name: str
     period: int
     period_with_P: str
+    plant_id: int
+    plant_matrix_id: str
+    plant_name: str
+    value: Optional[float] = None
     week: int
     year: int
-    total_value: float
 
-class ExportExcelBigJSONList(BaseModel): # pragma: no cover
-    data: List[ExportExcelBigJSON]
+class ExportExcelPlantMatrixAllocationList(BaseModel): # pragma: no cover
+    data: List[ExportExcelPlantMatrixAllocation]
+
+class ExportExcelOwnership(BaseModel): # pragma: no cover
+    A2S: str
+    Contract: str
+    Demand: str
+    Extension: str
+    Flex: str
+    Growing_Area: str
+    Market: str
+    Position: str
+    Shrinkage: str
+    To_Ship: str
+
+class ExportExcelOwnershipList(BaseModel): # pragma: no cover
+    data:List[ExportExcelOwnership]
+
+class ExportExcelplantmatrixregionweek(BaseModel): # pragma: no cover
+    period: int
+    period_with_P: str
+    region_name: str
+    totalValue_regionWise: Optional[float] = None
+    week: int
+    year: int
+
+class ExportExcelplantmatrixregionweekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelplantmatrixregionweek]
+
+class ExportExcelplantmatrixgrowerweek(BaseModel): # pragma: no cover
+    crop_type: str
+    crop_year: str
+    growing_area_id: int
+    growing_area_name: str
+    period: int
+    period_with_P: str
+    total_value: Optional[float] = None
+    week: int
+    year: int
+
+class ExportExcelplantmatrixgrowerweekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelplantmatrixgrowerweek]
+
+class ExportExcelForecast(BaseModel): # pragma: no cover
+    Period_with_P: str
+    period: int
+    plant_id: int
+    plant_name: str
+    total_actual_value: Optional[float] = None
+    total_forecast_value: Optional[float] = None
+    week: int
+    year: int
+
+class ExportExcelForecastList(BaseModel): # pragma: no cover
+    data:List[ExportExcelForecast]
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
