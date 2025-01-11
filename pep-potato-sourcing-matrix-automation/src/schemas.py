@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 
 
 class PlantSchema(BaseModel):
@@ -1174,6 +1174,27 @@ class ExportExcelForecast(BaseModel): # pragma: no cover
 
 class ExportExcelForecastList(BaseModel): # pragma: no cover
     data:List[ExportExcelForecast]
+
+class ExportExcelInflationDeflation(BaseModel): # pragma: no cover
+    impact_bw_vs_prior_year: float = Field(..., alias="IMPACT B/W vs Prior Year ($)")
+    index: float = Field(..., alias="Index (%)")
+    index_frt: float = Field(..., alias="Index (%) -FRT")
+    index_mat: float = Field(..., alias="Index (%) -MAT")
+    bw_than_py_frt: float = Field(..., alias="b/(w) than py frt ($/u)")
+    bw_than_py_matl: float = Field(..., alias="b/(w) than py matl ($/u)")
+    bw_than_py_total: float = Field(..., alias="b/(w) than py total ($/u)")
+    company_name: str
+    freight: float
+    freight_prev: float
+    material: float
+    material_prev: float
+    period: int
+    total: float
+    total_prior: float
+    year: int
+
+class ExportExcelInflationDeflationList(BaseModel): # pragma: no cover
+    data:List[ExportExcelInflationDeflation]
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
