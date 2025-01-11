@@ -334,6 +334,144 @@ def export_forecast(periods:List[str],payload:schemas.ExportExcelForecastList): 
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
+
+@router.post('/export_inflation_deflation')
+def export_inflation_deflation(payload:schemas.ExportExcelInflationDeflationList): # pragma: no cover
+    output_export_json =[]
+    export_object = {"Performance vs YAG":"Material CY"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].material,2)
+        total+=round(filtered_payload[0].material,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Frieght CY"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].freight,2)
+        total+=round(filtered_payload[0].freight,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Total"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].total,2)
+        total+=round(filtered_payload[0].total,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Material PY"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].material_prev,2)
+        total+=round(filtered_payload[0].material_prev,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Freight PY"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].freight_prev,2)
+        total+=round(filtered_payload[0].freight_prev,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Total PY"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].total_prior,2)
+        total+=round(filtered_payload[0].total_prior,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"(B)/W vs PY MAT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].bw_than_py_matl,2)
+        total+=round(filtered_payload[0].bw_than_py_matl,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"(B)/W vs. PY FRT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].bw_than_py_frt,2)
+        total+=round(filtered_payload[0].bw_than_py_frt,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"(B)/W vs. PY TOT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].bw_than_py_total,2)
+        total+=round(filtered_payload[0].bw_than_py_total,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"$ Impact vs PY"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].impact_bw_vs_prior_year,0)
+        total+=round(filtered_payload[0].impact_bw_vs_prior_year,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Index (%) -MAT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].index_mat,1)
+        total+=round(filtered_payload[0].index_mat,1)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Index (%) -FRT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].index_frt,2)
+        total+=round(filtered_payload[0].index_frt,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs YAG":"Index (%) -TOT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].index,1)
+        total+=round(filtered_payload[0].index,1)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"inflation_deflation_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+
+
+
     
 
 @router.post('/export_finance_summary_solids')
