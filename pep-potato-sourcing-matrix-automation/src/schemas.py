@@ -1196,6 +1196,145 @@ class ExportExcelInflationDeflation(BaseModel): # pragma: no cover
 class ExportExcelInflationDeflationList(BaseModel): # pragma: no cover
     data:List[ExportExcelInflationDeflation]
 
+class ExportExcelPVP_PVP(BaseModel): # pragma: no cover
+    FREIGHT_BW_per_unit: float= Field(..., alias="FREIGHT B/(W) ($/unit)")
+    IMPACT_BW_vs_Plan: float= Field(..., alias="IMPACT B/W vs Plan ($)")
+    Index_percent: float= Field(..., alias="Index (%)")
+    Index_percent_FRT: float= Field(..., alias="Index (%) -FRT")
+    Index_percent_MAT: float= Field(..., alias="Index (%) -MAT")
+    MATERIAL_BW_per_unit: float= Field(..., alias="MATERIAL B/(W) ($/unit)")
+    MCWT_Volume: float
+    TOTAL_per_unit: float= Field(..., alias="TOTAL ($/unit)")
+    company_name: str
+    m_dollar_impact: float
+    period: int
+    total_actual: float
+    total_freight_cost_actual: float
+    total_freight_cost_plan: float
+    total_material_actual: float
+    total_material_plan: float
+    total_plan: float
+    year: int
+
+class ExportExcelPVP_PVPList(BaseModel): # pragma: no cover
+    data:List[ExportExcelPVP_PVP]
+
+class ExportExcelPVP_PV(BaseModel): # pragma: no cover
+    company_name: str= Field(..., alias="company-name")
+    period: int
+    period_with_P: str
+    price_variance_task_id: int
+    value: float
+    year: int
+
+class ExportExcelPVP_PVList(BaseModel): # pragma: no cover
+    data:List[ExportExcelPVP_PV]
+
+class ExportOffContract(BaseModel): # pragma: no cover
+    company_name: str
+    off_contract_task_id: int
+    period: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportOffContractList(BaseModel): # pragma: no cover
+    data:List[ExportOffContract]
+
+class ExportExcelAdjustmentsFreight(BaseModel): # pragma: no cover
+    company_name: str
+    freight_task_id: int
+    period: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportExcelAdjustmentsFreightList(BaseModel): # pragma: no cover
+    data:List[ExportExcelAdjustmentsFreight]
+
+class ExportExcelAdjustmentsP4P(BaseModel): # pragma: no cover
+    company_name: str
+    defects_actual: int
+    defects_plan: int
+    diff_Defects: int
+    diff_solid: int
+    p4pDiff: int
+    p_year: int
+    periods: int
+    ptdActualP4P: int
+    solid_actual: int
+    solid_plan: int
+    total: int
+
+class ExportExcelAdjustmentsP4PList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAdjustmentsP4P]
+
+class ExportExcelAdjustmentsGA(BaseModel): # pragma: no cover
+    company_name: str
+    general_administrative_id: int
+    period: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportExcelAdjustmentsGAList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAdjustmentsGA]
+
+class ExportExcelAdjustmentsGAplan(BaseModel): # pragma: no cover
+    company_name: str
+    general_administrative_plan_id: int
+    period: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportExcelAdjustmentsGAplanList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAdjustmentsGAplan]
+
+class ExportExcelAdjustmentsBTL(BaseModel): # pragma: no cover
+    btl_task_id: int
+    company_name: str
+    period: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportExcelAdjustmentsBTLList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAdjustmentsBTL]
+
+class ExportExcelAdjustmentsBTLplan(BaseModel): # pragma: no cover
+    btl_plan_task_id: int
+    company_name: str
+    period: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportExcelAdjustmentsBTLplanList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAdjustmentsBTLplan]
+
+class ExportExcelAdjustmentsProductivity(BaseModel): # pragma: no cover
+    company_name: str
+    period: int
+    productivity_task_id: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportExcelAdjustmentsProductivityList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAdjustmentsProductivity]
+
+class ExportExcelAdjustmentsProductivityPlan(BaseModel): # pragma: no cover
+    company_name: str
+    period: int
+    productivity_plan_task_id: int
+    row_id: int
+    value: int
+    year: int
+
+class ExportExcelAdjustmentsProductivityPlanList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAdjustmentsProductivityPlan]
+
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
     email : str
