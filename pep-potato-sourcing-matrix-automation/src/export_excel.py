@@ -470,9 +470,839 @@ def export_inflation_deflation(payload:schemas.ExportExcelInflationDeflationList
         )
 
 
+@router.post('/export_performance_vs_plan')
+def export_performance_vs_plan(payload1:schemas.ExportExcelPVP_PVPList,payload2:schemas.ExportExcelPVP_PVList):
+    output_export_json =[]
+    export_object = {"Performance vs Plan":"Actual($/u)-Material"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].total_material_actual,2)
+        total+=round(filtered_payload[0].total_material_actual,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Actual($/u)-Freight"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].total_freight_cost_actual,2)
+        total+=round(filtered_payload[0].total_freight_cost_actual,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
 
 
-    
+    export_object = {"Performance vs Plan":"Actual($/u)-Total"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round((filtered_payload[0].total_freight_cost_actual+filtered_payload[0].total_material_actual),2)
+        total+=round((filtered_payload[0].total_freight_cost_actual+filtered_payload[0].total_material_actual),2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Plan($/u)-Material"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.price_variance_task_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,2)
+        total+=round(filtered_payload[0].value,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Plan($/u)-Freight"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.price_variance_task_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,2)
+        total+=round(filtered_payload[0].value,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Plan($/u)-Raw Material"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.price_variance_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,2)
+        total+=round(filtered_payload[0].value,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Plan($/u)-total"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload_1 = [item for item in payload2.data if item.period==pr and item.price_variance_task_id==1]
+        filtered_payload_2 = [item for item in payload2.data if item.period==pr and item.price_variance_task_id==2]
+        filtered_payload_3 = [item for item in payload2.data if item.period==pr and item.price_variance_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload_1[0].value+filtered_payload_2[0].value+filtered_payload_3[0].value,2)
+        total+=round(filtered_payload_1[0].value+filtered_payload_2[0].value+filtered_payload_3[0].value,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"PV($/u)-Material-B/(W)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].MATERIAL_BW_per_unit,2)
+        total+=round(filtered_payload[0].MATERIAL_BW_per_unit,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"PV($/u)-Frieght-B/(W)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].FREIGHT_BW_per_unit,2)
+        total+=round(filtered_payload[0].FREIGHT_BW_per_unit,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Total"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].FREIGHT_BW_per_unit+filtered_payload[0].MATERIAL_BW_per_unit,2)
+        total+=round(filtered_payload[0].FREIGHT_BW_per_unit+filtered_payload[0].MATERIAL_BW_per_unit,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"IMP B/(W) Vs Plan ($)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].IMPACT_BW_vs_Plan,2)
+        total+=round(filtered_payload[0].IMPACT_BW_vs_Plan,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"IMP B/(W) Vs Plan ($)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
+        total+=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"IMP B/(W) Vs Plan ($)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
+        total+=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+
+    export_object = {"Performance vs Plan":"Index (%) -MAT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].Index_percent_MAT,2)
+        total+=round(filtered_payload[0].Index_percent_MAT,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Index (%) -FRT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].Index_percent_FRT,2)
+        total+=round(filtered_payload[0].Index_percent_FRT,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Performance vs Plan":"Index (%) -TOTT"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].Index_percent,2)
+        total+=round(filtered_payload[0].Index_percent,2)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Performance_VS_Plan_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_offcontract')
+def export_offcontract(payload:schemas.ExportOffContractList):  # pragma: no cover
+    output_export_json =[]
+    export_object = {"Off Contract Adj-Act":"Misc Bills"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==9]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"Price ADJ"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==7]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"Project"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==8]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"Standards Adjustement"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==10]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"JE (+)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"JE (-)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==6]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"Stoarage research"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"End year ADJ"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Off Contract Adj-Act":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.off_contract_task_id==13]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Off_Contract_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_Adjustments_freight')
+def export_Adjustments_freight(payload:schemas.ExportExcelAdjustmentsFreightList): # pragma: no cover
+    output_export_json =[]
+    export_object = {"Freight Adjustments-Act":"Adjustments"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Freight Adjustments-Act":"Sourcing"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Freight Adjustments-Act":"Rail Lease Expense"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Freight Adjustments-Act":"Productivity"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==4]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Freight Adjustments-Act":"Auto=pay-fuel"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==5]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Freight Adjustments-Act":"Fuel Surcharge"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==6]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Freight Adjustments-Act":"Accesorial"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==7]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    export_object = {"Freight Adjustments-Act":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr and item.freight_task_id==8]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Adjustments_freight_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_adjustments_P4P')
+def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pragma: no cover
+    output_export_json =[]
+    export_object = {"P4P Adjustments":"Solids-Plan"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].solid_plan,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Solids-Actual/Fcst"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].solid_actual,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Diff(Solids)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].diff_solid,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Defects-Plan"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].defects_plan,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Defects-Actual/Fcst"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].defects_actual,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Diff(Defects)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].diff_Defects,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+ 
+    export_object = {"P4P Adjustments":"Total-P4P VS Plan"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].p4pDiff,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Actual P4P"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].ptdActualP4P,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Plan Solids"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].solid_plan,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Plan Defects"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].defects_actual,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    export_object = {"P4P Adjustments":"Total P4P"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pr]
+        export_object[f"P{pr}"]=round(filtered_payload[0].total,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total,0)
+    output_export_json.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Adjustments_P4P_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_excel_adjustments_GA')
+def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,payload2:schemas.ExportExcelAdjustmentsGAplanList):
+    output_export_json1 =[]
+    export_object = {"G&A Adj - Act":"HeadQuarters30510-2000100226"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"G&A Adj - Act":"Rhinelander30541-2798100200"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"G&A Adj - Act":"Research30548-2798100201"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"G&A Adj - Act":"Seed30516-2000100228"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==4]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"G&A Adj - Act":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==5]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object={"G&A Adj - Act":"Total"}
+    total=0
+    for pr in range(1,14):
+        sub_total=0
+        for oej in output_export_json1:
+            sub_total+=oej[f"P{pr}"]
+        export_object[f"P{pr}"]=sub_total/1000
+        total+=sub_total/1000
+    export_object["Total"]=round(total,0)
+    output_export_json1.append(export_object)
+
+    output_export_json2 =[]
+    export_object = {"G&A Adj - Plan":"HeadQuarters30510-2000100226"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"G&A Adj - Plan":"Rhinelander30541-2798100200"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"G&A Adj - Plan":"Research30548-2798100201"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==4]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"G&A Adj - Plan":"Seed30516-2000100228"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==5]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"G&A Adj - Plan":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==6]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object={"G&A Adj - Plan":"Total"}
+    total=0
+    for pr in range(1,14):
+        sub_total=0
+        for oej in output_export_json2:
+            sub_total+=oej[f"P{pr}"]
+        export_object[f"P{pr}"]=sub_total/1000
+        total+=sub_total/1000
+    export_object["Total"]=round(total,0)
+    output_export_json2.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df1 = pd.DataFrame(output_export_json1)
+    df2 = pd.DataFrame(output_export_json2)
+    file_name = f"Adjustments_GA_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df1.to_excel(writer, index=False, sheet_name='Sheet1',startrow=0, header=True)
+        writer.sheets['Sheet1'].append([])
+        df2.to_excel(writer, index=False, sheet_name='Sheet1', startrow=len(df1)+2, header=True)
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_excel_adjustments_BTL')
+def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,payload2:schemas.ExportExcelAdjustmentsBTLplanList):
+    output_export_json1 =[]
+    export_object = {"BTL - Act":"BTL(+)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.btl_task_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"BTL - Act":"BTL(-)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.btl_task_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"BTL - Act":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.btl_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object={"BTL - Act":"Total BTL"}
+    total=0
+    for pr in range(1,14):
+        sub_total=0
+        for oej in output_export_json1:
+            sub_total+=oej[f"P{pr}"]
+        export_object[f"P{pr}"]=sub_total
+        total+=sub_total/1000
+    export_object["Total"]=round(total,0)
+    output_export_json1.append(export_object)
+
+    output_export_json2 =[]
+    export_object = {"BTL - Plan":"BTL(+)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.btl_plan_task_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"BTL - Plan":"BTL(-)"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.btl_plan_task_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"BTL - Plan":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.btl_plan_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object={"BTL - Plan":"Total BTL- Plan"}
+    total=0
+    for pr in range(1,14):
+        sub_total=0
+        for oej in output_export_json2:
+            sub_total+=oej[f"P{pr}"]
+        export_object[f"P{pr}"]=sub_total
+        total+=sub_total/1000
+    export_object["Total"]=round(total,0)
+    output_export_json2.append(export_object)
+
+    export_object={"BTL - Plan":"Delta Total- BTL"}
+    total=0
+    for pr in range(1,14):
+        filtered_object_1 = [item for item in output_export_json1 if item["BTL - Act"]=="Total BTL"]
+        filtered_object_2 = [item for item in output_export_json2 if item["BTL - Plan"]=="Total BTL- Plan"]
+        export_object[f"P{pr}"]=filtered_object_1[0][f"P{pr}"]-filtered_object_2[0][f"P{pr}"]
+        total+=filtered_object_1[0][f"P{pr}"]-filtered_object_2[0][f"P{pr}"]
+    export_object["Total"]=round(total,0)
+    output_export_json2.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df1 = pd.DataFrame(output_export_json1)
+    df2 = pd.DataFrame(output_export_json2)
+    file_name = f"Adjustments_BTL_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df1.to_excel(writer, index=False, sheet_name='Sheet1',startrow=0, header=True)
+        writer.sheets['Sheet1'].append([])
+        df2.to_excel(writer, index=False, sheet_name='Sheet1', startrow=len(df1)+2, header=True)
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_excel_adjustments_Productivity')
+def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustmentsProductivityList,payload2:schemas.ExportExcelAdjustmentsProductivityPlanList):
+    output_export_json1 =[]
+    export_object = {"Productivity - Act":"Productivity - Task"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"Productivity - Act":"Productivity Gross"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"Productivity - Act":"Productivity-net"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object = {"Productivity - Act":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==4]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json1.append(export_object)
+
+    export_object={"Productivity - Act":"Total Productivity"}
+    total=0
+    for pr in range(1,14):
+        sub_total=0
+        for oej in output_export_json1:
+            sub_total+=oej[f"P{pr}"]
+        export_object[f"P{pr}"]=sub_total
+        total+=sub_total/1000
+    export_object["Total"]=round(total,0)
+    output_export_json1.append(export_object)
+
+    output_export_json2 =[]
+    export_object = {"Productivity-Plan":"Productivity - Task"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==1]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"Productivity-Plan":"Productivity Gross"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==2]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"Productivity-Plan":"Productivity-net"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==3]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object = {"Productivity-Plan":"Others"}
+    total=0
+    for pr in range(1,14):
+        filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==4]
+        export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].value,0)
+    export_object["Total"]=round(total/13,2)
+    output_export_json2.append(export_object)
+
+    export_object={"Productivity-Plan":"Total productivity-Plan"}
+    total=0
+    for pr in range(1,14):
+        sub_total=0
+        for oej in output_export_json2:
+            sub_total+=oej[f"P{pr}"]
+        export_object[f"P{pr}"]=sub_total
+        total+=sub_total/1000
+    export_object["Total"]=round(total,0)
+    output_export_json2.append(export_object)
+
+    export_object={"Productivity-Plan":"Delta Total Productivity"}
+    total=0
+    for pr in range(1,14):
+        filtered_object_1 = [item for item in output_export_json1 if item["Productivity - Act"]=="Total Productivity"]
+        filtered_object_2 = [item for item in output_export_json2 if item["Productivity-Plan"]=="Total productivity-Plan"]
+        export_object[f"P{pr}"]=filtered_object_1[0][f"P{pr}"]-filtered_object_2[0][f"P{pr}"]
+        total+=filtered_object_1[0][f"P{pr}"]-filtered_object_2[0][f"P{pr}"]
+    export_object["Total"]=round(total,0)
+    output_export_json2.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df1 = pd.DataFrame(output_export_json1)
+    df2 = pd.DataFrame(output_export_json2)
+    file_name = f"Adjustments_Productivity_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df1.to_excel(writer, index=False, sheet_name='Sheet1',startrow=0, header=True)
+        writer.sheets['Sheet1'].append([])
+        df2.to_excel(writer, index=False, sheet_name='Sheet1', startrow=len(df1)+2, header=True)
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
 
 @router.post('/export_finance_summary_solids')
 def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolidsList): # pragma: no cover
