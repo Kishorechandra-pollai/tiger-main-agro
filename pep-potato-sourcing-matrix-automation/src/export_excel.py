@@ -1305,6 +1305,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
 
 @router.post('/export_Freight_Rates_vendor_site')
 def export_Freight_Rates_vendor_site(periods:List[str],payload:schemas.ExportExcelAdjustmentsFreightList): # pragma: no cover
+    return 0
 
 
 
