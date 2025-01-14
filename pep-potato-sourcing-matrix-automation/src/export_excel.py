@@ -939,7 +939,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
         )
 
 @router.post('/export_excel_adjustments_GA')
-def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,payload2:schemas.ExportExcelAdjustmentsGAplanList):
+def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,payload2:schemas.ExportExcelAdjustmentsGAplanList): #pragma: no cover
     output_export_json1 =[]
     export_object = {"G&A Adj - Act":"HeadQuarters30510-2000100226"}
     total=0
@@ -1072,7 +1072,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         )
 
 @router.post('/export_excel_adjustments_BTL')
-def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,payload2:schemas.ExportExcelAdjustmentsBTLplanList):
+def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,payload2:schemas.ExportExcelAdjustmentsBTLplanList): #pragma: no cover
     output_export_json1 =[]
     export_object = {"BTL - Act":"BTL(+)"}
     total=0
@@ -1179,7 +1179,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         )
 
 @router.post('/export_excel_adjustments_Productivity')
-def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustmentsProductivityList,payload2:schemas.ExportExcelAdjustmentsProductivityPlanList):
+def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustmentsProductivityList,payload2:schemas.ExportExcelAdjustmentsProductivityPlanList): #pragma: no cover
     output_export_json1 =[]
     export_object = {"Productivity - Act":"Productivity - Task"}
     total=0
@@ -1302,6 +1302,10 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
+
+@router.post('/export_Freight_Rates_vendor_site')
+def export_Freight_Rates_vendor_site(periods:List[str],payload:schemas.ExportExcelAdjustmentsFreightList): # pragma: no cover
+
 
 
 @router.post('/export_finance_summary_solids')
