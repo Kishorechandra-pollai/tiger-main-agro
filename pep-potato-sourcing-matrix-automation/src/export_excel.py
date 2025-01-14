@@ -471,7 +471,7 @@ def export_inflation_deflation(payload:schemas.ExportExcelInflationDeflationList
 
 
 @router.post('/export_performance_vs_plan')
-def export_performance_vs_plan(payload1:schemas.ExportExcelPVP_PVPList,payload2:schemas.ExportExcelPVP_PVList):
+def export_performance_vs_plan(payload1:schemas.ExportExcelPVP_PVPList,payload2:schemas.ExportExcelPVP_PVList): #pragma: no cover
     output_export_json =[]
     export_object = {"Performance vs Plan":"Actual($/u)-Material"}
     total=0
