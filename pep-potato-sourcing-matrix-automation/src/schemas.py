@@ -1335,6 +1335,101 @@ class ExportExcelAdjustmentsProductivityPlan(BaseModel): # pragma: no cover
 class ExportExcelAdjustmentsProductivityPlanList(BaseModel): # pragma: no cover
     data:list[ExportExcelAdjustmentsProductivityPlan]
 
+class ExportExcelAFreightRateVendorSiteCode(BaseModel): # pragma: no cover
+    Vendor_Site_Code: str
+    company_name: str
+    freight_cost_id: int
+    fuel_cf: float
+    growing_area: str
+    growing_area_id: int
+    miles: int
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_name: str
+    rate: float
+    round_trip: int
+    vendor_site_id: int
+    year: int
+
+class ExportExcelAFreightRateVendorSiteCodeList(BaseModel): # pragma: no cover
+    data:list[ExportExcelAFreightRateVendorSiteCode]
+
+class ExportExcelFreightRateperiod(BaseModel): # pragma: no cover
+    Row_Number: int
+    actual_dollar_bymcwt: float
+    actual_total_dollar_spend: float
+    actual_volume: float
+    company_name: str
+    country: str
+    forecast_dollar_bymcwt: float
+    forecast_total_dollar_spend: float
+    forecast_volume: float
+    p_year: int
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_name: str
+    week: str
+
+class ExportExcelFreightRateperiodList(BaseModel): # pragma: no cover
+    data:list[ExportExcelFreightRateperiod]
+
+class ExportExcelFreightRateweek(BaseModel): # pragma: no cover
+    Total_dollor_spend_week: float
+    actual_dollor_MCWT_week: float
+    actual_volume: float
+    company_name: str
+    country: str
+    forecast_dollor_cwt: float
+    forecast_spend_week: float
+    forecast_volume: float
+    p_year: int
+    period: int
+    period_with_P: str
+    period_with_week: str
+    plant_id: int
+    plant_name: str
+    rate: float
+    week_no: int
+
+class ExportExcelFreightRateweekList(BaseModel): # pragma: no cover
+    data:list[ExportExcelFreightRateweek]
+
+class ExportExcelFreightRateGrowingArea(BaseModel): # pragma: no cover
+    growing_area_id: int
+    growing_area_name: str
+    p_year: int
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_name: str
+    rate_actual: float
+    rate_plan: float
+    totaldollarcwt: float
+
+class ExportExcelFreightRateGrowingAreaList(BaseModel): # pragma: no cover
+    data:list[ExportExcelFreightRateGrowingArea]
+
+class ExportExcelPotatoRatesGrowingAreaPeriod(BaseModel): # pragma: no cover
+    actual_total_dollor: float
+    actual_volume: float
+    fcst_rate: float
+    fcst_total_dollor: float
+    forecast_volume: float
+    growing_area_id: int
+    growing_area_name: str
+    p_year: int
+    period: int
+    period_with_P: str
+    price_actual: float
+    region: int
+    region_name: str
+    week: int
+
+class ExportExcelPotatoRatesGrowingAreaPeriodList(BaseModel): # pragma: no cover
+    data:list[ExportExcelPotatoRatesGrowingAreaPeriod]
+
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
     email : str
