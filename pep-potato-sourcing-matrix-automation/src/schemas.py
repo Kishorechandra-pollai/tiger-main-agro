@@ -1267,7 +1267,7 @@ class ExportExcelAdjustmentsP4P(BaseModel): # pragma: no cover
     total: int
 
 class ExportExcelAdjustmentsP4PList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAdjustmentsP4P]
+    data:List[ExportExcelAdjustmentsP4P]
 
 class ExportExcelAdjustmentsGA(BaseModel): # pragma: no cover
     company_name: str
