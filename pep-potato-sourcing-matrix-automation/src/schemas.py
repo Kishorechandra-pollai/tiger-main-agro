@@ -1278,7 +1278,7 @@ class ExportExcelAdjustmentsGA(BaseModel): # pragma: no cover
     year: int
 
 class ExportExcelAdjustmentsGAList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAdjustmentsGA]
+    data:List[ExportExcelAdjustmentsGA]
 
 class ExportExcelAdjustmentsGAplan(BaseModel): # pragma: no cover
     company_name: str
@@ -1289,7 +1289,7 @@ class ExportExcelAdjustmentsGAplan(BaseModel): # pragma: no cover
     year: int
 
 class ExportExcelAdjustmentsGAplanList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAdjustmentsGAplan]
+    data:List[ExportExcelAdjustmentsGAplan]
 
 class ExportExcelAdjustmentsBTL(BaseModel): # pragma: no cover
     btl_task_id: int
@@ -1300,7 +1300,7 @@ class ExportExcelAdjustmentsBTL(BaseModel): # pragma: no cover
     year: int
 
 class ExportExcelAdjustmentsBTLList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAdjustmentsBTL]
+    data:List[ExportExcelAdjustmentsBTL]
 
 class ExportExcelAdjustmentsBTLplan(BaseModel): # pragma: no cover
     btl_plan_task_id: int
@@ -1311,7 +1311,7 @@ class ExportExcelAdjustmentsBTLplan(BaseModel): # pragma: no cover
     year: int
 
 class ExportExcelAdjustmentsBTLplanList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAdjustmentsBTLplan]
+    data:List[ExportExcelAdjustmentsBTLplan]
 
 class ExportExcelAdjustmentsProductivity(BaseModel): # pragma: no cover
     company_name: str
@@ -1322,7 +1322,7 @@ class ExportExcelAdjustmentsProductivity(BaseModel): # pragma: no cover
     year: int
 
 class ExportExcelAdjustmentsProductivityList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAdjustmentsProductivity]
+    data:List[ExportExcelAdjustmentsProductivity]
 
 class ExportExcelAdjustmentsProductivityPlan(BaseModel): # pragma: no cover
     company_name: str
@@ -1333,7 +1333,7 @@ class ExportExcelAdjustmentsProductivityPlan(BaseModel): # pragma: no cover
     year: int
 
 class ExportExcelAdjustmentsProductivityPlanList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAdjustmentsProductivityPlan]
+    data:List[ExportExcelAdjustmentsProductivityPlan]
 
 class ExportExcelAFreightRateVendorSiteCode(BaseModel): # pragma: no cover
     Vendor_Site_Code: str
@@ -1353,7 +1353,7 @@ class ExportExcelAFreightRateVendorSiteCode(BaseModel): # pragma: no cover
     year: int
 
 class ExportExcelAFreightRateVendorSiteCodeList(BaseModel): # pragma: no cover
-    data:list[ExportExcelAFreightRateVendorSiteCode]
+    data:List[ExportExcelAFreightRateVendorSiteCode]
 
 class ExportExcelFreightRateperiod(BaseModel): # pragma: no cover
     Row_Number: int
@@ -1373,7 +1373,7 @@ class ExportExcelFreightRateperiod(BaseModel): # pragma: no cover
     week: str
 
 class ExportExcelFreightRateperiodList(BaseModel): # pragma: no cover
-    data:list[ExportExcelFreightRateperiod]
+    data:List[ExportExcelFreightRateperiod]
 
 class ExportExcelFreightRateweek(BaseModel): # pragma: no cover
     Total_dollor_spend_week: float
@@ -1394,7 +1394,7 @@ class ExportExcelFreightRateweek(BaseModel): # pragma: no cover
     week_no: int
 
 class ExportExcelFreightRateweekList(BaseModel): # pragma: no cover
-    data:list[ExportExcelFreightRateweek]
+    data:List[ExportExcelFreightRateweek]
 
 class ExportExcelFreightRateGrowingArea(BaseModel): # pragma: no cover
     growing_area_id: int
@@ -1409,7 +1409,7 @@ class ExportExcelFreightRateGrowingArea(BaseModel): # pragma: no cover
     totaldollarcwt: float
 
 class ExportExcelFreightRateGrowingAreaList(BaseModel): # pragma: no cover
-    data:list[ExportExcelFreightRateGrowingArea]
+    data:List[ExportExcelFreightRateGrowingArea]
 
 class ExportExcelPotatoRatesGrowingAreaPeriod(BaseModel): # pragma: no cover
     actual_total_dollor: float
@@ -1428,7 +1428,7 @@ class ExportExcelPotatoRatesGrowingAreaPeriod(BaseModel): # pragma: no cover
     week: int
 
 class ExportExcelPotatoRatesGrowingAreaPeriodList(BaseModel): # pragma: no cover
-    data:list[ExportExcelPotatoRatesGrowingAreaPeriod]
+    data:List[ExportExcelPotatoRatesGrowingAreaPeriod]
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
