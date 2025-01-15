@@ -73,6 +73,6 @@ async def get_erp_alerts(db: Session = Depends(get_db)): # pragma: no cover
         if len(records)>0:
             return {"message": alert_json}
         else:        
-            return {"message": None}
+            return {"message": {"Alert message": "0"}}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
