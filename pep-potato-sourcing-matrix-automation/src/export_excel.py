@@ -16,12 +16,6 @@ from pydantic import BaseModel,create_model
 
 router = APIRouter()
 
-class DynamicSchema(BaseModel):
-    Plant_name: str
-    pass
-
-class DynamicSchemaList(BaseModel):
-    data: List[DynamicSchema]
 @router.post('/export_test')
 def dynamicPeriodSchemaCreator(periods:List[str]): # pragma: no cover
     dynamic_period_list=[]
