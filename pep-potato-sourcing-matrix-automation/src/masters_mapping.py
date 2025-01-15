@@ -185,7 +185,8 @@ def create_plant(payload: schemas.MastersMapping, db: Session = Depends(get_db))
                                     "updated_time":current_time,
                                     "updated_by":"SYSTEM",
                                     "currency":"USD",
-                                    "growing_area_id":growing_area_id}
+                                    "growing_area_id":growing_area_id,
+                                    "miles": 0}
         create_freight_rates_in_db(freight_cost_rate_payload, db)
 
         ## Freight Cost mappings
