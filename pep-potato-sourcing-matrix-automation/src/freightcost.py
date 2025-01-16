@@ -4,7 +4,8 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
-                    freight_cost_period_week_table, rate_growing_area_table,freight_rates_period_totals,freight_rates_week_totals, FileUploadTemplate,Plant)
+                    freight_cost_period_week_table, rate_growing_area_table,freight_rates_period_totals,
+                    freight_rates_week_totals, FileUploadTemplate,Plant,View_freight_fuel_cost)
 from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -574,5 +575,19 @@ def update_fuel_cf(payload: schemas.FreightMilesSchema,
         record.fuel_cf = payload.fuel_cf
         db.commit()
     return update_records
+
+
+@router.get('/freight_fuel_cost/{year}/{country}')
+def fuel_cost(year: int,country:str,db: Session = Depends(get_db)): # pragma: no cover
+    """Function to fetch all records from freight period week view totals table """
+    try:
+        records = db.query(View_freight_fuel_cost).filter(
+            View_freight_fuel_cost.columns.year == year,
+            View_freight_fuel_cost.columns.country_name == country
+            ).order_by(View_freight_fuel_cost.columns.period
+                      ).all()
+        return {"freight_fuel_cost": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     
     
