@@ -1495,9 +1495,154 @@ def Export_Excel_PotatoRates_GrowingArea_period(periods:List[str],payload:schema
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
 
+@router.post('/Export_Excel_PotatoRates_GrowingArea_week')
+def Export_Excel_PotatoRates_GrowingArea_week(periods:List[str],payload:schemas.ExportExcelPotatoRatesGrowingAreaWeekList): # pragma: no cover
+    unique_growing_area =  sorted(list(set([entry.growing_area_name for entry in payload.data])))
+    period_list = dynamicPeriodSchemaCreator(periods)
+    output_export_json = []
+    for uga in unique_growing_area:
+        total_forecast_dollar_bymcwt=0
+        total_forecast_total_dollar_spend=0
+        total_actual_dollar_bymcwt=0
+        total_actual_total_dollar_spend=0
+        export_object={"Growing Area":uga}
+        for pl in period_list:
+            filtered_payload = [item for item in payload.data if item.growing_area_name==uga and str(item.period) == str(pl["dynamic_period"]) and  str(item.week)==str(pl["dynamic_week"])] 
+            if len(filtered_payload)>0:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=filtered_payload[0].rate
+                total_forecast_dollar_bymcwt+=filtered_payload[0].rate
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].forecaste_total_dollor/1000,3)
+                total_forecast_total_dollar_spend+=round(filtered_payload[0].forecaste_total_dollor/1000,3)
+                if filtered_payload[0].actual_volume==0:
+                    export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+                else:
+                    export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=round(filtered_payload[0].actual_total_dollor/filtered_payload[0].actual_volume,2)
+                    total_actual_dollar_bymcwt+=round(filtered_payload[0].actual_total_dollor/filtered_payload[0].actual_volume,2)
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=filtered_payload[0].actual_total_dollor
+                total_actual_total_dollar_spend+=filtered_payload[0].actual_total_dollor
+            else:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=0
 
-            
-        
+        export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
+        export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
+        export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
+        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+        output_export_json.append(export_object)
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Potatorates_GrowingArea_week_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+
+@router.post('/Export_Excel_PotatoRates_plantview_period')
+def Export_Excel_PotatoRates_plantview_period(periods:List[str],payload:schemas.ExportExcelPotatoRatesPlantViewPeriodList): # pragma: no cover      
+    unique_plant =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    period_list = dynamicPeriodOnlySchemaCreator(periods)
+    output_export_json = []
+    for uga in unique_plant:
+        total_forecast_dollar_bymcwt=0
+        total_forecast_total_dollar_spend=0
+        total_actual_dollar_bymcwt=0
+        total_actual_total_dollar_spend=0
+        export_object={"Plant Name":uga}
+        for pl in period_list:
+            filtered_payload = [item for item in payload.data if item.plant_name==uga and str(item.period) == str(pl["dynamic_period"])]
+            if len(filtered_payload)>0:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=filtered_payload[0].forecast_dollar_bymcwt
+                total_forecast_dollar_bymcwt+=filtered_payload[0].forecast_dollar_bymcwt
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].forecast_total_dollar_spend,0)
+                total_forecast_total_dollar_spend+=round(filtered_payload[0].forecast_total_dollar_spend,0)
+                if filtered_payload[0].actual_volume==0:
+                    export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+                else:
+                    export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=round(filtered_payload[0].actual_dollar_bymcwt,2)
+                    total_actual_dollar_bymcwt+=round(filtered_payload[0].actual_dollar_bymcwt,2)
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=round(filtered_payload[0].actual_total_dollar_spend,0)
+                total_actual_total_dollar_spend+=round(filtered_payload[0].actual_total_dollar_spend,0)
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=0
+
+        export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
+        export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
+        export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
+        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+        output_export_json.append(export_object)
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Potatorates_PlantView_period_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/Export_Excel_PotatoRates_PlantView_Week')
+def Export_Excel_PotatoRates_PlantView_Week(periods:List[str],payload:schemas.ExportExcelPotatoRatesPlantViewWeekList): # pragma: no cover
+    unique_plant =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    period_list = dynamicPeriodSchemaCreator(periods)
+    output_export_json = []
+    for uga in unique_plant:
+        total_forecast_dollar_bymcwt=0
+        total_forecast_total_dollar_spend=0
+        total_actual_dollar_bymcwt=0
+        total_actual_total_dollar_spend=0
+        export_object={"Plant Name":uga}
+        for pl in period_list:
+            filtered_payload = [item for item in payload.data if item.plant_name==uga and str(item.period) == str(pl["dynamic_period"]) and str(item.week_no)==str(pl["dynamic_week"])]
+            if len(filtered_payload)>0:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=filtered_payload[0].forecast_dollor_cwt
+                total_forecast_dollar_bymcwt+=filtered_payload[0].forecast_dollor_cwt
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].forecast_spend_week,0)
+                total_forecast_total_dollar_spend+=round(filtered_payload[0].forecast_spend_week,0)
+                if filtered_payload[0].actual_volume==0:
+                    export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+                else:
+                    export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=round(filtered_payload[0].actual_dollor_MCWT_week,2)
+                    total_actual_dollar_bymcwt+=round(filtered_payload[0].actual_dollor_MCWT_week,2)
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=round(filtered_payload[0].Total_dollor_spend_week,0)
+                total_actual_total_dollar_spend+=round(filtered_payload[0].Total_dollor_spend_week,0)
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=0
+
+        export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
+        export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
+        export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
+        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+        output_export_json.append(export_object)
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Potatorates_PlantView_week_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
 
 
 
