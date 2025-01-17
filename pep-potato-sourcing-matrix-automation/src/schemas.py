@@ -1356,7 +1356,7 @@ class ExportExcelAFreightRateVendorSiteCodeList(BaseModel): # pragma: no cover
     data:List[ExportExcelAFreightRateVendorSiteCode]
 
 class ExportExcelFreightRateperiod(BaseModel): # pragma: no cover
-    Row_Number: int
+    Row_Number: int= Field(..., alias="Row Number")
     actual_dollar_bymcwt: float
     actual_total_dollar_spend: float
     actual_volume: float
