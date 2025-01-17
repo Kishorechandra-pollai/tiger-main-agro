@@ -6,7 +6,7 @@ from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table,freight_rates_period_totals,
                     freight_rates_week_totals, FileUploadTemplate,Plant,View_freight_fuel_cost)
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_,text
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from io import BytesIO
@@ -589,5 +589,32 @@ def fuel_cost(year: int,country:str,db: Session = Depends(get_db)): # pragma: no
         return {"freight_fuel_cost": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    
+    
+@router.get("/freight_cost/{year}/{country_name}/{company_name}")
+def get_freight_cost(year: int, country_name: str, company_name: str, db: Session = Depends(get_db)):  # pragma: no cover
+    """
+    Fetch records from the table-valued function using raw SQL.
+    """
+    try:
+        # Define raw SQL query to call the TVF
+        query = text("""
+            SELECT * FROM [dbo].[getplant_view_freight_cost] (:year, :country_name, :company_name)
+        """)
+
+        # Execute the query with parameters
+        results = db.execute(query, {
+            "year": year,
+            "country_name": country_name,
+            "company_name": company_name
+        }).fetchall()
+
+        # Convert the results to a list of dictionaries
+        data = [dict(row._mapping) for row in results]
+
+        return {"freight_cost": data}
+    except Exception as e:
+        # Raise HTTPException for any errors
+        raise HTTPException(status_code=400, detail=f"Error querying TVF: {str(e)}") from e
     
     
