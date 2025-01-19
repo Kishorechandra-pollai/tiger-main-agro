@@ -1493,6 +1493,45 @@ class ExportExcelPotatoRatesPlantViewWeek(BaseModel): # pragma: no cover
 class ExportExcelPotatoRatesPlantViewWeekList(BaseModel): # pragma: no cover
     data:List[ExportExcelPotatoRatesPlantViewWeek]
 
+class ExportExcelSolidsGrowingAreaView(BaseModel): # pragma: no cover
+    actual_rate: float
+    actual_total_solids: float
+    actual_volume: float
+    forecast_volume: float
+    growing_area_id: int
+    growing_area_name: str
+    period: int
+    period_with_P: str
+    plan_rate: float
+    plan_total_solids: float
+    region: int
+    region_name: str
+    year: int
+
+class ExportExcelSolidsGrowingAreaViewList(BaseModel): # pragma: no cover
+    data:List[ExportExcelSolidsGrowingAreaView]
+
+class ExportExcelSolidsPlantView(BaseModel): # pragma: no cover
+    row_number: int= Field(..., alias="Row Number")
+    actual_solids: float
+    actual_total_solids: float
+    actual_volume: float
+    company_name: str
+    country: str
+    forecast_solids: float
+    forecast_total_solids: float
+    forecast_volume: float
+    p_year: int
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_name: str
+    sum_rate: float
+    week: str
+
+class ExportExcelSolidsPlantViewList(BaseModel): # pragma: no cover
+    data:List[ExportExcelSolidsPlantView]
+
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
     email : str

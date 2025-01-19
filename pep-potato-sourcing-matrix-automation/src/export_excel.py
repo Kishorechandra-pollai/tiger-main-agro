@@ -1644,6 +1644,107 @@ def Export_Excel_PotatoRates_PlantView_Week(periods:List[str],payload:schemas.Ex
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
 
+@router.post('/export_excel_solids_growingarea')
+def export_excel_solids_growingarea(periods:List[str],payload:schemas.ExportExcelSolidsGrowingAreaViewList): # pragma: no cover
+    unique_growing_area =  list(set([entry.growing_area_name for entry in payload.data]))
+    period_list = dynamicPeriodOnlySchemaCreator(periods)
+    output_export_json = []
+    for uga in unique_growing_area:
+        export_object= {"Growing Area":uga}
+        total_plan=0
+        total_actual=0
+        for pl in period_list:
+            filtered_payload = [item for item in payload.data if item.growing_area_name==uga and str(item.period) == str(pl["dynamic_period"])]
+            if len(filtered_payload)>0:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(filtered_payload[0].plan_rate,2)
+                total_plan += round(filtered_payload[0].plan_rate,2)
+                export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(filtered_payload[0].actual_rate,2)
+                total_actual += round(filtered_payload[0].actual_rate,2)
+            else:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
+        export_object["Total plan"]=total_plan
+        export_object["Total actual"]=total_actual
+        output_export_json.append(export_object)
+    
+    export_object={"Growing Area":"Total"}
+    total=0
+    for pr in range(1,14):
+        sub_total_plan=0
+        sub_total_act=0
+        for oej in output_export_json:
+            sub_total_plan+=oej[f"P{pr}-Plan"]
+            sub_total_act+=oej[f"P{pr}-Actual"]
+        export_object[f"P{pr}-Plan"]=sub_total_plan
+        export_object[f"P{pr}-Actual"]=sub_total_act
+        total+=sub_total_plan+sub_total_act
+    export_object["Total"]=round(total,2)
+    output_export_json.append(export_object)
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Solids_GrowingArea{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_excel_solids_plant')
+def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolidsPlantViewList): # pragma: no cover
+    unique_plant =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    period_list = dynamicPeriodOnlySchemaCreator(periods)
+    output_export_json = []
+    for uga in unique_plant:
+        export_object= {"Plant Name":uga}
+        total_plan=0
+        total_actual=0
+        for pl in period_list:
+            filtered_payload = [item for item in payload.data if item.plant_name==uga and str(item.period) == str(pl["dynamic_period"])]
+            if len(filtered_payload)>0:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(filtered_payload[0].forecast_solids,2)
+                total_plan += round(filtered_payload[0].forecast_solids,2)
+                export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(filtered_payload[0].actual_solids,2)
+                total_actual += round(filtered_payload[0].actual_solids,2)
+            else:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
+        export_object["Total plan"]=total_plan
+        export_object["Total actual"]=total_actual
+        output_export_json.append(export_object)
+    
+    export_object={"Growing Area":"Total"}
+    total=0
+    for pr in range(1,14):
+        sub_total_plan=0
+        sub_total_act=0
+        for oej in output_export_json:
+            sub_total_plan+=oej[f"P{pr}-Plan"]
+            sub_total_act+=oej[f"P{pr}-Actual"]
+        export_object[f"P{pr}-Plan"]=sub_total_plan
+        export_object[f"P{pr}-Actual"]=sub_total_act
+        total+=sub_total_plan+sub_total_act
+    export_object["Total"]=round(total,2)
+    output_export_json.append(export_object)
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Solids_Plant_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+
 
 
 @router.post('/export_finance_summary_solids')
