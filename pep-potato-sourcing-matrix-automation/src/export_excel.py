@@ -564,28 +564,12 @@ def export_performance_vs_plan(payload1:schemas.ExportExcelPVP_PVPList,payload2:
     total=0
     for pr in range(1,14):
         filtered_payload = [item for item in payload1.data if item.period==pr]
-        export_object[f"P{pr}"]=round(filtered_payload[0].IMPACT_BW_vs_Plan,2)
+        export_object[f"P{pr}"]=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
         total+=round(filtered_payload[0].IMPACT_BW_vs_Plan,2)
     export_object["Total"]=round(total/13,2)
     output_export_json.append(export_object)
 
-    export_object = {"Performance vs Plan":"IMP B/(W) Vs Plan ($)"}
-    total=0
-    for pr in range(1,14):
-        filtered_payload = [item for item in payload1.data if item.period==pr]
-        export_object[f"P{pr}"]=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
-        total+=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
-    export_object["Total"]=round(total/13,2)
-    output_export_json.append(export_object)
-
-    export_object = {"Performance vs Plan":"IMP B/(W) Vs Plan ($)"}
-    total=0
-    for pr in range(1,14):
-        filtered_payload = [item for item in payload1.data if item.period==pr]
-        export_object[f"P{pr}"]=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
-        total+=round(filtered_payload[0].IMPACT_BW_vs_Plan,0)
-    export_object["Total"]=round(total/13,2)
-    output_export_json.append(export_object)
+    
 
 
     export_object = {"Performance vs Plan":"Index (%) -MAT"}
