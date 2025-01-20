@@ -1147,8 +1147,8 @@ class ExportExcelplantmatrixregionweekList(BaseModel): # pragma: no cover
     data:List[ExportExcelplantmatrixregionweek]
 
 class ExportExcelplantmatrixgrowerweek(BaseModel): # pragma: no cover
-    crop_type: str
-    crop_year: str
+    crop_type: Optional[str] = None
+    crop_year: Optional[str] = None
     growing_area_id: int
     growing_area_name: str
     period: int
