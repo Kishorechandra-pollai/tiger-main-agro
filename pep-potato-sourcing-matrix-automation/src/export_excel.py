@@ -1749,10 +1749,101 @@ def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolid
 
 @router.post('/export_finance_summary_solids')
 def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolidsList): # pragma: no cover
+    output_export_json=[]
+    export_object = {"Solids":"Prior"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].prior,2)
+        total+=round(filtered_payload[0].prior,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"Plan"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].plan,2)
+        total+=round(filtered_payload[0].plan,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"Forecast"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].forecast,2)
+        total+=round(filtered_payload[0].forecast,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"Fcst/Act"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].fcst_act,2)
+        total+=round(filtered_payload[0].fcst_act,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"+/(-) VS Plan"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].fore_plan,2)
+        total+=round(filtered_payload[0].fore_plan,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"Index VS Plan"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].yag_index,2)
+        total+=round(filtered_payload[0].yag_index,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"M$Imp B/(W) Plan"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].m_dollar_impact_plan,3)
+        total+=round(filtered_payload[0].m_dollar_impact_plan,3)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"M$Imp B/(W) Plan"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].m_dollar_impact,3)
+        total+=round(filtered_payload[0].m_dollar_impact,3)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"Delta M$ Imp"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].delta_m_imp,2)
+        total+=round(filtered_payload[0].delta_m_imp,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
+    export_object = {"Solids":"Conv. Factor"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.period==pl]
+        export_object[f"P{pl}"]=round(filtered_payload[0].conversion_factor,2)
+        total+=round(filtered_payload[0].conversion_factor,2)
+    export_object["total"]=total
+    output_export_json.append(export_object)
+
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
-    df = pd.DataFrame([item.dict() for item in payload.data])
-    file_name = f"finance_summary_solids_{str_date}.xlsx"
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Finance_solids_summary_{str_date}.xlsx"
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
@@ -1763,6 +1854,151 @@ def export_finance_summary_solids(payload:schemas.ExportExcelFinanceSummarySolid
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
     
+@router.post('/Export_Home_Pop_Up')
+def Export_Home_Pop_Up(payload1:schemas.ExportExcelHomePopUpList,payload2:schemas.ExportExcelHomePopUpPlanList,periods:List[str]): # pragma: no cover
+     period_list = dynamicPeriodSchemaCreator(periods)
+     output_export_json1=[]
+     output_export_json2=[]
+     export_object ={"BU-Act":"FLUS"}
+     total=0
+     for pl in period_list:
+            filtered_payload = [item for item in payload1.data if item.category_name=="FLUS" and str(item.period) == str(pl["dynamic_period"]) and str(item.week)==str(pl["dynamic_week"])]
+            if len(filtered_payload)>0:
+             export_object[pl['dynamic_period_with_P']]=filtered_payload[0].volume
+             total+=filtered_payload[0].volume
+            else:
+             export_object[pl['dynamic_period_with_P']]=0
+     export_object["Total"] =total     
+     output_export_json1.append(export_object)
+
+     export_object ={"BU-Act":"Co-Man"}
+     total=0
+     for pl in period_list:
+            filtered_payload = [item for item in payload1.data if item.category_name=="Co-Man" and str(item.period) == str(pl["dynamic_period"]) and str(item.week)==str(pl["dynamic_week"])]
+            if len(filtered_payload)>0:
+             export_object[pl['dynamic_period_with_P']]=filtered_payload[0].volume
+             total+=filtered_payload[0].volume
+            else:
+             export_object[pl['dynamic_period_with_P']]=0
+     export_object["Total"] =total 
+     output_export_json1.append(export_object)
+
+     
+
+     export_object ={"BU-Act":"FLC"}
+     total=0
+     for pl in period_list:
+            filtered_payload = [item for item in payload1.data if item.category_name=="FLC" and str(item.period) == str(pl["dynamic_period"]) and str(item.week)==str(pl["dynamic_week"])]
+            if len(filtered_payload)>0:
+             export_object[pl['dynamic_period_with_P']]=filtered_payload[0].volume
+             total+=filtered_payload[0].volume
+            else:
+             export_object[pl['dynamic_period_with_P']]=0
+     export_object["Total"] =total 
+     output_export_json1.append(export_object)
+
+     export_object ={"BU-Plan":"FLUS"}
+     total=0
+     for pl in period_list:
+            filtered_payload = [item for item in payload2.data if item.category_name=="FLUS" and str(item.period) == str(pl["dynamic_period"]) and str(item.week)==str(pl["dynamic_week"])]
+            if len(filtered_payload)>0:
+             export_object[pl['dynamic_period_with_P']]=filtered_payload[0].volume
+             total+=filtered_payload[0].volume
+            else:
+             export_object[pl['dynamic_period_with_P']]=0
+     export_object["Total"] =total
+     output_export_json2.append(export_object)
+
+     export_object ={"BU-Plan":"Co-Man"}
+     total=0
+     for pl in period_list:
+            filtered_payload = [item for item in payload2.data if item.category_name=="Co-Man" and str(item.period) == str(pl["dynamic_period"]) and str(item.week)==str(pl["dynamic_week"])]
+            if len(filtered_payload)>0:
+             export_object[pl['dynamic_period_with_P']]=filtered_payload[0].volume
+             total+=filtered_payload[0].volume
+            else:
+             export_object[pl['dynamic_period_with_P']]=0
+     export_object["Total"] =total
+     output_export_json2.append(export_object)
+
+     export_object ={"BU-Plan":"FLC"}
+     total=0
+     for pl in period_list:
+            filtered_payload = [item for item in payload2.data if item.category_name=="FLC" and str(item.period) == str(pl["dynamic_period"]) and str(item.week)==str(pl["dynamic_week"])]
+            if len(filtered_payload)>0:
+             export_object[pl['dynamic_period_with_P']]=filtered_payload[0].volume
+             total+=filtered_payload[0].volume
+            else:
+             export_object[pl['dynamic_period_with_P']]=0
+     export_object["Total"] =total
+     output_export_json2.append(export_object)
+
+     dt = datetime.now()
+     str_date = dt.strftime("%d%m%y%H%M%S")
+     df1 = pd.DataFrame(output_export_json1)
+     df2 = pd.DataFrame(output_export_json2)
+     file_name = f"Homepopup_{str_date}.xlsx"
+     output = BytesIO()
+     with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df1.to_excel(writer, index=False, sheet_name='Sheet1',startrow=0, header=True)
+        writer.sheets['Sheet1'].append([])
+        df2.to_excel(writer, index=False, sheet_name='Sheet1', startrow=len(df1)+2, header=True)
+     output.seek(0)
+     return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/Export_active_allocation_index')
+def Export_active_allocation_index(payload:schemas.ExportExcelActiveAllocationIndexList): # pragma: no cover
+    output_export_json =[]
+    export_object = {"Country":"Co-Man"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.category_name=="Co-Man" and item.period==pl]
+        if len(filtered_payload)>0:
+          export_object[f"P{pl}"]=filtered_payload[0].value
+          total+=filtered_payload[0].value
+    export_object["FY"]=total/13
+    output_export_json.append(export_object)
+
+    export_object = {"Country":"FLC"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.category_name=="FLC" and item.period==pl]
+        if len(filtered_payload)>0:
+          export_object[f"P{pl}"]=filtered_payload[0].value
+          total+=filtered_payload[0].value
+    export_object["FY"]=total/13
+    output_export_json.append(export_object)
+
+    export_object = {"Country":"FLUS"}
+    total=0
+    for pl in range(1,14):
+        filtered_payload = [item for item in payload.data if item.category_name=="FLUS" and item.period==pl]
+        if len(filtered_payload)>0:
+          export_object[f"P{pl}"]=filtered_payload[0].value
+          total+=filtered_payload[0].value
+    export_object["FY"]=total/13
+    output_export_json.append(export_object)
+
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"Active_allocation_index_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+
+
 
 
 
