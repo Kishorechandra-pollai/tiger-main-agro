@@ -1998,6 +1998,50 @@ def Export_active_allocation_index(payload:schemas.ExportExcelActiveAllocationIn
         )
 
 
+@router.post('/export_forecast_week')
+def export_forecast_week(periods:List[str],payload:schemas.ExportExcelForecastWeekList): # pragma: no cover
+    unique_plants =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    period_list =dynamicPeriodSchemaCreator(periods)
+    output_export_json = []
+    for up in unique_plants:
+        export_object={"plant_name":up}
+        filtered_payload = [item for item in payload.data if item.plant_name==up]
+        total_act =0
+        total_fore=0
+        total_delta=0
+        for pl in period_list:
+            filtered_payload_period = [
+                item for item in filtered_payload
+                if str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"]) 
+            ]
+            
+            export_object[f"{pl['dynamic_period_with_P']}-Act"]=round(filtered_payload_period[0].forecasted_value)
+            total_fore+=round(filtered_payload_period[0].forecasted_value)
+            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(filtered_payload_period[0].total_actual_value)
+            total_act+=round(filtered_payload_period[0].total_actual_value)
+            export_object[f"{pl['dynamic_period_with_P']}-Diff"]=round(filtered_payload_period[0].forecasted_value)-round(filtered_payload_period[0].total_actual_value)
+            total_delta+=round(filtered_payload_period[0].forecasted_value)-round(filtered_payload_period[0].total_actual_value)
+            
+        export_object["Total_plan"]=total_fore
+        export_object["Total_Act"]=total_act
+        export_object["Total_Delta"]=total_delta
+        output_export_json.append(export_object)
+    
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json)
+    file_name = f"forecast_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+
 
 
 

@@ -1568,6 +1568,23 @@ class ExportExcelActiveAllocationIndex(BaseModel): # pragma: no cover
 class ExportExcelActiveAllocationIndexList(BaseModel): # pragma: no cover
     data:List[ExportExcelActiveAllocationIndex]
 
+class ExportExcelForecastWeek(BaseModel): # pragma: no cover
+    Period_with_P: str
+    company_name: str
+    country: str
+    forecasted_value: float
+    pcusage_id: str
+    period: int
+    plant_id: int
+    plant_name: str
+    region_id: int
+    total_actual_value: float
+    week: int
+    year: int
+
+class ExportExcelForecastWeekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelForecastWeek]
+
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
     email : str
