@@ -1086,21 +1086,19 @@ class ExportExcelPayloadSchema(BaseModel): # pragma: no cover
     
 
 class ExportExcelFinanceSummarySolids(BaseModel): # pragma: no cover
-    solids:str
-    P1:Optional[float] = None
-    P2:Optional[float] = None
-    P3:Optional[float] = None
-    P4:Optional[float] = None
-    P5:Optional[float] = None
-    P6:Optional[float] = None
-    P7:Optional[float] = None
-    P8:Optional[float] = None
-    P9:Optional[float] = None
-    P10:Optional[float] = None
-    P11:Optional[float] = None
-    P12:Optional[float] = None
-    P13:Optional[float] = None
-    Total:str
+    conversion_factor: float= Field(..., alias="Conversion_Factor")
+    delta_m_imp: float= Field(..., alias="Delta M$ Imp")
+    fore_plan: float =Field(..., alias="FORE_PLAN")
+    m_dollar_impact: float =Field(..., alias="M_dollar_IMPACT")
+    m_dollar_impact_plan: float=Field(..., alias="M_dollar_Impact-Plan")
+    plan: float=Field(..., alias="Plan")
+    yag_index: float=Field(..., alias="YAG_Index")
+    country_code: str
+    fcst_act: float
+    forecast: float
+    period: int
+    prior: float
+    year: int
 
    
 
@@ -1531,6 +1529,44 @@ class ExportExcelSolidsPlantView(BaseModel): # pragma: no cover
 
 class ExportExcelSolidsPlantViewList(BaseModel): # pragma: no cover
     data:List[ExportExcelSolidsPlantView]
+
+class ExportExcelHomePopUp(BaseModel): # pragma: no cover
+    PxW: str
+    category_name: str
+    crop_type: int
+    period: int
+    period_with_P: str
+    plan_volume_id: str
+    volume: int
+    week: int
+
+class ExportExcelHomePopUpList(BaseModel): # pragma: no cover
+    data:List[ExportExcelHomePopUp]
+
+class ExportExcelHomePopUpPlan(BaseModel): # pragma: no cover
+    PxW: str
+    category_name: str
+    crop_type: int
+    pc_volume_plan_id: str
+    period: int
+    period_with_P: str
+    volume: int
+    week: int
+    year: int
+
+class ExportExcelHomePopUpPlanList(BaseModel): # pragma: no cover
+    data:List[ExportExcelHomePopUpPlan]
+
+class ExportExcelActiveAllocationIndex(BaseModel): # pragma: no cover
+    allocation_id: str
+    category_name: str
+    country: str
+    period: int
+    value: float
+    year: int
+
+class ExportExcelActiveAllocationIndexList(BaseModel): # pragma: no cover
+    data:List[ExportExcelActiveAllocationIndex]
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
