@@ -1254,16 +1254,16 @@ class ExportExcelAdjustmentsFreightList(BaseModel): # pragma: no cover
 
 class ExportExcelAdjustmentsP4P(BaseModel): # pragma: no cover
     company_name: str
-    defects_actual: int
-    defects_plan: int
+    defects_actual: int= Field(..., alias="defects-actual")
+    defects_plan: int= Field(..., alias="defects-plan")
     diff_Defects: int
     diff_solid: int
     p4pDiff: int
     p_year: int
     periods: int
     ptdActualP4P: int
-    solid_actual: int
-    solid_plan: int
+    solid_actual: int= Field(..., alias="solid-actual")
+    solid_plan: int= Field(..., alias="solid-plan")
     total: int
 
 class ExportExcelAdjustmentsP4PList(BaseModel): # pragma: no cover
@@ -1356,7 +1356,7 @@ class ExportExcelAFreightRateVendorSiteCodeList(BaseModel): # pragma: no cover
     data:List[ExportExcelAFreightRateVendorSiteCode]
 
 class ExportExcelFreightRateperiod(BaseModel): # pragma: no cover
-    Row_Number: int
+    Row_Number: int= Field(..., alias="Row Number")
     actual_dollar_bymcwt: float
     actual_total_dollar_spend: float
     actual_volume: float
@@ -1429,6 +1429,108 @@ class ExportExcelPotatoRatesGrowingAreaPeriod(BaseModel): # pragma: no cover
 
 class ExportExcelPotatoRatesGrowingAreaPeriodList(BaseModel): # pragma: no cover
     data:List[ExportExcelPotatoRatesGrowingAreaPeriod]
+
+class ExportExcelPotatoRatesGrowingAreaWeek(BaseModel): # pragma: no cover
+    actual_rate: float
+    actual_total_dollor: float
+    actual_volume: float
+    forecast_volume: float
+    forecaste_total_dollor: float
+    growing_area_id: int
+    growing_area_name: str
+    p_year: int
+    period: int
+    period_with_P: str
+    period_with_week: str
+    potato_rate_id: int
+    rate: float
+    region_id: int
+    region_name: str
+    week: int
+
+class ExportExcelPotatoRatesGrowingAreaWeekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelPotatoRatesGrowingAreaWeek]
+
+class ExportExcelPotatoRatesPlantViewPeriod(BaseModel): # pragma: no cover
+    row_number: int
+    actual_dollar_bymcwt: float
+    actual_total_dollar_spend: float
+    actual_volume: float
+    company_name: str
+    country: str
+    forecast_dollar_bymcwt: float
+    forecast_total_dollar_spend: float
+    forecast_volume: float
+    p_year: int
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_name: str
+    sum_rate: float
+    total_sum_quantity: float
+    week: str
+
+class ExportExcelPotatoRatesPlantViewPeriodList(BaseModel): # pragma: no cover
+    data:List[ExportExcelPotatoRatesPlantViewPeriod]
+
+class ExportExcelPotatoRatesPlantViewWeek(BaseModel): # pragma: no cover
+    Total_dollor_spend_week: float
+    actual_dollor_MCWT_week: float
+    actual_volume: float
+    company_name: str
+    country: str
+    forecast_dollor_cwt: float
+    forecast_spend_week: float
+    forecast_volume: float
+    p_year: int
+    period: int
+    period_with_P: str
+    period_with_week: str
+    plant_id: int
+    plant_name: str
+    week_no: int
+
+class ExportExcelPotatoRatesPlantViewWeekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelPotatoRatesPlantViewWeek]
+
+class ExportExcelSolidsGrowingAreaView(BaseModel): # pragma: no cover
+    actual_rate: float
+    actual_total_solids: float
+    actual_volume: float
+    forecast_volume: float
+    growing_area_id: int
+    growing_area_name: str
+    period: int
+    period_with_P: str
+    plan_rate: float
+    plan_total_solids: float
+    region: int
+    region_name: str
+    year: int
+
+class ExportExcelSolidsGrowingAreaViewList(BaseModel): # pragma: no cover
+    data:List[ExportExcelSolidsGrowingAreaView]
+
+class ExportExcelSolidsPlantView(BaseModel): # pragma: no cover
+    row_number: int= Field(..., alias="Row Number")
+    actual_solids: float
+    actual_total_solids: float
+    actual_volume: float
+    company_name: str
+    country: str
+    forecast_solids: float
+    forecast_total_solids: float
+    forecast_volume: float
+    p_year: int
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_name: str
+    sum_rate: float
+    week: str
+
+class ExportExcelSolidsPlantViewList(BaseModel): # pragma: no cover
+    data:List[ExportExcelSolidsPlantView]
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str
