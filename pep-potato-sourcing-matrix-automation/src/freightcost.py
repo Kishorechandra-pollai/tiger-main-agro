@@ -22,7 +22,25 @@ def view_freight_cost(db: Session = Depends(get_db)):
     """Function to fetch all records from freight_cost_rate table """
     try:
         records = db.query(FreightCostRate).all()
-        return {"data": records}
+        time = text("DATEADD(day,-1,GETDATE())")
+        new_records = (db.query(PlantSiteGrowingAreaMapping.plant_name,
+                                PlantSiteGrowingAreaMapping.Vendor_Site_Code,
+                                growing_area.growing_area_desc,
+                                FreightCostRate.miles)
+                    .select_from(FreightCostRate)
+                    .join(growing_area,
+                          growing_area.growing_area_id == FreightCostRate.growing_area_id)
+                    .join(PlantSiteGrowingAreaMapping,
+                     and_(FreightCostRate.growing_area_id == PlantSiteGrowingAreaMapping.growing_area_id,
+                          FreightCostRate.plant_id == PlantSiteGrowingAreaMapping.plant_id,
+                          FreightCostRate.vendor_site_id == PlantSiteGrowingAreaMapping.vendor_site_id))
+                    .filter(FreightCostRate.updated_time > time).all())
+        
+        alert = "New Mapping is created in Freight Rates tables --> "
+        for items in new_records:
+            mappings = f"Plant : {items.plant_name}, Vendor_Site_Code : {items.Vendor_Site_Code}, Growing_area : {items.growing_area_desc}"
+            alert += "{" + mappings +"}, "
+        return {"All_data": records, "Alert_data": alert[:-2] + ". Please enter the Freight Rates, Miles, Round Trip and Conversion factor for this new Mapping"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
