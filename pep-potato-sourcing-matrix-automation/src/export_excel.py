@@ -926,7 +926,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].solid_plan,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].solid_plan,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -935,7 +935,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].solid_actual,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].solid_actual,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -944,7 +944,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].diff_solid,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].diff_solid,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -953,7 +953,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].defects_plan,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].defects_plan,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -962,7 +962,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].defects_actual,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].defects_actual,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -971,7 +971,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].diff_Defects,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].diff_Defects,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
  
@@ -980,7 +980,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].p4pDiff,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].p4pDiff,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -989,7 +989,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].ptdActualP4P,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].ptdActualP4P,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -998,7 +998,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].solid_plan,0)
-        total+=round(filtered_payload[0].solid_actual,0)
+        total+=round(filtered_payload[0].solid_plan,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -1016,7 +1016,7 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
         export_object[f"P{pr}"]=round(filtered_payload[0].total,0)
-        total+=round(filtered_payload[0].value,0)
+        total+=round(filtered_payload[0].total,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
