@@ -410,3 +410,22 @@ def update_contract_shrinkage_mkt_flex(payload: schemas.UpdateOwnershipGrowerGro
                 "message": f"Ownership is updated for this growing_area_id: {growing_area_id}"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get('/get_recent_extensions')
+def get_extensions(db: Session = Depends(get_db)):
+    try:
+        today_date = date.today()
+        year = int(today_date.year)
+        records =(db.query( models.View_Ownership.columns.growing_area_name,
+                            models.View_Ownership.columns.demand,
+                            models.View_Ownership.columns.Position,
+                            models.View_Ownership.columns.extension,
+                            Ownership.updated_time)
+                    .select_from(models.View_Ownership)
+                    .join(Ownership,
+                          Ownership.ownership_id == models.View_Ownership.columns.ownership_id)
+                    .filter(models.View_Ownership.columns.extension!=0,
+                            models.View_Ownership.columns.year==year).all())
+        return {"record":records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
