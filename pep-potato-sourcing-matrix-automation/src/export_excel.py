@@ -1815,22 +1815,22 @@ def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolid
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        export_object["Total plan"]=total_plan
-        export_object["Total actual"]=total_actual
+        export_object["Total plan"]=total_plan/len(period_list)
+        export_object["Total actual"]=total_actual/len(period_list)
         output_export_json.append(export_object)
     
-    export_object={"Growing Area":"Total"}
+    export_object={"Plant Name":"Total"}
     total=0
-    for pr in range(1,14):
+    for pl in period_list:
         sub_total_plan=0
         sub_total_act=0
         for oej in output_export_json:
-            sub_total_plan+=oej[f"P{pr}-Plan"]
-            sub_total_act+=oej[f"P{pr}-Actual"]
-        export_object[f"P{pr}-Plan"]=sub_total_plan
-        export_object[f"P{pr}-Actual"]=sub_total_act
+            sub_total_plan+=oej[f"{pl['dynamic_period_with_P']}-Plan"]
+            sub_total_act+=oej[f"{pl['dynamic_period_with_P']}-Actual"]
+        export_object[f"{pl['dynamic_period_with_P']}-Plan"]=sub_total_plan
+        export_object[f"{pl['dynamic_period_with_P']}-Actual"]=sub_total_act
         total+=sub_total_plan+sub_total_act
-    export_object["Total"]=round(total,2)
+    
     output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
