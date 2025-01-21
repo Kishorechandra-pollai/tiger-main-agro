@@ -6,7 +6,7 @@ from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table,freight_rates_period_totals,
                     freight_rates_week_totals, FileUploadTemplate,Plant,View_freight_fuel_cost)
-from sqlalchemy import func, and_,text
+from sqlalchemy import func, and_,text,or_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from io import BytesIO
@@ -22,28 +22,47 @@ def view_freight_cost(db: Session = Depends(get_db)):
     """Function to fetch all records from freight_cost_rate table """
     try:
         records = db.query(FreightCostRate).all()
-        time = text("DATEADD(day,-1,GETDATE())")
-        new_records = (db.query(PlantSiteGrowingAreaMapping.plant_name,
+        return {"All_data": records}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.get('/freight_alert')
+def view_freight_cost(db: Session = Depends(get_db)):
+    """Function to alert the user about new freight mappings """
+    try:
+        records = (db.query(PlantSiteGrowingAreaMapping.plant_name,
                                 PlantSiteGrowingAreaMapping.Vendor_Site_Code,
                                 growing_area.growing_area_desc,
-                                FreightCostRate.miles)
+                                FreightCostRate.miles,
+                                FreightCostMapping.round_trip,
+                                FreightCostMapping.fuel_cf,
+                                FreightCostMapping.rate)
                     .select_from(FreightCostRate)
                     .join(growing_area,
                           growing_area.growing_area_id == FreightCostRate.growing_area_id)
+                    .join(FreightCostMapping,
+                          FreightCostMapping.freight_cost_id == FreightCostRate.freight_cost_id)
                     .join(PlantSiteGrowingAreaMapping,
                      and_(FreightCostRate.growing_area_id == PlantSiteGrowingAreaMapping.growing_area_id,
                           FreightCostRate.plant_id == PlantSiteGrowingAreaMapping.plant_id,
                           FreightCostRate.vendor_site_id == PlantSiteGrowingAreaMapping.vendor_site_id))
-                    .filter(FreightCostRate.updated_time > time).all())
+                    .filter(
+                        or_(FreightCostRate.miles==None,
+                            FreightCostMapping.fuel_cf==None,
+                            FreightCostMapping.round_trip==None,
+                            FreightCostMapping.rate==None)).all())
         
         alert = "New Mapping is created in Freight Rates tables --> "
-        for items in new_records:
+        for items in records:
             mappings = f"Plant : {items.plant_name}, Vendor_Site_Code : {items.Vendor_Site_Code}, Growing_area : {items.growing_area_desc}"
             alert += "{" + mappings +"}, "
-        return {"All_data": records, "Alert_data": alert[:-2] + ". Please enter the Freight Rates, Miles, Round Trip and Conversion factor for this new Mapping"}
+
+        if len(records)>0:
+            return {"message":{"Alert_message": alert[:-2] + ". Please enter the Freight Rates, Miles, Round Trip and Conversion factor for this new Mapping"}}
+        else:
+            return {"message":{"Alert_message": "0"}}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-
 
 @router.post("/create_freight_cost_records")
 def create_freight_cost(payload: schemas.FreightCostRateSchema, db: Session = Depends(get_db)): # pragma: no cover
