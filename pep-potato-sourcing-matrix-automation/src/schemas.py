@@ -1230,7 +1230,8 @@ class ExportExcelPVP_PVList(BaseModel): # pragma: no cover
 
 class ExportOffContract(BaseModel): # pragma: no cover
     company_name: str
-    off_contract_task_id: int
+    off_contract_task_id: Optional[int] = None
+    off_contract_plan_task_id: Optional[int] = None
     period: int
     row_id: int
     value: int
@@ -1450,7 +1451,7 @@ class ExportExcelPotatoRatesGrowingAreaWeekList(BaseModel): # pragma: no cover
     data:List[ExportExcelPotatoRatesGrowingAreaWeek]
 
 class ExportExcelPotatoRatesPlantViewPeriod(BaseModel): # pragma: no cover
-    row_number: int
+    row_number: int= Field(..., alias="Row Number")
     actual_dollar_bymcwt: float
     actual_total_dollar_spend: float
     actual_volume: float
