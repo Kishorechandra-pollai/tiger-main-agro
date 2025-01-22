@@ -1563,8 +1563,8 @@ def Export_Excel_PotatoRates_GrowingArea_period(periods:List[str],payload:schema
             if len(filtered_payload)>0:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=filtered_payload[0].fcst_rate
                 total_forecast_dollar_bymcwt+=filtered_payload[0].fcst_rate
-                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].fcst_total_dollor/1000,3)
-                total_forecast_total_dollar_spend+=round(filtered_payload[0].fcst_total_dollor/1000,3)
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].fcst_total_dollor,0)
+                total_forecast_total_dollar_spend+=round(filtered_payload[0].fcst_total_dollor,0)
                 if filtered_payload[0].actual_volume==0:
                     export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
                 else:
@@ -1581,7 +1581,7 @@ def Export_Excel_PotatoRates_GrowingArea_period(periods:List[str],payload:schema
         export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
         export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
         export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
-        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+        export_object["total-Actual-Total$"]=total_actual_total_dollar_spend
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -1613,8 +1613,8 @@ def Export_Excel_PotatoRates_GrowingArea_week(periods:List[str],payload:schemas.
             if len(filtered_payload)>0:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=filtered_payload[0].rate
                 total_forecast_dollar_bymcwt+=filtered_payload[0].rate
-                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].forecaste_total_dollor/1000,3)
-                total_forecast_total_dollar_spend+=round(filtered_payload[0].forecaste_total_dollor/1000,3)
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].forecaste_total_dollor,0)
+                total_forecast_total_dollar_spend+=round(filtered_payload[0].forecaste_total_dollor,0)
                 if filtered_payload[0].actual_volume==0:
                     export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
                 else:
@@ -1631,7 +1631,7 @@ def Export_Excel_PotatoRates_GrowingArea_week(periods:List[str],payload:schemas.
         export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
         export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
         export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
-        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+        export_object["total-Actual-Total$"]=total_actual_total_dollar_spend
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -1681,7 +1681,7 @@ def Export_Excel_PotatoRates_plantview_period(periods:List[str],payload:schemas.
         export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
         export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
         export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
-        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+        export_object["total-Actual-Total$"]=total_actual_total_dollar_spend
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -1730,7 +1730,7 @@ def Export_Excel_PotatoRates_PlantView_Week(periods:List[str],payload:schemas.Ex
         export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
         export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
         export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
-        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+        export_object["total-Actual-Total$"]=total_actual_total_dollar_spend
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -1765,22 +1765,43 @@ def export_excel_solids_growingarea(periods:List[str],payload:schemas.ExportExce
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        export_object["Total plan"]=total_plan
-        export_object["Total actual"]=total_actual
+        count_plan = sum(1 for key, value in export_object.items() if 'Plan' in key and value != 0)
+        if count_plan>0:
+            export_object["Total plan"]=total_plan/count_plan
+        else:
+            export_object["Total plan"]=0
+        count_act = sum(1 for key, value in export_object.items() if 'Actual' in key and value != 0)
+        if count_act>0:
+            export_object["Total actual"]=total_actual/count_act
+        else:
+            export_object["Total actual"]=0
         output_export_json.append(export_object)
     
     export_object={"Growing Area":"Total"}
-    total=0
-    for pr in range(1,14):
+    total_plan=0
+    total_actual=0
+    for pl in period_list:
         sub_total_plan=0
         sub_total_act=0
         for oej in output_export_json:
-            sub_total_plan+=oej[f"P{pr}-Plan"]
-            sub_total_act+=oej[f"P{pr}-Actual"]
-        export_object[f"P{pr}-Plan"]=sub_total_plan
-        export_object[f"P{pr}-Actual"]=sub_total_act
-        total+=sub_total_plan+sub_total_act
-    export_object["Total"]=round(total,2)
+            sub_total_plan+=oej[f"{pl['dynamic_period_with_P']}-Plan"]
+            sub_total_act+=oej[f"{pl['dynamic_period_with_P']}-Actual"]
+        count_plan=len([item for item in output_export_json if item.get(f"{pl['dynamic_period_with_P']}-Plan") != 0])
+        if count_plan>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=sub_total_plan/count_plan
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
+        count_act=len([item for item in output_export_json if item.get(f"{pl['dynamic_period_with_P']}-Actual") != 0])
+        if count_act>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=sub_total_act/count_act
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
+
+    for oej in output_export_json:
+        total_plan+=oej["Total plan"]
+        total_actual+=oej["Total actual"]
+    export_object["Total plan"]=total_plan/len(output_export_json)
+    export_object["Total actual"]=total_actual/len(output_export_json)
     output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -1815,22 +1836,28 @@ def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolid
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        export_object["Total plan"]=total_plan
-        export_object["Total actual"]=total_actual
+        export_object["Total plan"]=total_plan/len(period_list)
+        export_object["Total actual"]=total_actual/len(period_list)
         output_export_json.append(export_object)
     
-    export_object={"Growing Area":"Total"}
-    total=0
-    for pr in range(1,14):
+    export_object={"Plant Name":"Total"}
+    total_plan=0
+    total_actual=0
+    for pl in period_list:
         sub_total_plan=0
         sub_total_act=0
         for oej in output_export_json:
-            sub_total_plan+=oej[f"P{pr}-Plan"]
-            sub_total_act+=oej[f"P{pr}-Actual"]
-        export_object[f"P{pr}-Plan"]=sub_total_plan
-        export_object[f"P{pr}-Actual"]=sub_total_act
-        total+=sub_total_plan+sub_total_act
-    export_object["Total"]=round(total,2)
+            sub_total_plan+=oej[f"{pl['dynamic_period_with_P']}-Plan"]
+            sub_total_act+=oej[f"{pl['dynamic_period_with_P']}-Actual"]
+        export_object[f"{pl['dynamic_period_with_P']}-Plan"]=sub_total_plan/len(output_export_json)
+        export_object[f"{pl['dynamic_period_with_P']}-Actual"]=sub_total_act/len(output_export_json)
+    for oej in output_export_json:
+        total_plan+=oej["Total plan"]
+        total_actual+=oej["Total actual"]
+    export_object["Total plan"]=total_plan/len(output_export_json)
+    export_object["Total actual"]=total_actual/len(output_export_json)
+
+    
     output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
