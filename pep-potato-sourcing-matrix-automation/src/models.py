@@ -524,7 +524,7 @@ class ExtensionOwnershipMapping(Base):
     year = Column(String, nullable=True)
     split = Column(String, nullable=True)
     status = Column(String, nullable=True)
-    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now(),onupdate = func.now())
 
 
 class price_variance_task(Base):
