@@ -997,8 +997,8 @@ def export_adjustments_P4P(payload:schemas.ExportExcelAdjustmentsP4PList): # pra
     total=0
     for pr in range(1,14):
         filtered_payload = [item for item in payload.data if item.periods==pr]
-        export_object[f"P{pr}"]=round(filtered_payload[0].solid_plan,0)
-        total+=round(filtered_payload[0].solid_plan,0)
+        export_object[f"P{pr}"]=round(filtered_payload[0].solid_actual,0)
+        total+=round(filtered_payload[0].solid_actual,0)
     export_object["Total"]=round(total,0)
     output_export_json.append(export_object)
 
@@ -1043,7 +1043,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==1]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json1.append(export_object)
 
     export_object = {"G&A Adj - Act":"Rhinelander30541-2798100200"}
@@ -1052,7 +1052,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==2]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json1.append(export_object)
 
     export_object = {"G&A Adj - Act":"Research30548-2798100201"}
@@ -1061,7 +1061,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==3]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json1.append(export_object)
 
     export_object = {"G&A Adj - Act":"Seed30516-2000100228"}
@@ -1070,7 +1070,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==4]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json1.append(export_object)
 
     export_object = {"G&A Adj - Act":"Others"}
@@ -1079,7 +1079,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload1.data if item.period==pr and item.general_administrative_id==5]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json1.append(export_object)
 
     export_object={"G&A Adj - Act":"Total"}
@@ -1089,8 +1089,8 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         for oej in output_export_json1:
             sub_total+=oej[f"P{pr}"]
         export_object[f"P{pr}"]=sub_total/1000
-        total+=sub_total/1000
-    export_object["Total"]=round(total,0)
+        total+=sub_total
+    export_object["Total"]=round(total,0)/1000
     output_export_json1.append(export_object)
 
     output_export_json2 =[]
@@ -1100,7 +1100,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==2]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json2.append(export_object)
 
     export_object = {"G&A Adj - Plan":"Rhinelander30541-2798100200"}
@@ -1109,7 +1109,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==3]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json2.append(export_object)
 
     export_object = {"G&A Adj - Plan":"Research30548-2798100201"}
@@ -1118,7 +1118,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==4]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json2.append(export_object)
 
     export_object = {"G&A Adj - Plan":"Seed30516-2000100228"}
@@ -1127,7 +1127,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==5]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json2.append(export_object)
 
     export_object = {"G&A Adj - Plan":"Others"}
@@ -1136,7 +1136,7 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         filtered_payload = [item for item in payload2.data if item.period==pr and item.general_administrative_plan_id==6]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,0)/1000
     output_export_json2.append(export_object)
 
     export_object={"G&A Adj - Plan":"Total"}
@@ -1146,7 +1146,17 @@ def export_excel_adjustments_GA(payload1:schemas.ExportExcelAdjustmentsGAList,pa
         for oej in output_export_json2:
             sub_total+=oej[f"P{pr}"]
         export_object[f"P{pr}"]=sub_total/1000
-        total+=sub_total/1000
+        total+=sub_total
+    export_object["Total"]=round(total,0)/1000
+    output_export_json2.append(export_object)
+
+    export_object={"G&A Adj - Plan":"Delta Total- G&A expense"}
+    total=0
+    for pr in range(1,14):
+        filtered_object_1 = [item for item in output_export_json1 if item["G&A Adj - Act"]=="Total"]
+        filtered_object_2 = [item for item in output_export_json2 if item["G&A Adj - Plan"]=="Total"]
+        export_object[f"P{pr}"]=filtered_object_1[0][f"P{pr}"]-filtered_object_2[0][f"P{pr}"]
+        total+=filtered_object_1[0][f"P{pr}"]-filtered_object_2[0][f"P{pr}"]
     export_object["Total"]=round(total,0)
     output_export_json2.append(export_object)
 
