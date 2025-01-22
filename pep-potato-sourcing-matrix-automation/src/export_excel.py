@@ -1765,12 +1765,12 @@ def export_excel_solids_growingarea(periods:List[str],payload:schemas.ExportExce
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        count_plan = sum(1 for key, value in export_object.items() if 'plan' in key and value != 0)
+        count_plan = sum(1 for key, value in export_object.items() if 'Plan' in key and value != 0)
         if count_plan>0:
             export_object["Total plan"]=total_plan/count_plan
         else:
             export_object["Total plan"]=0
-        count_act = sum(1 for key, value in export_object.items() if 'actual' in key and value != 0)
+        count_act = sum(1 for key, value in export_object.items() if 'Actual' in key and value != 0)
         if count_act>0:
             export_object["Total actual"]=total_actual/count_act
         else:
