@@ -30,27 +30,18 @@ def view_freight_cost(db: Session = Depends(get_db)):
 def view_freight_cost(db: Session = Depends(get_db)):
     """Function to alert the user about new freight mappings """
     try:
+        time = text("DATEADD(day,-1,GETDATE())")
         records = (db.query(PlantSiteGrowingAreaMapping.plant_name,
-                                PlantSiteGrowingAreaMapping.Vendor_Site_Code,
-                                growing_area.growing_area_desc,
-                                FreightCostRate.miles,
-                                FreightCostMapping.round_trip,
-                                FreightCostMapping.fuel_cf,
-                                FreightCostMapping.rate)
+                            PlantSiteGrowingAreaMapping.Vendor_Site_Code,
+                            growing_area.growing_area_desc)
                     .select_from(FreightCostRate)
                     .join(growing_area,
                           growing_area.growing_area_id == FreightCostRate.growing_area_id)
-                    .join(FreightCostMapping,
-                          FreightCostMapping.freight_cost_id == FreightCostRate.freight_cost_id)
                     .join(PlantSiteGrowingAreaMapping,
                      and_(FreightCostRate.growing_area_id == PlantSiteGrowingAreaMapping.growing_area_id,
                           FreightCostRate.plant_id == PlantSiteGrowingAreaMapping.plant_id,
                           FreightCostRate.vendor_site_id == PlantSiteGrowingAreaMapping.vendor_site_id))
-                    .filter(
-                        or_(FreightCostRate.miles==None,
-                            FreightCostMapping.fuel_cf==None,
-                            FreightCostMapping.round_trip==None,
-                            FreightCostMapping.rate==None)).all())
+                    .filter(FreightCostRate.updated_time > time).all())
         
         alert = "New Mapping is created in Freight Rates tables"
 
