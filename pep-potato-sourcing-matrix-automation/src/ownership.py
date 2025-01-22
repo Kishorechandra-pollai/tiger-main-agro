@@ -1,4 +1,4 @@
-from sqlalchemy import or_, delete
+from sqlalchemy import or_, delete, extract
 from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -416,16 +416,16 @@ def get_extensions(db: Session = Depends(get_db)):
     try:
         today_date = date.today()
         year = int(today_date.year)
-        records =(db.query( models.View_Ownership.columns.growing_area_name,
-                            models.View_Ownership.columns.demand,
-                            models.View_Ownership.columns.Position,
-                            models.View_Ownership.columns.extension,
-                            Ownership.updated_time)
-                    .select_from(models.View_Ownership)
-                    .join(Ownership,
-                          Ownership.ownership_id == models.View_Ownership.columns.ownership_id)
-                    .filter(models.View_Ownership.columns.extension!=0,
-                            models.View_Ownership.columns.year==year).all())
+        records =(db.query( models.growing_area.growing_area_desc,
+                            models.ExtensionOwnershipMapping.period,
+                            models.ExtensionOwnershipMapping.week,
+                            models.ExtensionOwnershipMapping.total_value,
+                            models.ExtensionOwnershipMapping.updated_time)
+                    .select_from(models.ExtensionOwnershipMapping)
+                    .join(models.growing_area,
+                          models.growing_area.growing_area_id == models.ExtensionOwnershipMapping.growing_area_id)
+                    .filter(models.ExtensionOwnershipMapping.total_value != 0,
+                            extract('year',models.ExtensionOwnershipMapping.updated_time)==year).all())
         return {"record":records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

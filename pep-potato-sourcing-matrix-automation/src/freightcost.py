@@ -52,15 +52,12 @@ def view_freight_cost(db: Session = Depends(get_db)):
                             FreightCostMapping.round_trip==None,
                             FreightCostMapping.rate==None)).all())
         
-        alert = "New Mapping is created in Freight Rates tables --> "
-        for items in records:
-            mappings = f"Plant : {items.plant_name}, Vendor_Site_Code : {items.Vendor_Site_Code}, Growing_area : {items.growing_area_desc}"
-            alert += "{" + mappings +"}, "
+        alert = "New Mapping is created in Freight Rates tables"
 
         if len(records)>0:
-            return {"message":{"Alert_message": alert[:-2] + ". Please enter the Freight Rates, Miles, Round Trip and Conversion factor for this new Mapping"}}
+            return {"message": alert, "table": records}
         else:
-            return {"message":{"Alert_message": "0"}}
+            return {"message":"0", "table": records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 

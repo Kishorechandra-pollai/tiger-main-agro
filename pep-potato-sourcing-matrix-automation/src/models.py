@@ -524,6 +524,7 @@ class ExtensionOwnershipMapping(Base):
     year = Column(String, nullable=True)
     split = Column(String, nullable=True)
     status = Column(String, nullable=True)
+    updated_time = Column(TIMESTAMP(timezone=False), nullable=False, server_default=func.now())
 
 
 class price_variance_task(Base):
@@ -891,3 +892,14 @@ class productivity_plan_task_mapping(Base):
     year = Column(Integer, nullable=True)
     value = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
+
+class admin_alert(Base):
+    __tablename__ = "admin_alert"
+    alert_id = Column(Integer(), primary_key=True, autoincrement=True)
+    category = Column(String, nullable=False)
+    bpa_number = Column(Integer(),nullable = False)
+    columns = Column(String, nullable=True)
+    count = Column(Integer(),nullable = False)
+    year = Column(Integer, nullable=False)
+    period = Column(Integer, nullable=False)
+    flag = Column(Integer(), default = 1, nullable=False)
