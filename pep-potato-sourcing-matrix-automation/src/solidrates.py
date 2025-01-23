@@ -7,7 +7,7 @@ import pandas as pd
 import os
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status,UploadFile, File
-from models import (growing_area, solid_rate_mapping, solids_rate_table_period,solids_rate_plant_period,solids_period_totals,
+from models import (growing_area, solid_rate_mapping, solids_rate_table_period,solids_rate_plant_period,
                     solids_rates,region,FileUploadTemplate)
 from schemas import solidRateMappingPayload,SolidRatesSchema
 from pydantic import BaseModel
@@ -180,19 +180,7 @@ def solid_rate_period_year_plant(year:int,country:str, db: Session = Depends(get
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     
-@router.get('/solid_rate_period_plant_totals/{year}/{country}')
-def solid_rate_period_plant_totals(year:int,country:str, db: Session = Depends(get_db)):# pragma: no cover
-    """Function to fetch all records from Solids-plant period view totals table """
-    try:
-        records = db.query(solids_period_totals).filter(
-            solids_period_totals.columns.p_year == year,
-            solids_period_totals.columns.country == country
-            ).order_by(solids_period_totals.columns.period).all()
-        return {"solids_plant_period_totals": records}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    
-   
+     
 def solids_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db: Session):  # pragma: no cover
     # Capture file upload start time
     file_uploaded_time = datetime.now()
