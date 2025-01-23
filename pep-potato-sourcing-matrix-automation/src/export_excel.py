@@ -1536,14 +1536,17 @@ def export_Freight_Rates_vendor_site(periods:List[str],payload:schemas.ExportExc
                         "G.Area":pld.growing_area,
                         "Plants":pld.plant_name,
                         "Miles":pld.miles}
-        for pl in period_list:
-            filtered_payload = [
-                item for item in payload.data
-                if str(item.period) == str(pl["dynamic_period"]) and item.Vendor_Site_Code==pld.Vendor_Site_Code and item.plant_name==pld.plant_name
+        filtered_payload=[item for item in payload.data if
+                 item.Vendor_Site_Code==pld.Vendor_Site_Code and item.plant_name==pld.plant_name
             ]
-            export_object[f"{pl['dynamic_period_with_P']}-Rate"]=filtered_payload[0].rate
-            export_object[f"{pl['dynamic_period_with_P']}-RT"]=filtered_payload[0].round_trip
-            export_object[f"{pl['dynamic_period_with_P']}-Fuel_CF"]=filtered_payload[0].fuel_cf
+        for pl in period_list:
+            filtered_payload_period = [
+                item for item in filtered_payload
+                if str(item.period) == str(pl["dynamic_period"]) 
+            ]
+            export_object[f"{pl['dynamic_period_with_P']}-Rate"]=filtered_payload_period[0].rate
+            export_object[f"{pl['dynamic_period_with_P']}-RT"]=filtered_payload_period[0].round_trip
+            export_object[f"{pl['dynamic_period_with_P']}-Fuel_CF"]=filtered_payload_period[0].fuel_cf
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -1651,7 +1654,7 @@ def export_freight_rate_week(periods:List[str],payload:schemas.ExportExcelFreigh
 def export_freight_growing_area(payload:schemas.ExportExcelFreightRateGrowingAreaList): # pragma: no cover
     unique_growing_area =  sorted(list(set([entry.plant_name for entry in payload.data])))
     output_export_json = []
-    for uga in unique_growing_area:
+    for uga in payload.data:
         export_object={"Destination":uga}
         for pl in range(1,14):
             filtered_payload = [item for item in payload.data if item.plant_name==uga and item.period==pl]
