@@ -1242,7 +1242,8 @@ class ExportOffContractList(BaseModel): # pragma: no cover
 
 class ExportExcelAdjustmentsFreight(BaseModel): # pragma: no cover
     company_name: str
-    freight_task_id: int
+    freight_task_id: Optional[int] = None
+    freight_task_plan_id:Optional[int] = None
     period: int
     row_id: int
     value: int
