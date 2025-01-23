@@ -1086,21 +1086,19 @@ class ExportExcelPayloadSchema(BaseModel): # pragma: no cover
     
 
 class ExportExcelFinanceSummarySolids(BaseModel): # pragma: no cover
-    solids:str
-    P1:Optional[float] = None
-    P2:Optional[float] = None
-    P3:Optional[float] = None
-    P4:Optional[float] = None
-    P5:Optional[float] = None
-    P6:Optional[float] = None
-    P7:Optional[float] = None
-    P8:Optional[float] = None
-    P9:Optional[float] = None
-    P10:Optional[float] = None
-    P11:Optional[float] = None
-    P12:Optional[float] = None
-    P13:Optional[float] = None
-    Total:str
+    conversion_factor: float= Field(..., alias="Conversion_Factor")
+    delta_m_imp: float= Field(..., alias="Delta M$ Imp")
+    fore_plan: float =Field(..., alias="FORE_PLAN")
+    m_dollar_impact: float =Field(..., alias="M_dollar_IMPACT")
+    m_dollar_impact_plan: float=Field(..., alias="M_dollar_Impact-Plan")
+    plan: float=Field(..., alias="Plan")
+    yag_index: float=Field(..., alias="YAG_Index")
+    country_code: str
+    fcst_act: float
+    forecast: float
+    period: int
+    prior: float
+    year: int
 
    
 
@@ -1149,8 +1147,8 @@ class ExportExcelplantmatrixregionweekList(BaseModel): # pragma: no cover
     data:List[ExportExcelplantmatrixregionweek]
 
 class ExportExcelplantmatrixgrowerweek(BaseModel): # pragma: no cover
-    crop_type: str
-    crop_year: str
+    crop_type: Optional[str] = None
+    crop_year: Optional[str] = None
     growing_area_id: int
     growing_area_name: str
     period: int
@@ -1232,7 +1230,8 @@ class ExportExcelPVP_PVList(BaseModel): # pragma: no cover
 
 class ExportOffContract(BaseModel): # pragma: no cover
     company_name: str
-    off_contract_task_id: int
+    off_contract_task_id: Optional[int] = None
+    off_contract_plan_task_id: Optional[int] = None
     period: int
     row_id: int
     value: int
@@ -1243,7 +1242,8 @@ class ExportOffContractList(BaseModel): # pragma: no cover
 
 class ExportExcelAdjustmentsFreight(BaseModel): # pragma: no cover
     company_name: str
-    freight_task_id: int
+    freight_task_id: Optional[int] = None
+    freight_task_plan_id:Optional[int] = None
     period: int
     row_id: int
     value: int
@@ -1452,7 +1452,7 @@ class ExportExcelPotatoRatesGrowingAreaWeekList(BaseModel): # pragma: no cover
     data:List[ExportExcelPotatoRatesGrowingAreaWeek]
 
 class ExportExcelPotatoRatesPlantViewPeriod(BaseModel): # pragma: no cover
-    row_number: int
+    row_number: int= Field(..., alias="Row Number")
     actual_dollar_bymcwt: float
     actual_total_dollar_spend: float
     actual_volume: float
@@ -1492,6 +1492,100 @@ class ExportExcelPotatoRatesPlantViewWeek(BaseModel): # pragma: no cover
 
 class ExportExcelPotatoRatesPlantViewWeekList(BaseModel): # pragma: no cover
     data:List[ExportExcelPotatoRatesPlantViewWeek]
+
+class ExportExcelSolidsGrowingAreaView(BaseModel): # pragma: no cover
+    actual_rate: float
+    actual_total_solids: float
+    actual_volume: float
+    forecast_volume: float
+    growing_area_id: int
+    growing_area_name: str
+    period: int
+    period_with_P: str
+    plan_rate: float
+    plan_total_solids: float
+    region: int
+    region_name: str
+    year: int
+
+class ExportExcelSolidsGrowingAreaViewList(BaseModel): # pragma: no cover
+    data:List[ExportExcelSolidsGrowingAreaView]
+
+class ExportExcelSolidsPlantView(BaseModel): # pragma: no cover
+    row_number: int= Field(..., alias="Row Number")
+    actual_solids: float
+    actual_total_solids: float
+    actual_volume: float
+    company_name: str
+    country: str
+    forecast_solids: float
+    forecast_total_solids: float
+    forecast_volume: float
+    p_year: int
+    period: int
+    period_with_P: str
+    plant_id: int
+    plant_name: str
+    sum_rate: float
+    week: str
+
+class ExportExcelSolidsPlantViewList(BaseModel): # pragma: no cover
+    data:List[ExportExcelSolidsPlantView]
+
+class ExportExcelHomePopUp(BaseModel): # pragma: no cover
+    PxW: str
+    category_name: str
+    crop_type: int
+    period: int
+    period_with_P: str
+    plan_volume_id: str
+    volume: int
+    week: int
+
+class ExportExcelHomePopUpList(BaseModel): # pragma: no cover
+    data:List[ExportExcelHomePopUp]
+
+class ExportExcelHomePopUpPlan(BaseModel): # pragma: no cover
+    PxW: str
+    category_name: str
+    crop_type: int
+    pc_volume_plan_id: str
+    period: int
+    period_with_P: str
+    volume: int
+    week: int
+    year: int
+
+class ExportExcelHomePopUpPlanList(BaseModel): # pragma: no cover
+    data:List[ExportExcelHomePopUpPlan]
+
+class ExportExcelActiveAllocationIndex(BaseModel): # pragma: no cover
+    allocation_id: str
+    category_name: str
+    country: str
+    period: int
+    value: float
+    year: int
+
+class ExportExcelActiveAllocationIndexList(BaseModel): # pragma: no cover
+    data:List[ExportExcelActiveAllocationIndex]
+
+class ExportExcelForecastWeek(BaseModel): # pragma: no cover
+    Period_with_P: str
+    company_name: str
+    country: str
+    forecasted_value: float
+    pcusage_id: str
+    period: int
+    plant_id: int
+    plant_name: str
+    region_id: int
+    total_actual_value: float
+    week: int
+    year: int
+
+class ExportExcelForecastWeekList(BaseModel): # pragma: no cover
+    data:List[ExportExcelForecastWeek]
 
 class JournalEntrySchema(BaseModel):  # pragma: no cover
     comments: str

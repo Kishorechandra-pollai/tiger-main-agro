@@ -10,6 +10,7 @@ import schemas
 from potatorates import create_potato_rate_in_db, update_potato_rates_default
 from solidrates import create_solid_rate_in_db, update_solids_rates_default
 from freightcost import create_freight_rates_in_db,update_freight_cost_mapping_with_default_value,update_freight_rates_with_default_value
+from plant_mtrx import func_getcrop_type
 
 router = APIRouter()
 
@@ -418,6 +419,21 @@ def update_plant(grower_id: int, update_payload: schemas.GrowersDummy, db: Sessi
     # except Exception as e:
     #     raise HTTPException(status_code=400, detail=str(e))
 
+def update_plantMtrx_NY_crop_type(growing_area_id,db):
+    try:
+        today_date = date.today()
+        year = int(today_date.year)+1
+        plant_mtrx = db.query(models.plantMtrx).filter(models.plantMtrx.year==year,
+                                                             models.plantMtrx.growing_area_id == growing_area_id)
+        if plant_mtrx:
+            for record in plant_mtrx:
+                crop_type, crop_year = func_getcrop_type(record.period, record.week, 
+                                                        year,growing_area_id, db)
+                setattr(record,"crop_type",crop_type)
+            db.commit()
+            return {"status": "Plant matrix updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.put('/update_growing_area/{growing_area_id}', status_code=status.HTTP_200_OK)
 def update_plant(growing_area_id: int, update_payload: schemas.UpdateGrowingAreaSchema, db: Session = Depends(get_db)): # pragma: no cover
@@ -438,6 +454,10 @@ def update_plant(growing_area_id: int, update_payload: schemas.UpdateGrowingArea
             ga_to_update.updated_time = datetime.now()
 
         db.commit()
+        
+        #Updating the next year plant matrix table to fecth the crop type based on this change
+        update_plantMtrx_NY_crop_type(growing_area_id,db)
+
         return {"status": "Growing Area updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -852,8 +872,8 @@ def get_plants(db: Session = Depends(get_db)):  # pragma: no cover
         return {"in_plants":all_plants if all_plants else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-		
-		
+        
+        
 @router.get('/get_inactive_growers')
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
@@ -889,8 +909,8 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
         return {"in_growers":all_growers if all_growers else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-		
-		
+        
+        
 @router.get('/get_growing_area')
 def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     try:
@@ -953,7 +973,7 @@ def get_growers(db: Session = Depends(get_db)):  # pragma: no cover
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-	
+    
 @router.get('/get_inactive_region')
 def get_region(db: Session = Depends(get_db)):  # pragma: no cover
     try:
@@ -980,8 +1000,8 @@ def get_region(db: Session = Depends(get_db)):  # pragma: no cover
         return {"in_regions":all_regions if all_regions else empty_json}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-		
-		
+        
+        
 @router.get('/get_inactive_crop_category')
 def get_crop_category(db: Session = Depends(get_db)):  # pragma: no cover
     try:

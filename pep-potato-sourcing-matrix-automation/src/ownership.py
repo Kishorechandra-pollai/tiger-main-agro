@@ -1,4 +1,4 @@
-from sqlalchemy import or_, delete
+from sqlalchemy import or_, delete, extract
 from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -408,5 +408,24 @@ def update_contract_shrinkage_mkt_flex(payload: schemas.UpdateOwnershipGrowerGro
         total_ship_calculation(growing_area_id, crop_period, db)
         return {"status": "success",
                 "message": f"Ownership is updated for this growing_area_id: {growing_area_id}"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get('/get_recent_extensions')
+def get_extensions(db: Session = Depends(get_db)):
+    try:
+        today_date = date.today()
+        year = int(today_date.year)
+        records =(db.query( models.growing_area.growing_area_desc,
+                            models.ExtensionOwnershipMapping.period,
+                            models.ExtensionOwnershipMapping.week,
+                            models.ExtensionOwnershipMapping.total_value,
+                            models.ExtensionOwnershipMapping.updated_time)
+                    .select_from(models.ExtensionOwnershipMapping)
+                    .join(models.growing_area,
+                          models.growing_area.growing_area_id == models.ExtensionOwnershipMapping.growing_area_id)
+                    .filter(models.ExtensionOwnershipMapping.total_value != 0,
+                            extract('year',models.ExtensionOwnershipMapping.updated_time)==year).all())
+        return {"record":records}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
