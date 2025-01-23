@@ -1801,6 +1801,7 @@ def Export_Excel_PotatoRates_plantview_period(periods:List[str],payload:schemas.
                     total_actual_dollar_bymcwt+=round(filtered_payload[0].actual_dollar_bymcwt,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=round(filtered_payload[0].actual_total_dollar_spend,0)
                 total_actual_total_dollar_spend+=round(filtered_payload[0].actual_total_dollar_spend,0)
+            else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Total$"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
@@ -1850,6 +1851,7 @@ def Export_Excel_PotatoRates_PlantView_Week(periods:List[str],payload:schemas.Ex
                     total_actual_dollar_bymcwt+=round(filtered_payload[0].actual_dollor_MCWT_week,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=round(filtered_payload[0].Total_dollor_spend_week,0)
                 total_actual_total_dollar_spend+=round(filtered_payload[0].Total_dollor_spend_week,0)
+            else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Total$"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
