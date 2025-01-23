@@ -1652,17 +1652,17 @@ def export_freight_rate_week(periods:List[str],payload:schemas.ExportExcelFreigh
 
 @router.post('/export_freight_growing_area')
 def export_freight_growing_area(payload:schemas.ExportExcelFreightRateGrowingAreaList): # pragma: no cover
-    unique_growing_area =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    
     output_export_json = []
     for uga in payload.data:
-        export_object={"Destination":uga}
+        export_object={"Origin":uga.growing_area_name,"Destination":uga.plant_name}
+        filtered_payload = [item for item in payload.data if item.plant_name==uga.plant_name and item.growing_area_name==uga.growing_area_name]
         for pl in range(1,14):
-            filtered_payload = [item for item in payload.data if item.plant_name==uga and item.period==pl]
+            filtered_payload_period = [item for item in filtered_payload if item.period==pl]
             if len(filtered_payload)>0:
                  
-                 export_object["Origin"]=filtered_payload[0].growing_area_name
-                 export_object[f"P{pl}|Plan"]=filtered_payload[0].rate_plan
-                 export_object[f"P{pl}|Actual"]=filtered_payload[0].rate_actual
+                 export_object[f"P{pl}|Plan"]=filtered_payload_period[0].rate_plan
+                 export_object[f"P{pl}|Actual"]=filtered_payload_period[0].rate_actual
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
