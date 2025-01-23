@@ -1304,7 +1304,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         filtered_payload = [item for item in payload1.data if item.period==pr and item.btl_task_id==1]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json1.append(export_object)
 
     export_object = {"BTL - Act":"BTL(-)"}
@@ -1313,7 +1313,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         filtered_payload = [item for item in payload1.data if item.period==pr and item.btl_task_id==2]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json1.append(export_object)
 
     export_object = {"BTL - Act":"Others"}
@@ -1322,7 +1322,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         filtered_payload = [item for item in payload1.data if item.period==pr and item.btl_task_id==3]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json1.append(export_object)
 
     export_object={"BTL - Act":"Total BTL"}
@@ -1332,7 +1332,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         for oej in output_export_json1:
             sub_total+=oej[f"P{pr}"]
         export_object[f"P{pr}"]=sub_total
-        total+=sub_total/1000
+        total+=sub_total
     export_object["Total"]=round(total,0)
     output_export_json1.append(export_object)
 
@@ -1343,7 +1343,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         filtered_payload = [item for item in payload2.data if item.period==pr and item.btl_plan_task_id==1]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json2.append(export_object)
 
     export_object = {"BTL - Plan":"BTL(-)"}
@@ -1352,7 +1352,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         filtered_payload = [item for item in payload2.data if item.period==pr and item.btl_plan_task_id==2]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json2.append(export_object)
 
     export_object = {"BTL - Plan":"Others"}
@@ -1361,7 +1361,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         filtered_payload = [item for item in payload2.data if item.period==pr and item.btl_plan_task_id==3]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json2.append(export_object)
 
     export_object={"BTL - Plan":"Total BTL- Plan"}
@@ -1371,7 +1371,7 @@ def export_excel_adjustments_BTL(payload1:schemas.ExportExcelAdjustmentsBTLList,
         for oej in output_export_json2:
             sub_total+=oej[f"P{pr}"]
         export_object[f"P{pr}"]=sub_total
-        total+=sub_total/1000
+        total+=sub_total
     export_object["Total"]=round(total,0)
     output_export_json2.append(export_object)
 
@@ -1411,7 +1411,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==1]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json1.append(export_object)
 
     export_object = {"Productivity - Act":"Productivity Gross"}
@@ -1420,7 +1420,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==2]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json1.append(export_object)
 
     export_object = {"Productivity - Act":"Productivity-net"}
@@ -1429,7 +1429,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==3]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json1.append(export_object)
 
     export_object = {"Productivity - Act":"Others"}
@@ -1438,7 +1438,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload1.data if item.period==pr and item.productivity_task_id==4]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json1.append(export_object)
 
     export_object={"Productivity - Act":"Total Productivity"}
@@ -1448,7 +1448,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         for oej in output_export_json1:
             sub_total+=oej[f"P{pr}"]
         export_object[f"P{pr}"]=sub_total
-        total+=sub_total/1000
+        total+=sub_total
     export_object["Total"]=round(total,0)
     output_export_json1.append(export_object)
 
@@ -1459,7 +1459,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==1]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json2.append(export_object)
 
     export_object = {"Productivity-Plan":"Productivity Gross"}
@@ -1468,7 +1468,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==2]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json2.append(export_object)
 
     export_object = {"Productivity-Plan":"Productivity-net"}
@@ -1477,7 +1477,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==3]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json2.append(export_object)
 
     export_object = {"Productivity-Plan":"Others"}
@@ -1486,7 +1486,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         filtered_payload = [item for item in payload2.data if item.period==pr and item.productivity_plan_task_id==4]
         export_object[f"P{pr}"]=round(filtered_payload[0].value,0)
         total+=round(filtered_payload[0].value,0)
-    export_object["Total"]=round(total/13,2)
+    export_object["Total"]=round(total,2)
     output_export_json2.append(export_object)
 
     export_object={"Productivity-Plan":"Total productivity-Plan"}
@@ -1496,7 +1496,7 @@ def export_excel_adjustments_Productivity(payload1:schemas.ExportExcelAdjustment
         for oej in output_export_json2:
             sub_total+=oej[f"P{pr}"]
         export_object[f"P{pr}"]=sub_total
-        total+=sub_total/1000
+        total+=sub_total
     export_object["Total"]=round(total,0)
     output_export_json2.append(export_object)
 
