@@ -1106,6 +1106,8 @@ class ExportExcelFinanceSummarySolidsList(BaseModel): # pragma: no cover
     data: List[ExportExcelFinanceSummarySolids]
 
 class ExportExcelPlantMatrixAllocation(BaseModel): # pragma: no cover
+    crop_type: Optional[str] = None
+    crop_year:Optional[str] = None
     growing_area_id: int
     growing_area_name: str
     period: int
