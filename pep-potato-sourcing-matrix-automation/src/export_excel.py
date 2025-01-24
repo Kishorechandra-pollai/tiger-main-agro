@@ -2340,7 +2340,7 @@ def export_plant_matrix_allocation_croptype(periods:List[str],crop_type:str,crop
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame(output_export_json_plac)
-    file_name = f"plant_matrix_allocation_{str_date}.xlsx"
+    file_name = f"plant_matrix_allocation_croptype_{str_date}.xlsx"
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
