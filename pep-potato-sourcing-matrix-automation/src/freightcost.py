@@ -582,7 +582,7 @@ def fuel_cost(year: int,country:str,db: Session = Depends(get_db)): # pragma: no
     try:
         records = db.query(View_freight_fuel_cost).filter(
             View_freight_fuel_cost.columns.year == year,
-            View_freight_fuel_cost.columns.country_name == country
+            View_freight_fuel_cost.columns.country == country
             ).order_by(View_freight_fuel_cost.columns.period
                       ).all()
         return {"freight_fuel_cost": records}
