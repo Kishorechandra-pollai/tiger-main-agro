@@ -614,7 +614,7 @@ potato_rate_plant_weekly = db.Table('View_potato_cost_week_view_combine', metada
 #solids_period_totals = db.Table('View_solid_period_combine_code', metadata, autoload=True, autoload_with=engine)
 View_ownership_journal_info = db.Table('View_ownership_journal_info', metadata, autoload=True, autoload_with=engine)
 View_erp_raw_alerts = db.Table('View_erp_raw_alerts', metadata, autoload=True, autoload_with=engine)
-View_freight_fuel_cost = db.Table('View_fuel_cost_calculation', metadata, autoload=True, autoload_with=engine)
+View_freight_fuel_cost = db.Table('View_fuel_cost_calculation_growing_area', metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
