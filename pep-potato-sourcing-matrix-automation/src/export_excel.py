@@ -2305,11 +2305,11 @@ def export_forecast_week(periods:List[str],payload:schemas.ExportExcelForecastWe
 
 @router.post('/export_plant_matrix_allocation_croptype')
 def export_plant_matrix_allocation_croptype(periods:List[str],crop_type:str,crop_year:str,payload:schemas.ExportExcelPlantMatrixAllocationList): # pragma: no cover
-    unique_plants =  sorted(list(set([entry.plant_name for entry in payload.data])))
-    period_list = dynamicPeriodSchemaCreator(periods)
-    output_export_json = []
-    for up in unique_plants: 
-        export_object={"plant_name":up}
+    unique_plants_plac =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    period_list_plac = dynamicPeriodSchemaCreator(periods)
+    output_export_json_plac = []
+    for up in unique_plants_plac: 
+        export_object_plac={"plant_name":up}
         total_value=0
         if crop_type=="Fresh":
             filtered_payload = [item for item in payload.data if item.plant_name==up and (item.crop_type=="Fresh" or item.crop_type=="FRESH") and item.crop_year==crop_year]
@@ -2317,8 +2317,8 @@ def export_plant_matrix_allocation_croptype(periods:List[str],crop_type:str,crop
             filtered_payload = [item for item in payload.data if item.plant_name==up and (item.crop_type=="Storage" or item.crop_type=="STORAGE") and item.crop_year==crop_year]
         if crop_type=="All":
             filtered_payload = [item for item in payload.data if item.plant_name==up]
-        for pl in period_list:
-           allocation_placeholder = ""
+        for pl in period_list_plac:
+           allocation_placeholder_plac = ""
            if len(filtered_payload)>0:
                 filtered_payload_period =  [
                         item for item in filtered_payload
@@ -2327,19 +2327,19 @@ def export_plant_matrix_allocation_croptype(periods:List[str],crop_type:str,crop
                 
                 if len(filtered_payload_period)>0:
                     for fpp in filtered_payload_period:
-                        allocation_placeholder=allocation_placeholder+fpp.growing_area_name+"-"+str(round(fpp.value))+" "
+                        allocation_placeholder_plac=allocation_placeholder_plac+fpp.growing_area_name+"-"+str(round(fpp.value))+" "
                         total_value+=fpp.value
-           export_object[pl["dynamic_period_with_P"]]=allocation_placeholder
-        export_object["Total"]=round(total_value)
-        output_export_json.append(export_object)
+           export_object_plac[pl["dynamic_period_with_P"]]=allocation_placeholder_plac
+        export_object_plac["Total"]=round(total_value)
+        output_export_json_plac.append(export_object_plac)
         weekly_average = 0
         for fp in filtered_payload:
             weekly_average+=round(fp.value)
-        export_object["Annual Weekly Avg."] = round(weekly_average/52)
+        export_object_plac["Annual Weekly Avg."] = round(weekly_average/52)
         
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
-    df = pd.DataFrame(output_export_json)
+    df = pd.DataFrame(output_export_json_plac)
     file_name = f"plant_matrix_allocation_{str_date}.xlsx"
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
