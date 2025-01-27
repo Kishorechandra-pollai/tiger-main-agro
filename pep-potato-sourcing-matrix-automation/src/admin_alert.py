@@ -155,9 +155,12 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
                             .all())
         
         for rows in records:
+
+            plant_name = db.query(Plant.plant_name).filter(Plant.plant_id == rows.plant_id).first()
+
             Admin_payload_2 = {"category": "Data missing",
                                "bpa_number" : rows.BPA_Number,
-                               "plant_id": rows.plant_id,
+                               "plant_name": plant_name.plant_name,
                                "vendor_name": rows.VENDOR_NAME,
                                "vendor_site_code": rows.VENDOR_SITE_CODE,
                                "ship_to_org": rows.ShipToOrg,
@@ -171,7 +174,7 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
         db.commit()
 
         other_table = (db.query(admin_alert.bpa_number,
-                               admin_alert.plant_id,
+                               admin_alert.plant_name,
                                admin_alert.vendor_name,
                                admin_alert.vendor_site_code,
                                admin_alert.growing_area,
