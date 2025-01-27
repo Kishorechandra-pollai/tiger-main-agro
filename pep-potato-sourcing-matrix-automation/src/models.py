@@ -899,7 +899,7 @@ class admin_alert(Base):
     category = Column(String, nullable=False)
     bpa_number = Column(Integer(),nullable = False)
     Quantity_Accepted_MCWT = Column(Integer(), nullable=True)
-    plant_id = Column(Integer(), nullable=True)
+    plant_name = Column(String, nullable=True)
     vendor_site_code = Column(String, nullable=True)
     vendor_name = Column(String, nullable=True)
     growing_area = Column(String, nullable=True)
