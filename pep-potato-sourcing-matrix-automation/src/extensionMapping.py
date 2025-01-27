@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, status, APIRouter
 from database import get_db
 import schemas
 import models
+from datetime import datetime
 
 router = APIRouter()
 
@@ -139,7 +140,8 @@ def update_extension_mapping(payload: schemas.ExtensionOwnershipPayload,
                         "total_value": item.total_value,
                         "split": item.split,
                         "year": item.year,
-                        "status": "ACTIVE"}
+                        "status": "ACTIVE",
+                        "updated_time": datetime.now()}
                     new_records = models.ExtensionOwnershipMapping(**payload)
                     db.add(new_records)
                 db.commit()
