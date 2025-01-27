@@ -1536,14 +1536,17 @@ def export_Freight_Rates_vendor_site(periods:List[str],payload:schemas.ExportExc
                         "G.Area":pld.growing_area,
                         "Plants":pld.plant_name,
                         "Miles":pld.miles}
-        for pl in period_list:
-            filtered_payload = [
-                item for item in payload.data
-                if str(item.period) == str(pl["dynamic_period"]) and item.Vendor_Site_Code==pld.Vendor_Site_Code and item.plant_name==pld.plant_name
+        filtered_payload=[item for item in payload.data if
+                 item.Vendor_Site_Code==pld.Vendor_Site_Code and item.plant_name==pld.plant_name
             ]
-            export_object[f"{pl['dynamic_period_with_P']}-Rate"]=filtered_payload[0].rate
-            export_object[f"{pl['dynamic_period_with_P']}-RT"]=filtered_payload[0].round_trip
-            export_object[f"{pl['dynamic_period_with_P']}-Fuel_CF"]=filtered_payload[0].fuel_cf
+        for pl in period_list:
+            filtered_payload_period = [
+                item for item in filtered_payload
+                if str(item.period) == str(pl["dynamic_period"]) 
+            ]
+            export_object[f"{pl['dynamic_period_with_P']}-Rate"]=filtered_payload_period[0].rate
+            export_object[f"{pl['dynamic_period_with_P']}-RT"]=filtered_payload_period[0].round_trip
+            export_object[f"{pl['dynamic_period_with_P']}-Fuel_CF"]=filtered_payload_period[0].fuel_cf
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -1649,17 +1652,17 @@ def export_freight_rate_week(periods:List[str],payload:schemas.ExportExcelFreigh
 
 @router.post('/export_freight_growing_area')
 def export_freight_growing_area(payload:schemas.ExportExcelFreightRateGrowingAreaList): # pragma: no cover
-    unique_growing_area =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    
     output_export_json = []
-    for uga in unique_growing_area:
-        export_object={"Destination":uga}
+    for uga in payload.data:
+        export_object={"Origin":uga.growing_area_name,"Destination":uga.plant_name}
+        filtered_payload = [item for item in payload.data if item.plant_name==uga.plant_name and item.growing_area_name==uga.growing_area_name]
         for pl in range(1,14):
-            filtered_payload = [item for item in payload.data if item.plant_name==uga and item.period==pl]
+            filtered_payload_period = [item for item in filtered_payload if item.period==pl]
             if len(filtered_payload)>0:
                  
-                 export_object["Origin"]=filtered_payload[0].growing_area_name
-                 export_object[f"P{pl}|Plan"]=filtered_payload[0].rate_plan
-                 export_object[f"P{pl}|Actual"]=filtered_payload[0].rate_actual
+                 export_object[f"P{pl}|Plan"]=filtered_payload_period[0].rate_plan
+                 export_object[f"P{pl}|Actual"]=filtered_payload_period[0].rate_actual
         output_export_json.append(export_object)
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -2290,6 +2293,54 @@ def export_forecast_week(periods:List[str],payload:schemas.ExportExcelForecastWe
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame(output_export_json)
     file_name = f"forecast_{str_date}.xlsx"
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"}
+        )
+
+@router.post('/export_plant_matrix_allocation_croptype')
+def export_plant_matrix_allocation_croptype(periods:List[str],crop_type:str,crop_year:str,payload:schemas.ExportExcelPlantMatrixAllocationList): # pragma: no cover
+    unique_plants_plac =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    period_list_plac = dynamicPeriodSchemaCreator(periods)
+    output_export_json_plac = []
+    for up in unique_plants_plac: 
+        export_object_plac={"plant_name":up}
+        total_value=0
+        if crop_type=="Fresh":
+            filtered_payload = [item for item in payload.data if item.plant_name==up and (item.crop_type=="Fresh" or item.crop_type=="FRESH") and item.crop_year==crop_year]
+        if crop_type=="Storage":
+            filtered_payload = [item for item in payload.data if item.plant_name==up and (item.crop_type=="Storage" or item.crop_type=="STORAGE") and item.crop_year==crop_year]
+        if crop_type=="All":
+            filtered_payload = [item for item in payload.data if item.plant_name==up]
+        for pl in period_list_plac:
+           allocation_placeholder_plac = ""
+           if len(filtered_payload)>0:
+                filtered_payload_period =  [
+                        item for item in filtered_payload
+                        if str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"])
+                    ]
+                
+                if len(filtered_payload_period)>0:
+                    for fpp in filtered_payload_period:
+                        allocation_placeholder_plac=allocation_placeholder_plac+fpp.growing_area_name+"-"+str(round(fpp.value))+" "
+                        total_value+=fpp.value
+           export_object_plac[pl["dynamic_period_with_P"]]=allocation_placeholder_plac
+        export_object_plac["Total"]=round(total_value)
+        output_export_json_plac.append(export_object_plac)
+        weekly_average = 0
+        for fp in filtered_payload:
+            weekly_average+=round(fp.value)
+        export_object_plac["Annual Weekly Avg."] = round(weekly_average/52)
+        
+    dt = datetime.now()
+    str_date = dt.strftime("%d%m%y%H%M%S")
+    df = pd.DataFrame(output_export_json_plac)
+    file_name = f"plant_matrix_allocation_croptype_{str_date}.xlsx"
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')

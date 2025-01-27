@@ -8,7 +8,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Response, status,UploadFile, File
 from models import (growing_area, potato_rate_mapping,FileUploadTemplate,
                     potato_rate_table_period, potato_rate_table_weekly,
-                    potato_rates,region,potato_rate_plant_weekly,potato_rate_plant_period,potato_rates_plant_week_totals,potato_rates_plant_period_totals)
+                    potato_rates,region,potato_rate_plant_weekly,potato_rate_plant_period)
 from schemas import potatoRateMappingPayload,PotatoRatesSchema
 from pydantic import BaseModel
 from sqlalchemy import and_
@@ -233,30 +233,6 @@ def potato_rate_plant_week_view(year: int,country:str,db: Session = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     
-@router.get('/potato_rate_plant_period_totals/{year}/{country}')
-def potato_rate_plant_period_totals(year:int,country:str, db: Session = Depends(get_db)): # pragma: no cover
-    """Function to fetch all records from potato rate plant period totals table """
-    try:
-        records = db.query(potato_rates_plant_period_totals).filter(
-            potato_rates_plant_period_totals.columns.p_year == year,
-            potato_rates_plant_period_totals.columns.country == country
-            ).order_by(potato_rates_plant_period_totals.columns.period).all()
-        return {"potato_rates_plant_period_totals": records}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    
-@router.get('/potato_rate_plant_week_totals/{year}/{country}')
-def potato_rate_plant_week_totals(year: int,country:str,db: Session = Depends(get_db)): # pragma: no cover
-    """Function to fetch all records from potato rate plant week view totals table """
-    try:
-        records = db.query(potato_rates_plant_week_totals).filter(
-            potato_rates_plant_week_totals.columns.p_year == year,
-            potato_rates_plant_week_totals.columns.country == country
-            ).order_by(potato_rates_plant_week_totals.columns.period,
-                      potato_rates_plant_week_totals.columns.week_no).all()
-        return {"potato_rates_plant_week_totals": records}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
     
 def potato_rates_upload_file(uploaded_year: int, user_email: str, file: UploadFile, db: Session):  # pragma: no cover
     # Capture file upload start time

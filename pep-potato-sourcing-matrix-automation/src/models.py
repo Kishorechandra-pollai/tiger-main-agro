@@ -607,14 +607,14 @@ user_information_mapping_view = db.Table('View_user_infomartion',metadata, autol
 solids_rate_plant_period = db.Table('View_solid_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 potato_rate_plant_period = db.Table('View_potato_cost_period_combine', metadata, autoload=True, autoload_with=engine)
 potato_rate_plant_weekly = db.Table('View_potato_cost_week_view_combine', metadata, autoload=True, autoload_with=engine)
-freight_rates_period_totals = db.Table('View_freight_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
-freight_rates_week_totals = db.Table('View_freight_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
-potato_rates_plant_week_totals = db.Table('View_potato_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
-potato_rates_plant_period_totals = db.Table('View_potato_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
-solids_period_totals = db.Table('View_solid_period_combine_code', metadata, autoload=True, autoload_with=engine)
+#freight_rates_period_totals = db.Table('View_freight_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
+#freight_rates_week_totals = db.Table('View_freight_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
+#potato_rates_plant_week_totals = db.Table('View_potato_cost_week_view_combine_country', metadata, autoload=True, autoload_with=engine)
+#potato_rates_plant_period_totals = db.Table('View_potato_cost_period_combine_code', metadata, autoload=True, autoload_with=engine)
+#solids_period_totals = db.Table('View_solid_period_combine_code', metadata, autoload=True, autoload_with=engine)
 View_ownership_journal_info = db.Table('View_ownership_journal_info', metadata, autoload=True, autoload_with=engine)
 View_erp_raw_alerts = db.Table('View_erp_raw_alerts', metadata, autoload=True, autoload_with=engine)
-View_freight_fuel_cost = db.Table('View_fuel_cost_calculation', metadata, autoload=True, autoload_with=engine)
+View_freight_fuel_cost = db.Table('View_fuel_cost_calculation_growing_area', metadata, autoload=True, autoload_with=engine)
 
 class MarketFlexMapping(Base):
     __tablename__ = 'ownership_grower_growing_area_market_area_mapping'
