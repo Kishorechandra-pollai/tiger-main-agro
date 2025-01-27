@@ -1881,61 +1881,76 @@ def Export_Excel_PotatoRates_PlantView_Week(periods:List[str],payload:schemas.Ex
 
 @router.post('/export_excel_solids_growingarea')
 def export_excel_solids_growingarea(periods:List[str],payload:schemas.ExportExcelSolidsGrowingAreaViewList): # pragma: no cover
-    unique_growing_area =  list(set([entry.growing_area_name for entry in payload.data]))
+    unique_growing_area =  sorted(list(set([entry.growing_area_name for entry in payload.data])))
     period_list = dynamicPeriodOnlySchemaCreator(periods)
     output_export_json = []
     for uga in unique_growing_area:
         export_object= {"Growing Area":uga}
         total_plan=0
+        total_plan_vol=0
         total_actual=0
+        total_actual_vol=0
         for pl in period_list:
             filtered_payload = [item for item in payload.data if item.growing_area_name==uga and str(item.period) == str(pl["dynamic_period"])]
             if len(filtered_payload)>0:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(filtered_payload[0].plan_rate,2)
-                total_plan += round(filtered_payload[0].plan_rate,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(filtered_payload[0].actual_rate,2)
-                total_actual += round(filtered_payload[0].actual_rate,2)
+                total_actual += round(filtered_payload[0].actual_total_solids,2)
+                total_actual_vol+= round(filtered_payload[0].actual_volume,2)
+                total_plan += round(filtered_payload[0].plan_total_solids,2)
+                total_plan_vol+= round(filtered_payload[0].forecast_volume,2)
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        count_plan = sum(1 for key, value in export_object.items() if 'Plan' in key and value != 0)
-        if count_plan>0:
-            export_object["Total plan"]=total_plan/count_plan
+        if total_plan_vol>0:
+                export_object["Total-plan"]=round(total_plan/total_plan_vol,2)
         else:
-            export_object["Total plan"]=0
-        count_act = sum(1 for key, value in export_object.items() if 'Actual' in key and value != 0)
-        if count_act>0:
-            export_object["Total actual"]=total_actual/count_act
+                export_object["Total-plan"]=0
+        if total_actual_vol>0:
+                export_object["Total-actual"]=round(total_actual/total_actual_vol,2)
         else:
-            export_object["Total actual"]=0
+                export_object["Total-actual"]=0
+        
+
+
         output_export_json.append(export_object)
     
-    export_object={"Growing Area":"Total"}
-    total_plan=0
-    total_actual=0
+    export_object= {"Growing Area":"Total"}
+    total_plan_total=0
+    total_plan_vol_total=0
+    total_actual_total=0
+    total_actual_vol_total=0
     for pl in period_list:
-        sub_total_plan=0
-        sub_total_act=0
-        for oej in output_export_json:
-            sub_total_plan+=oej[f"{pl['dynamic_period_with_P']}-Plan"]
-            sub_total_act+=oej[f"{pl['dynamic_period_with_P']}-Actual"]
-        count_plan=len([item for item in output_export_json if item.get(f"{pl['dynamic_period_with_P']}-Plan") != 0])
-        if count_plan>0:
-            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=sub_total_plan/count_plan
+        total_plan=0
+        total_plan_vol=0
+        total_actual=0
+        total_actual_vol=0
+        
+        filtered_payload_total = [item for item in payload.data if  str(item.period) == str(pl["dynamic_period"])]
+        for fpt in filtered_payload_total:
+            total_plan+=round(fpt.plan_total_solids,2)
+            total_plan_vol+=round(fpt.forecast_volume,2)
+            total_actual+=round(fpt.actual_total_solids,2)
+            total_actual_vol+=round(fpt.actual_volume,2)
+        if total_plan_vol>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(total_plan/total_plan_vol,2)
         else:
             export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
-        count_act=len([item for item in output_export_json if item.get(f"{pl['dynamic_period_with_P']}-Actual") != 0])
-        if count_act>0:
-            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=sub_total_act/count_act
+        if total_actual_vol>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(total_actual/total_actual_vol,2)
         else:
             export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-
-    for oej in output_export_json:
-        total_plan+=oej["Total plan"]
-        total_actual+=oej["Total actual"]
-    export_object["Total plan"]=total_plan/len(output_export_json)
-    export_object["Total actual"]=total_actual/len(output_export_json)
+        total_plan_total+=total_plan
+        total_plan_vol_total+=total_plan_vol
+        total_actual_total+=total_actual
+        total_actual_vol_total+=total_actual_vol
+    export_object["Total-plan"]=round(total_plan_total/total_plan_vol_total,2)
+    export_object["Total-actual"]=round(total_actual_total/total_actual_vol_total,2)
     output_export_json.append(export_object)
+    
+
+    
+    
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame(output_export_json)
