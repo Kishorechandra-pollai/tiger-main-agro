@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter, Response
 from database import get_db
 from datetime import date,datetime
-from sqlalchemy import or_,func
+from sqlalchemy import or_,func, and_
 from period_week_calc import calculate_period_and_week
 
 router = APIRouter()
@@ -86,7 +86,8 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
     today_date = date.today()
     year = int(today_date.year)
     period_week = calculate_period_and_week(year, today_date)
-    period = int(period_week['Period'])    
+    period = int(period_week['Period'])
+    week = int(period_week['week'])
     
     #Retrieving data
     try:
@@ -96,22 +97,36 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
                 db.delete(record)
             db.commit()
 
-        # Category - 1
-        null_volume_records = (db.query(View_erp_raw_alerts)
-                                .filter(View_erp_raw_alerts.columns.RECEIPT_YEAR == year,
-                                        View_erp_raw_alerts.columns.REC_DATE_PD == period,
-                                        View_erp_raw_alerts.columns.plant_id != 28, # Ignoring Mexicali plant
-                                        View_erp_raw_alerts.columns.Quantity_Accepted_MCWT == None)
-                                .all())
+        if int(period) ==1 and int(week)<4:
+            data = (db.query(View_erp_raw_alerts)
+                .filter(or_(
+                        and_(View_erp_raw_alerts.columns.REC_DATE_PD == 13,
+                        View_erp_raw_alerts.columns.REC_DATE_WK >= int(week)+1,
+                        View_erp_raw_alerts.columns.RECEIPT_YEAR == int(year)-1),
+                        and_(View_erp_raw_alerts.columns.REC_DATE_PD == int(period),
+                        View_erp_raw_alerts.columns.REC_DATE_WK <= int(week),
+                        View_erp_raw_alerts.columns.RECEIPT_YEAR == int(year))),
+                        View_erp_raw_alerts.columns.plant_id != 28,
+                        View_erp_raw_alerts.columns.Quantity_Accepted_MCWT== None).all())
+        else:
+            lower_limit = (int(period)*5)+int(week)-4
+            upper_limit = (int(period)*5)+int(week)
+            data = (db.query(View_erp_raw_alerts)
+                .filter((View_erp_raw_alerts.columns.REC_DATE_PD * 5) + View_erp_raw_alerts.columns.REC_DATE_WK >= lower_limit,
+                        (View_erp_raw_alerts.columns.REC_DATE_PD * 5) + View_erp_raw_alerts.columns.REC_DATE_WK <= upper_limit,
+                         View_erp_raw_alerts.columns.RECEIPT_YEAR == int(year),
+                         View_erp_raw_alerts.columns.plant_id != 28,
+                         View_erp_raw_alerts.columns.Quantity_Accepted_MCWT== None).all())
         
+    
         null_volume = {}
-        for record in null_volume_records:
+        for record in data:
             bpa = str(record.BPA_Number)
             if bpa not in null_volume:
                 null_volume[bpa]=1
             else:
                 null_volume[bpa]+=1
-
+    
         # Updating alert table
         for key,values in null_volume.items():
 
@@ -131,21 +146,51 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
                      .all())
         
         #Category - 2
-        records = (db.query(View_erp_raw_alerts.columns.BPA_Number,
+        if int(period) ==1 and int(week)<4:
+            data = (db.query(View_erp_raw_alerts.columns.BPA_Number,
                             View_erp_raw_alerts.columns.plant_id,
                             View_erp_raw_alerts.columns.VENDOR_NAME,
                             View_erp_raw_alerts.columns.VENDOR_SITE_CODE,
                             View_erp_raw_alerts.columns.ShipToOrg,
                             View_erp_raw_alerts.columns.growing_area,
                             func.count().label('count'))
-                           .filter(View_erp_raw_alerts.columns.RECEIPT_YEAR == year,
-                                                       View_erp_raw_alerts.columns.REC_DATE_PD == period,
-                                                       View_erp_raw_alerts.columns.plant_id != 28, # Ignoring Mexicali plant
-                                                   or_(
-                                                       View_erp_raw_alerts.columns.VENDOR_NAME == None,
-                                                       View_erp_raw_alerts.columns.VENDOR_SITE_CODE == None,
-                                                       View_erp_raw_alerts.columns.ShipToOrg == None,
-                                                       View_erp_raw_alerts.columns.growing_area == None))
+                           .filter(or_(
+                                        and_(View_erp_raw_alerts.columns.REC_DATE_PD == 13,
+                                             View_erp_raw_alerts.columns.REC_DATE_WK >= int(week)+1,
+                                             View_erp_raw_alerts.columns.RECEIPT_YEAR == int(year)-1),
+                                        and_(View_erp_raw_alerts.columns.REC_DATE_PD == int(period),
+                                             View_erp_raw_alerts.columns.REC_DATE_WK <= int(week),
+                                             View_erp_raw_alerts.columns.RECEIPT_YEAR == int(year))),
+                                    View_erp_raw_alerts.columns.plant_id != 28, # Ignoring Mexicali plant
+                                or_(View_erp_raw_alerts.columns.VENDOR_NAME == None,
+                                    View_erp_raw_alerts.columns.VENDOR_SITE_CODE == None,
+                                    View_erp_raw_alerts.columns.ShipToOrg == None,
+                                    View_erp_raw_alerts.columns.growing_area == None))
+                            .group_by(View_erp_raw_alerts.columns.BPA_Number,
+                            View_erp_raw_alerts.columns.plant_id,
+                            View_erp_raw_alerts.columns.VENDOR_NAME,
+                            View_erp_raw_alerts.columns.VENDOR_SITE_CODE,
+                            View_erp_raw_alerts.columns.ShipToOrg,
+                            View_erp_raw_alerts.columns.growing_area)
+                            .all())
+        else:
+            lower_limit = (int(period)*5)+int(week)-4
+            upper_limit = (int(period)*5)+int(week)
+            data = (db.query(View_erp_raw_alerts.columns.BPA_Number,
+                            View_erp_raw_alerts.columns.plant_id,
+                            View_erp_raw_alerts.columns.VENDOR_NAME,
+                            View_erp_raw_alerts.columns.VENDOR_SITE_CODE,
+                            View_erp_raw_alerts.columns.ShipToOrg,
+                            View_erp_raw_alerts.columns.growing_area,
+                            func.count().label('count'))
+                           .filter((View_erp_raw_alerts.columns.REC_DATE_PD * 5) + View_erp_raw_alerts.columns.REC_DATE_WK >= lower_limit,
+                                   (View_erp_raw_alerts.columns.REC_DATE_PD * 5) + View_erp_raw_alerts.columns.REC_DATE_WK <= upper_limit,
+                                    View_erp_raw_alerts.columns.RECEIPT_YEAR == int(year),
+                                    View_erp_raw_alerts.columns.plant_id != 28, # Ignoring Mexicali plant
+                                or_(View_erp_raw_alerts.columns.VENDOR_NAME == None,
+                                    View_erp_raw_alerts.columns.VENDOR_SITE_CODE == None,
+                                    View_erp_raw_alerts.columns.ShipToOrg == None,
+                                    View_erp_raw_alerts.columns.growing_area == None))
                             .group_by(View_erp_raw_alerts.columns.BPA_Number,
                             View_erp_raw_alerts.columns.plant_id,
                             View_erp_raw_alerts.columns.VENDOR_NAME,
@@ -154,10 +199,8 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
                             View_erp_raw_alerts.columns.growing_area)
                             .all())
         
-        for rows in records:
-
+        for rows in data:
             plant_name = db.query(Plant.plant_name).filter(Plant.plant_id == rows.plant_id).first()
-
             Admin_payload_2 = {"category": "Data missing",
                                "bpa_number" : rows.BPA_Number,
                                "plant_name": plant_name.plant_name,
@@ -183,35 +226,6 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
                          .filter(admin_alert.category=="Data missing")
                          .all())
 
-        # mapping_records = (db.query(View_erp_raw_alerts)
-        #                         .filter(View_erp_raw_alerts.columns.RECEIPT_YEAR == year,
-        #                                 View_erp_raw_alerts.columns.REC_DATE_PD == period,
-        #                                 View_erp_raw_alerts.columns.plant_id != 28) # Ignoring Mexicali plant
-        #                         .all())
-        # #Plant 
-        # plant_ids = db.query(Plant.plant_id).distinct().all()
-        # #Grower
-        # grower_ids = db.query(growers.grower_id).distinct().all()
-        # #Vendor
-        # vendor_ids = db.query(vendor_site_code.VENDOR_SITE_CODE).distinct().all()
-        # #GA
-        # ga_ids = db.query(growing_area.growing_area_id).distinct().all()
-
-        # #Unique IDs list
-
-        # mapping_plant_id=[]
-        # mapping_grower_id=[]
-        # mapping_vendor_id=[]
-        # for items in mapping_records:
-        #     if items.plant_id != None and items.plant_id not in plant_ids:
-        #         mapping_plant_id.append(items.plant_id)
-        #     if items.grower_id != None and items.grower_id not in grower_ids:
-        #         mapping_grower_id.append(items.grower_id)
-        #     if items.VENDOR_SITE_CODE != None and items.VENDOR_SITE_CODE not in vendor_ids:
-        #         mapping_vendor_id.append(items.VENDOR_SITE_CODE)
-        #     if items.growing_area != None and items.growing_area not in ga_ids:
-        #         mapping_ga_id.append(items.growing_area)
-
         if len(vol_table)>0 or len(other_table)>0:
             return {"message":"Null data is identified in the erp data", 
                     "vol_table": vol_table,
@@ -221,4 +235,4 @@ async def get_erp_alerts_new(db: Session = Depends(get_db)): # pragma: no cover
                     "vol_table": vol_table,
                     "other_table":other_table}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail="Error loading alert") from e
