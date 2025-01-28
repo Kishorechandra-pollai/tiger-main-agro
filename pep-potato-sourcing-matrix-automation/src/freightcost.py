@@ -6,7 +6,7 @@ from models import (FreightCostMapping, FreightCostRate,growing_area,
                     PlantSiteGrowingAreaMapping, freight_cost_period_table,
                     freight_cost_period_week_table, rate_growing_area_table,
                     FileUploadTemplate,Plant,View_freight_fuel_cost)
-from sqlalchemy import func, and_,text
+from sqlalchemy import func, and_,text,or_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from io import BytesIO
@@ -30,18 +30,19 @@ def view_freight_cost(db: Session = Depends(get_db)):
 def view_freight_cost(db: Session = Depends(get_db)):
     """Function to alert the user about new freight mappings """
     try:
-        time = text("DATEADD(day,-1,GETDATE())")
         records = (db.query(PlantSiteGrowingAreaMapping.plant_name,
                             PlantSiteGrowingAreaMapping.Vendor_Site_Code,
                             growing_area.growing_area_desc)
                     .select_from(FreightCostRate)
                     .join(growing_area,
                           growing_area.growing_area_id == FreightCostRate.growing_area_id)
+                    .join(FreightCostMapping,
+                          FreightCostMapping.freight_cost_id == FreightCostRate.freight_cost_id)
                     .join(PlantSiteGrowingAreaMapping,
                      and_(FreightCostRate.growing_area_id == PlantSiteGrowingAreaMapping.growing_area_id,
                           FreightCostRate.plant_id == PlantSiteGrowingAreaMapping.plant_id,
                           FreightCostRate.vendor_site_id == PlantSiteGrowingAreaMapping.vendor_site_id))
-                    .filter(FreightCostRate.updated_time > time).all())
+                    .filter(or_(FreightCostRate.miles==0, FreightCostMapping.rate==0)).distinct().all())
         
         alert = "New Mapping is created in Freight Rates tables"
 
