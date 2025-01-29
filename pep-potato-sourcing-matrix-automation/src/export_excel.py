@@ -1684,40 +1684,83 @@ def Export_Excel_PotatoRates_GrowingArea_period(periods:List[str],payload:schema
     period_list = dynamicPeriodOnlySchemaCreator(periods)
     output_export_json = []
     for uga in unique_growing_area:
-        total_forecast_dollar_bymcwt=0
+        total_forecast_volume=0
         total_forecast_total_dollar_spend=0
-        total_actual_dollar_bymcwt=0
         total_actual_total_dollar_spend=0
+        total_actual_vol=0
         export_object={"Growing Area":uga}
         for pl in period_list:
             filtered_payload = [item for item in payload.data if item.growing_area_name==uga and str(item.period) == str(pl["dynamic_period"])]
             if len(filtered_payload)>0:
-                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=filtered_payload[0].fcst_rate
-                total_forecast_dollar_bymcwt+=filtered_payload[0].fcst_rate
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=round(filtered_payload[0].fcst_rate,2)
+                total_forecast_volume+=round(filtered_payload[0].forecast_volume,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].fcst_total_dollor,0)
-                total_forecast_total_dollar_spend+=round(filtered_payload[0].fcst_total_dollor,0)
+                total_forecast_total_dollar_spend+=round(filtered_payload[0].fcst_total_dollor,2)
                 if filtered_payload[0].actual_volume==0:
                     export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
                 else:
                     export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=round(filtered_payload[0].actual_total_dollor/filtered_payload[0].actual_volume,2)
-                    total_actual_dollar_bymcwt+=round(filtered_payload[0].actual_total_dollor/filtered_payload[0].actual_volume,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=filtered_payload[0].actual_total_dollor
-                total_actual_total_dollar_spend+=filtered_payload[0].actual_total_dollor
+                total_actual_total_dollar_spend+=round(filtered_payload[0].actual_total_dollor,2)
+                total_actual_vol+=round(filtered_payload[0].actual_volume,2)
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Total$"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=0
-
-        export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
-        export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
-        export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
+        if total_forecast_volume>0:
+            export_object["total-Plan-$/MCWT"]=round(total_forecast_total_dollar_spend/total_forecast_volume,2)
+        else:
+            export_object["total-Plan-$/MCWT"]=0
+        export_object["total-Plan-Total$"]=total_forecast_total_dollar_spend
+        if total_actual_vol>0:
+            export_object["total-Actual-$/MCWT"]=round(total_actual_total_dollar_spend/total_actual_vol,2)
+        else:
+            export_object["total-Actual-$/MCWT"]=0
         export_object["total-Actual-Total$"]=total_actual_total_dollar_spend
         output_export_json.append(export_object)
+
+    export_object={"Growing Area":"Total"}
+    grand_total_forecast_volume_total=0
+    grand_total_forecast_total_dollar_spend_total=0
+    grand_total_actual_total_dollar_spend_total=0
+    grand_total_actual_vol_total=0
+    for pl in period_list:
+        total_forecast_volume_total=0
+        total_forecast_total_dollar_spend_total=0
+        total_actual_total_dollar_spend_total=0
+        total_actual_vol_total=0
+        filtered_payload_total = [item for item in payload.data if str(item.period)==str(pl["dynamic_period"])]
+        for fpt in filtered_payload_total:
+            total_forecast_volume_total+=round(fpt.forecast_volume,2)
+            total_forecast_total_dollar_spend_total+=round(fpt.fcst_total_dollor,2)
+            total_actual_total_dollar_spend_total+=round(fpt.actual_total_dollor,2)
+            total_actual_vol_total+=round(fpt.actual_volume,2)
+        if total_forecast_volume_total>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=round(total_forecast_total_dollar_spend_total/total_forecast_volume_total,2)
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
+        export_object[f"{pl['dynamic_period_with_P']}-Total$"]=total_forecast_total_dollar_spend_total
+        if total_actual_vol_total>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=round(total_actual_total_dollar_spend_total/total_actual_vol_total,2)
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+        export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=total_actual_total_dollar_spend_total
+        grand_total_forecast_volume_total+=total_forecast_volume_total
+        grand_total_forecast_total_dollar_spend_total+=total_forecast_total_dollar_spend_total
+        grand_total_actual_total_dollar_spend_total+=total_actual_total_dollar_spend_total
+        grand_total_actual_vol_total+=total_actual_vol_total
+    export_object["total-Plan-$/MCWT"]=round(grand_total_forecast_total_dollar_spend_total/grand_total_forecast_volume_total,2)
+    export_object["total-Plan-Total$"]=grand_total_forecast_total_dollar_spend_total
+    export_object["total-Actual-$/MCWT"]=round(grand_total_actual_total_dollar_spend_total/grand_total_actual_vol_total,2)
+    export_object["total-Actual-Total$"]=grand_total_actual_total_dollar_spend_total
+
+    output_export_json.append(export_object)
+
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame(output_export_json)
-    file_name = f"Potatorates_GrowingArea_period_{str_date}.xlsx"
+    file_name = f"Potatorates_GrowingArea_period_1{str_date}.xlsx"
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
@@ -1967,50 +2010,80 @@ def export_excel_solids_growingarea(periods:List[str],payload:schemas.ExportExce
 
 @router.post('/export_excel_solids_plant')
 def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolidsPlantViewList): # pragma: no cover
-    unique_plant =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    unique_growing_area =  sorted(list(set([entry.plant_name for entry in payload.data])))
     period_list = dynamicPeriodOnlySchemaCreator(periods)
     output_export_json = []
-    for uga in unique_plant:
+    for uga in unique_growing_area:
         export_object= {"Plant Name":uga}
         total_plan=0
+        total_plan_vol=0
         total_actual=0
+        total_actual_vol=0
         for pl in period_list:
             filtered_payload = [item for item in payload.data if item.plant_name==uga and str(item.period) == str(pl["dynamic_period"])]
             if len(filtered_payload)>0:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(filtered_payload[0].forecast_solids,2)
-                total_plan += round(filtered_payload[0].forecast_solids,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(filtered_payload[0].actual_solids,2)
-                total_actual += round(filtered_payload[0].actual_solids,2)
+                total_actual += round(filtered_payload[0].actual_total_solids,2)
+                total_actual_vol+= round(filtered_payload[0].actual_volume,2)
+                total_plan += round(filtered_payload[0].forecast_total_solids,2)
+                total_plan_vol+= round(filtered_payload[0].forecast_volume,2)
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        export_object["Total plan"]=total_plan/len(period_list)
-        export_object["Total actual"]=total_actual/len(period_list)
+        if total_plan_vol>0:
+                export_object["Total-plan"]=round(total_plan/total_plan_vol,2)
+        else:
+                export_object["Total-plan"]=0
+        if total_actual_vol>0:
+                export_object["Total-actual"]=round(total_actual/total_actual_vol,2)
+        else:
+                export_object["Total-actual"]=0
+        
+
+
         output_export_json.append(export_object)
     
-    export_object={"Plant Name":"Total"}
-    total_plan=0
-    total_actual=0
+    export_object= {"Plant Name":"Total"}
+    total_plan_total=0
+    total_plan_vol_total=0
+    total_actual_total=0
+    total_actual_vol_total=0
     for pl in period_list:
-        sub_total_plan=0
-        sub_total_act=0
-        for oej in output_export_json:
-            sub_total_plan+=oej[f"{pl['dynamic_period_with_P']}-Plan"]
-            sub_total_act+=oej[f"{pl['dynamic_period_with_P']}-Actual"]
-        export_object[f"{pl['dynamic_period_with_P']}-Plan"]=sub_total_plan/len(output_export_json)
-        export_object[f"{pl['dynamic_period_with_P']}-Actual"]=sub_total_act/len(output_export_json)
-    for oej in output_export_json:
-        total_plan+=oej["Total plan"]
-        total_actual+=oej["Total actual"]
-    export_object["Total plan"]=total_plan/len(output_export_json)
-    export_object["Total actual"]=total_actual/len(output_export_json)
+        total_plan=0
+        total_plan_vol=0
+        total_actual=0
+        total_actual_vol=0
+        
+        filtered_payload_total = [item for item in payload.data if  str(item.period) == str(pl["dynamic_period"])]
+        for fpt in filtered_payload_total:
+            total_plan+=round(fpt.forecast_total_solids,2)
+            total_plan_vol+=round(fpt.forecast_volume,2)
+            total_actual+=round(fpt.actual_total_solids,2)
+            total_actual_vol+=round(fpt.actual_volume,2)
+        if total_plan_vol>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(total_plan/total_plan_vol,2)
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
+        if total_actual_vol>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(total_actual/total_actual_vol,2)
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
+        total_plan_total+=total_plan
+        total_plan_vol_total+=total_plan_vol
+        total_actual_total+=total_actual
+        total_actual_vol_total+=total_actual_vol
+    export_object["Total-plan"]=round(total_plan_total/total_plan_vol_total,2)
+    export_object["Total-actual"]=round(total_actual_total/total_actual_vol_total,2)
+    output_export_json.append(export_object)
+    
 
     
-    output_export_json.append(export_object)
+    
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame(output_export_json)
-    file_name = f"Solids_Plant_{str_date}.xlsx"
+    file_name = f"Solids_plantView{str_date}.xlsx"
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
@@ -2020,6 +2093,7 @@ def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolid
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={file_name}"}
         )
+
 
 
 
