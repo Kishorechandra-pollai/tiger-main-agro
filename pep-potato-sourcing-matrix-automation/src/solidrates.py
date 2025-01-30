@@ -11,6 +11,7 @@ from models import (growing_area, solid_rate_mapping, solids_rate_table_period,s
                     solids_rates,region,FileUploadTemplate)
 from schemas import solidRateMappingPayload,SolidRatesSchema
 from pydantic import BaseModel
+from sqlalchemy import func
 
 
 router = APIRouter()
@@ -95,37 +96,126 @@ def solid_rate_period_year_region(year:int,region_name:str, db: Session = Depend
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
+# @router.post("/create_solid_rates_mappings_for_next_year/", status_code=status.HTTP_201_CREATED)
+# async def create_solid_rates_mappings_for_next_year(year: int, db: Session = Depends(get_db)): # pragma: no cover
+#     """Function to Create solid_rate_mapping records for next year."""
+#     all_records = db.query(solids_rates).all()
+#     query_view = db.query(solids_rate_table_period).filter(solids_rate_table_period.columns.year==(year-1)).all() #view which contains actual value by growing_area_id
+#     update_count = 0
+#     country = ''
+#     existingRecord = db.query(solid_rate_mapping)\
+#                     .filter(solid_rate_mapping.period_year==year).all()
+#     for ex in existingRecord:
+#         db.delete(ex)
+#     db.commit()
+#     for record in all_records: # Iterate over all solids_rates
+#         if record.currency=='USD':
+#             country = 'US'
+#         elif record.currency=='CAD':
+#             country ='Canada'
+#         for ele in query_view:  # Iterate through the view
+#             if ele.growing_area_id == record.growing_area_id:
+#                 new_record = solid_rate_mapping(solids_rate_id = record.solids_rate_id, period=ele.period, period_year=year, rate=ele.actual_rate, country_code=country)
+#                 db.add(new_record)
+#                 update_count += 1
+#             # else:
+#             #     for period in range(1,14):
+#             #         new_record = solid_rate_mapping(solids_rate_id = record.solids_rate_id,
+#             #                                             period=period, period_year=year, rate=0,country_code=country)
+#             #         db.add(new_record)
+#             #         update_count += 1
+
+#     db.commit()
+#     return {"status": "success", "Records added": update_count, "for Year": year}
+
 @router.post("/create_solid_rates_mappings_for_next_year/", status_code=status.HTTP_201_CREATED)
 async def create_solid_rates_mappings_for_next_year(year: int, db: Session = Depends(get_db)): # pragma: no cover
-    """Function to Create solid_rate_mapping records for next year."""
-    all_records = db.query(solids_rates).all()
-    query_view = db.query(solids_rate_table_period).filter(solids_rate_table_period.columns.year==(year-1)).all() #view which contains actual value by growing_area_id
-    update_count = 0
-    country = ''
-    existingRecord = db.query(solid_rate_mapping)\
-                    .filter(solid_rate_mapping.period_year==year).all()
-    for ex in existingRecord:
-        db.delete(ex)
-    db.commit()
-    for record in all_records: # Iterate over all solids_rates
-        if record.currency=='USD':
-            country = 'US'
-        elif record.currency=='CAD':
-            country ='Canada'
-        for ele in query_view:  # Iterate through the view
-            if ele.growing_area_id == record.growing_area_id:
-                new_record = solid_rate_mapping(solids_rate_id = record.solids_rate_id, period=ele.period, period_year=year, rate=ele.actual_rate, country_code=country)
-                db.add(new_record)
-                update_count += 1
-            # else:
-            #     for period in range(1,14):
-            #         new_record = solid_rate_mapping(solids_rate_id = record.solids_rate_id,
-            #                                             period=period, period_year=year, rate=0,country_code=country)
-            #         db.add(new_record)
-            #         update_count += 1
 
-    db.commit()
-    return {"status": "success", "Records added": update_count, "for Year": year}
+    """Function to Create potato_rate_mapping records for next year."""
+    try:
+        # Deleting old records
+        existingRecord = db.query(solid_rate_mapping)\
+                        .filter(solid_rate_mapping.period_year==year).all()
+        for old in existingRecord:
+            db.delete(old)
+        db.commit()
+
+        # Retreiving the country data
+        US = []
+        Canada = []
+        country_data = db.query(solids_rates.solids_rate_id,solids_rates.currency).all()
+        for items in country_data:
+            if items.currency == "CAD":
+                Canada.append(items.solids_rate_id)
+            elif items.currency == "USD":
+                US.append(items.solids_rate_id)
+
+        # Ids to create
+        new_rec = (db.query(solids_rate_table_period.columns.growing_area_id)
+                    .filter(solids_rate_table_period.columns.year==year-1).distinct().all())
+
+        # Creating records
+        period = 14
+        update_count = 0
+
+        for rec in new_rec:
+            for p in range(1,period):
+                rate = (db.query(solids_rate_table_period.columns.actual_rate)
+                        .filter(solids_rate_table_period.columns.period == p,
+                                solids_rate_table_period.columns.growing_area_id== rec.growing_area_id,
+                                solids_rate_table_period.columns.year ==year-1).first())
+                
+                solids_rate_id = (db.query(solids_rates.solids_rate_id)
+                                .filter(solids_rates.growing_area_id==rec.growing_area_id)
+                                .first())
+                if solids_rate_id.solids_rate_id in US:
+                    country = "US"
+                if solids_rate_id.solids_rate_id in Canada:
+                    country = "Canada"
+
+                if rate:
+                    data = solid_rate_mapping(solids_rate_id = solids_rate_id.solids_rate_id,
+                                              period = p,
+                                              period_year =  year,
+                                              rate = rate.actual_rate, 
+                                              country_code = country)
+                else:
+                    data = solid_rate_mapping(solids_rate_id = solids_rate_id.solids_rate_id,
+                                              period = p,
+                                              period_year =  year,
+                                              rate = 0, 
+                                              country_code = country)
+                db.add(data)
+                update_count+=1
+        db.commit()
+        return {"status": "success", "Records added": update_count, "for Year": year}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.get('/solid_rate_data/{year}/{country}')
+def solid_rate_data(year:int,country:str, db: Session = Depends(get_db)): # pragma: no cover
+
+    try:
+        records = (db.query(solid_rate_mapping.solids_rate_id,
+                            solid_rate_mapping.period,
+                            solid_rate_mapping.rate,
+                            solid_rate_mapping.period_year,
+                            solid_rate_mapping.country_code,
+                            growing_area.growing_area_name,
+                            growing_area.growing_area_desc,
+                            func.concat("P", solid_rate_mapping.period).label("period_with_P"),
+                            func.concat(growing_area.growing_area_name, " | ",growing_area.growing_area_desc).label("growing_area"))
+                    .select_from(solid_rate_mapping)
+                    .join(solids_rates,
+                          solids_rates.solids_rate_id == solid_rate_mapping.solids_rate_id)
+                    .join(growing_area,
+                          growing_area.growing_area_id == solids_rates.growing_area_id)
+                    .filter(solid_rate_mapping.country_code==country,solid_rate_mapping.period_year==year).all())
+        
+        return {"message": records}
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 def create_solid_rate_in_db(payload: SolidRatesSchema, db: Session): # pragma: no cover

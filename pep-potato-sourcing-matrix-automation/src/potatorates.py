@@ -11,8 +11,9 @@ from models import (growing_area, potato_rate_mapping,FileUploadTemplate,
                     potato_rates,region,potato_rate_plant_weekly,potato_rate_plant_period)
 from schemas import potatoRateMappingPayload,PotatoRatesSchema
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlalchemy import and_,func
 from sqlalchemy.orm import Session
+from period_week_calc import calculate_week_num
 
 
 router = APIRouter()
@@ -132,38 +133,137 @@ def potato_rate_period_week_year_region(year:int,region_name:str, db: Session = 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+# @router.post("/create_potato_rate_mapping_for_next_year/{year}", status_code=status.HTTP_201_CREATED)
+# async def create_potato_rate_mapping_for_next_year(year: int , db: Session = Depends(get_db)):  # pragma: no cover
+#     """Function to Create potato_rate_mapping records for next year."""
+#     all_records = db.query(potato_rates).all()
+#     query_view = db.query(potato_rate_table_weekly).filter(potato_rate_table_weekly.columns.p_year==(year-1)).all() #view which contains actual value by growing_area_id
+#     update_count = 0
+#     country = ''
+#     existingRecord = db.query(potato_rate_mapping)\
+#                     .filter(potato_rate_mapping.p_year==year).all()
+#     for ex in existingRecord:
+#         db.delete(ex)
+#     db.commit()
+#     for record in all_records: # Iterate over all potato_rates
+#         for ele in query_view:  # Iterate through the view
+#             if ele.potato_rate_id == record.potato_rate_id and ele.growing_area_id == record.growing_area_id:
+#                 if record.currency=='USD':
+#                     country = 'US'
+#                 elif record.currency=='CAD':
+#                     country ='Canada'
+#                 new_record = potato_rate_mapping(potato_rate_id = record.potato_rate_id, period=ele.period, week=ele.week, p_year=year, rate=ele.actual_rate, country_code=country)
+#                 db.add(new_record)
+#                 update_count += 1
+#             # else:
+#             #     for period in range(1,14):
+#             #         for week in range(1,5):
+#             #             new_record = potato_rate_mapping(potato_rate_id = record.potato_rate_id,
+#             #                                             period=period, week=week, p_year=year, rate=0,country_code=country)
+#             #             db.add(new_record)
+#             #             update_count += 1
+
+#     db.commit()
+#     return {"status": "success", "Records added": update_count, "for Year": year}
+
 @router.post("/create_potato_rate_mapping_for_next_year/{year}", status_code=status.HTTP_201_CREATED)
 async def create_potato_rate_mapping_for_next_year(year: int , db: Session = Depends(get_db)):  # pragma: no cover
-    """Function to Create potato_rate_mapping records for next year."""
-    all_records = db.query(potato_rates).all()
-    query_view = db.query(potato_rate_table_weekly).filter(potato_rate_table_weekly.columns.p_year==(year-1)).all() #view which contains actual value by growing_area_id
-    update_count = 0
-    country = ''
-    existingRecord = db.query(potato_rate_mapping)\
-                    .filter(potato_rate_mapping.p_year==year).all()
-    for ex in existingRecord:
-        db.delete(ex)
-    db.commit()
-    for record in all_records: # Iterate over all potato_rates
-        for ele in query_view:  # Iterate through the view
-            if ele.potato_rate_id == record.potato_rate_id and ele.growing_area_id == record.growing_area_id:
-                if record.currency=='USD':
-                    country = 'US'
-                elif record.currency=='CAD':
-                    country ='Canada'
-                new_record = potato_rate_mapping(potato_rate_id = record.potato_rate_id, period=ele.period, week=ele.week, p_year=year, rate=ele.actual_rate, country_code=country)
-                db.add(new_record)
-                update_count += 1
-            # else:
-            #     for period in range(1,14):
-            #         for week in range(1,5):
-            #             new_record = potato_rate_mapping(potato_rate_id = record.potato_rate_id,
-            #                                             period=period, week=week, p_year=year, rate=0,country_code=country)
-            #             db.add(new_record)
-            #             update_count += 1
 
-    db.commit()
-    return {"status": "success", "Records added": update_count, "for Year": year}
+    """Function to Create potato_rate_mapping records for next year."""
+    try:
+        #Deleting existing records
+        existingRecord = (db.query(potato_rate_mapping)
+                        .filter(potato_rate_mapping.p_year==year).all())
+        for old in existingRecord:
+            db.delete(old)
+        db.commit()
+
+        # Retreiving the country data
+        US = []
+        Canada = []
+        country_data = db.query(potato_rates.potato_rate_id,potato_rates.currency).all()
+        for items in country_data:
+            if items.currency == "CAD":
+                Canada.append(items.potato_rate_id)
+            elif items.currency == "USD":
+                US.append(items.potato_rate_id)
+
+        # Ids to create
+        new_rec = (db.query(potato_rate_table_weekly.columns.potato_rate_id)
+                    .filter(potato_rate_table_weekly.columns.p_year==year-1).distinct().all())
+
+        # Creating records
+        period = 14
+        update_count = 0
+
+        for rec in new_rec:
+            for p in range(1,period):
+                if calculate_week_num(year,p):
+                    week = 6
+                else:
+                    week = 5
+                for w in range(1,week):
+                    rate = (db.query(potato_rate_table_weekly.columns.actual_rate)
+                            .filter(potato_rate_table_weekly.columns.period == p,
+                                    potato_rate_table_weekly.columns.week == w,
+                                    potato_rate_table_weekly.columns.potato_rate_id== rec.potato_rate_id,
+                                    potato_rate_table_weekly.columns.p_year ==year-1).first())
+                    if rec.potato_rate_id in US:
+                        country = "US"
+                    if rec.potato_rate_id in Canada:
+                        country = "Canada"
+                    
+                    if rate:
+                        data = potato_rate_mapping(potato_rate_id = rec.potato_rate_id,
+                                                period = p,
+                                                week = w,
+                                                p_year = year,
+                                                rate = rate.actual_rate, 
+                                                country_code = country)
+                    else:
+                        data = potato_rate_mapping(potato_rate_id = rec.potato_rate_id,
+                                                period = p,
+                                                week = w,
+                                                p_year = year,
+                                                rate = 0, 
+                                                country_code = country)
+
+                    db.add(data)
+                    update_count+=1
+        db.commit()
+        return {"status": "success", "Records added": update_count, "for Year": year}
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+@router.get('/potato_rate_data/{year}/{country}')
+def potato_rate_data(year:int,country:str, db: Session = Depends(get_db)): # pragma: no cover
+
+    try:
+        records = (db.query(potato_rate_mapping.potato_rate_id,
+                            potato_rate_mapping.period,
+                            potato_rate_mapping.week,
+                            potato_rate_mapping.rate,
+                            potato_rate_mapping.p_year,
+                            potato_rate_mapping.country_code,
+                            growing_area.growing_area_name,
+                            growing_area.growing_area_desc,
+                            func.concat("P", potato_rate_mapping.period).label("period_with_P"),
+                            func.concat("W", potato_rate_mapping.week).label("week_with_w"),
+                            func.concat("P", potato_rate_mapping.period,"W",potato_rate_mapping.week).label("period_week"),
+                            func.concat(growing_area.growing_area_name, " | ",growing_area.growing_area_desc).label("growing_area"))
+                    .select_from(potato_rate_mapping)
+                    .join(potato_rates,
+                          potato_rates.potato_rate_id == potato_rate_mapping.potato_rate_id)
+                    .join(growing_area,
+                          growing_area.growing_area_id == potato_rates.growing_area_id)
+                    .filter(potato_rate_mapping.country_code==country,potato_rate_mapping.p_year==year).all())
+        
+        return {"message": records}
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
 
 def create_potato_rate_in_db(payload: PotatoRatesSchema, db: Session): # pragma: no cover
     if isinstance(payload, BaseModel):
