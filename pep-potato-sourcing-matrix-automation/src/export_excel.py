@@ -122,28 +122,28 @@ def export_plant_matrix_region_week(periods:List[str],payload:schemas.ExportExce
            total+=round(filtered_payload_period[0].totalValue_regionWise)
         export_object["Total"]=total
         output_export_json.append(export_object)
-    export_object_FLUS={"Region":"FLUS Total"}
-    export_object_FLNA ={"Region":"FLNA Total"}
-    total_FLUS=0
-    total_FLNA =0
+    export_object_FLUS_W={"Region":"FLUS Total"}
+    export_object_FLNA_W ={"Region":"FLNA Total"}
+    total_FLUS_W=0
+    total_FLNA_W =0
     for pl in period_list:
         filtered_payload_East_US=[item for item in payload.data if item.region_name=="East - US" and str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"])]
         filtered_payload_West_US=[item for item in payload.data if item.region_name=="West - US" and str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"])]
         filtered_payload_Central_US=[item for item in payload.data if item.region_name=="Central - US" and str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"])]
         filtered_payload_Canada=[item for item in payload.data if item.region_name=="Canada" and str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"])]
 
-        export_object_FLUS[pl["dynamic_period_with_P"]]=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise)
+        export_object_FLUS_W[pl["dynamic_period_with_P"]]=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise)
 
-        export_object_FLNA[pl["dynamic_period_with_P"]]=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise+filtered_payload_Canada[0].totalValue_regionWise)
+        export_object_FLNA_W[pl["dynamic_period_with_P"]]=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise+filtered_payload_Canada[0].totalValue_regionWise)
 
-        total_FLUS +=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise)
+        total_FLUS_W +=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise)
 
-        total_FLNA+=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise+filtered_payload_Canada[0].totalValue_regionWise)
+        total_FLNA_W+=round(filtered_payload_East_US[0].totalValue_regionWise+filtered_payload_Central_US[0].totalValue_regionWise+filtered_payload_West_US[0].totalValue_regionWise+filtered_payload_Canada[0].totalValue_regionWise)
 
-        export_object_FLUS["Total"]=total_FLUS
-        export_object_FLNA["Total"]=total_FLNA
-    output_export_json.append(export_object_FLUS)
-    output_export_json.append(export_object_FLNA)
+        export_object_FLUS_W["Total"]=total_FLUS_W
+        export_object_FLNA_W["Total"]=total_FLNA_W
+    output_export_json.append(export_object_FLUS_W)
+    output_export_json.append(export_object_FLNA_W)
 
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -220,7 +220,7 @@ def export_plant_matrix_grower_week(periods:List[str],payload:schemas.ExportExce
     period_list = dynamicPeriodSchemaCreator(periods) 
     output_export_json = []
     for ug in unique_growers:
-        export_object={"Growing_Area":ug}
+        export_object_pmgw={"Growing_Area":ug}
         filtered_payload = [item for item in payload.data if item.growing_area_name==ug]
         total=0
         for pl in period_list:
@@ -229,12 +229,12 @@ def export_plant_matrix_grower_week(periods:List[str],payload:schemas.ExportExce
                 if str(item.period) == str(pl["dynamic_period"]) and str(item.week) == str(pl["dynamic_week"])
             ]
              if len(filtered_payload_period)>0:
-                 export_object[pl["dynamic_period_with_P"]]=round(filtered_payload_period[0].total_value)
+                 export_object_pmgw[pl["dynamic_period_with_P"]]=round(filtered_payload_period[0].total_value)
                  total+=round(filtered_payload_period[0].total_value)
              else:
-                 export_object[pl["dynamic_period_with_P"]]=0
-        export_object["total"]=total
-        output_export_json.append(export_object)
+                 export_object_pmgw[pl["dynamic_period_with_P"]]=0
+        export_object_pmgw["total"]=total
+        output_export_json.append(export_object_pmgw)
     
     dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
@@ -2188,28 +2188,28 @@ def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolid
     output_export_json = []
     for uga in unique_growing_area:
         export_object= {"Plant Name":uga}
-        total_plan=0
-        total_plan_vol=0
-        total_actual=0
-        total_actual_vol=0
+        total_plan_sp=0
+        total_plan_vol_sp=0
+        total_actual_sp=0
+        total_actual_vol_sp=0
         for pl in period_list:
             filtered_payload = [item for item in payload.data if item.plant_name==uga and str(item.period) == str(pl["dynamic_period"])]
             if len(filtered_payload)>0:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(filtered_payload[0].forecast_solids,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(filtered_payload[0].actual_solids,2)
-                total_actual += round(filtered_payload[0].actual_total_solids,2)
-                total_actual_vol+= round(filtered_payload[0].actual_volume,2)
-                total_plan += round(filtered_payload[0].forecast_total_solids,2)
-                total_plan_vol+= round(filtered_payload[0].forecast_volume,2)
+                total_actual_sp += round(filtered_payload[0].actual_total_solids,2)
+                total_actual_vol_sp+= round(filtered_payload[0].actual_volume,2)
+                total_plan_sp += round(filtered_payload[0].forecast_total_solids,2)
+                total_plan_vol_sp+= round(filtered_payload[0].forecast_volume,2)
             else:
                 export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
                 export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        if total_plan_vol>0:
-                export_object["Total-plan"]=round(total_plan/total_plan_vol,2)
+        if total_plan_vol_sp>0:
+                export_object["Total-plan"]=round(total_plan_sp/total_plan_vol_sp,2)
         else:
                 export_object["Total-plan"]=0
-        if total_actual_vol>0:
-                export_object["Total-actual"]=round(total_actual/total_actual_vol,2)
+        if total_actual_vol_sp>0:
+                export_object["Total-actual"]=round(total_actual_sp/total_actual_vol_sp,2)
         else:
                 export_object["Total-actual"]=0
         
@@ -2218,36 +2218,36 @@ def export_excel_solids_plant(periods:List[str],payload:schemas.ExportExcelSolid
         output_export_json.append(export_object)
     
     export_object= {"Plant Name":"Total"}
-    total_plan_total=0
-    total_plan_vol_total=0
-    total_actual_total=0
-    total_actual_vol_total=0
+    total_plan_total_sp=0
+    total_plan_vol_total_sp=0
+    total_actual_total_sp=0
+    total_actual_vol_total_sp=0
     for pl in period_list:
-        total_plan=0
-        total_plan_vol=0
-        total_actual=0
-        total_actual_vol=0
+        total_plan_sp=0
+        total_plan_vol_sp=0
+        total_actual_sp=0
+        total_actual_vol_sp=0
         
         filtered_payload_total = [item for item in payload.data if  str(item.period) == str(pl["dynamic_period"])]
         for fpt in filtered_payload_total:
-            total_plan+=round(fpt.forecast_total_solids,2)
-            total_plan_vol+=round(fpt.forecast_volume,2)
-            total_actual+=round(fpt.actual_total_solids,2)
-            total_actual_vol+=round(fpt.actual_volume,2)
-        if total_plan_vol>0:
-            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(total_plan/total_plan_vol,2)
+            total_plan_sp+=round(fpt.forecast_total_solids,2)
+            total_plan_vol_sp+=round(fpt.forecast_volume,2)
+            total_actual_sp+=round(fpt.actual_total_solids,2)
+            total_actual_vol_sp+=round(fpt.actual_volume,2)
+        if total_plan_vol_sp>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan"]=round(total_plan_sp/total_plan_vol_sp,2)
         else:
             export_object[f"{pl['dynamic_period_with_P']}-Plan"]=0
-        if total_actual_vol>0:
-            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(total_actual/total_actual_vol,2)
+        if total_actual_vol_sp>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual"]=round(total_actual_sp/total_actual_vol_sp,2)
         else:
             export_object[f"{pl['dynamic_period_with_P']}-Actual"]=0
-        total_plan_total+=total_plan
-        total_plan_vol_total+=total_plan_vol
-        total_actual_total+=total_actual
-        total_actual_vol_total+=total_actual_vol
-    export_object["Total-plan"]=round(total_plan_total/total_plan_vol_total,2)
-    export_object["Total-actual"]=round(total_actual_total/total_actual_vol_total,2)
+        total_plan_total_sp+=total_plan_sp
+        total_plan_vol_total_sp+=total_plan_vol_sp
+        total_actual_total_sp+=total_actual_sp
+        total_actual_vol_total_sp+=total_actual_vol_sp
+    export_object["Total-plan"]=round(total_plan_total_sp/total_plan_vol_total_sp,2)
+    export_object["Total-actual"]=round(total_actual_total_sp/total_actual_vol_total_sp,2)
     output_export_json.append(export_object)
     
 
