@@ -1564,38 +1564,85 @@ def export_Freight_Rates_vendor_site(periods:List[str],payload:schemas.ExportExc
 
 @router.post('/export_freight_rate_period')
 def export_freight_rate_period(periods:List[str],payload:schemas.ExportExcelFreightRateperiodList): # pragma: no cover
-    unique_plants =  sorted(list(set([entry.plant_name for entry in payload.data])))
+    unique_plant =  sorted(list(set([entry.plant_name for entry in payload.data])))
     period_list = dynamicPeriodOnlySchemaCreator(periods)
     output_export_json = []
-    for up in unique_plants:
-        export_object = {"Plant Name":up}
-        total_forecast_dollar_bymcwt=0
-        total_forecast_total_dollar_spend=0
-        total_actual_dollar_bymcwt=0
-        total_actual_total_dollar_spend=0
+    for uga in unique_plant:
+        total_forecast_volume_frp=0
+        total_forecast_spend_week_frp=0
+        total_actual_vol_frp=0
+        total_dollar_spend_week_frp =0
+        export_object={"Plant Name":uga}
         for pl in period_list:
-            filtered_payload = [
-                item for item in payload.data
-                if str(item.period) == str(pl["dynamic_period"]) and item.plant_name==up
-            ]
+            filtered_payload = [item for item in payload.data if item.plant_name==uga and str(item.period) == str(pl["dynamic_period"])]
             if len(filtered_payload)>0:
-                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=filtered_payload[0].forecast_dollar_bymcwt
-                total_forecast_dollar_bymcwt+=filtered_payload[0].forecast_dollar_bymcwt
-                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=filtered_payload[0].forecast_total_dollar_spend
-                total_forecast_total_dollar_spend+=filtered_payload[0].forecast_total_dollar_spend
-                export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=filtered_payload[0].actual_dollar_bymcwt
-                total_actual_dollar_bymcwt+=filtered_payload[0].actual_dollar_bymcwt
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=round(filtered_payload[0].forecast_dollar_bymcwt,2)
+                total_forecast_volume_frp+=round(filtered_payload[0].forecast_volume,2)
+                total_forecast_spend_week_frp+=round(filtered_payload[0].forecast_total_dollar_spend,2)
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=round(filtered_payload[0].forecast_total_dollar_spend,0)
+                
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=round(filtered_payload[0].actual_dollar_bymcwt,2)
                 export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=filtered_payload[0].actual_total_dollar_spend
-                total_actual_total_dollar_spend+=filtered_payload[0].actual_total_dollar_spend
-        export_object["total-Plan-$/MCWT"]=total_forecast_dollar_bymcwt
-        export_object["total--Plan-Total$"]=total_forecast_total_dollar_spend
-        export_object["total-Actual-$/MCWT"]=total_actual_dollar_bymcwt
-        export_object["total-Actual-Total$"]=total_forecast_total_dollar_spend
+                total_dollar_spend_week_frp+=round(filtered_payload[0].actual_total_dollar_spend,2)
+                total_actual_vol_frp+=round(filtered_payload[0].actual_volume,2)
+            else:
+                export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Total$"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+                export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=0
+        if total_forecast_volume_frp>0:
+            export_object["total-Plan-$/MCWT"]=round(total_forecast_spend_week_frp/total_forecast_volume_frp,2)
+        else:
+            export_object["total-Plan-$/MCWT"]=0
+        export_object["total-Plan-Total$"]=total_forecast_spend_week_frp
+        if total_actual_vol_frp>0:
+            export_object["total-Actual-$/MCWT"]=round(total_dollar_spend_week_frp/total_actual_vol_frp,2)
+        else:
+            export_object["total-Actual-$/MCWT"]=0
+        export_object["total-Actual-Total$"]=total_dollar_spend_week_frp
         output_export_json.append(export_object)
-        dt = datetime.now()
+
+    export_object={"Plant Name":"Total"}
+    grand_total_forecast_volume_total_frp=0
+    grand_total_forecast_total_dollar_spend_total_frp=0
+    grand_total_actual_total_dollar_spend_total_frp=0
+    grand_total_actual_vol_total_frp=0
+    for pl in period_list:
+        total_forecast_volume_total_frp=0
+        total_forecast_total_dollar_spend_total_frp=0
+        total_actual_total_dollar_spend_total_frp=0
+        total_actual_vol_total_frp=0
+        filtered_payload_total = [item for item in payload.data if str(item.period)==str(pl["dynamic_period"])]
+        for fpt in filtered_payload_total:
+            total_forecast_volume_total_frp+=round(fpt.forecast_volume,2)
+            total_forecast_total_dollar_spend_total_frp+=round(fpt.forecast_total_dollar_spend,2)
+            total_actual_total_dollar_spend_total_frp+=round(fpt.actual_total_dollar_spend,2)
+            total_actual_vol_total_frp+=round(fpt.actual_volume,2)
+        if total_forecast_volume_total_frp>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=round(total_forecast_total_dollar_spend_total_frp/total_forecast_volume_total_frp,2)
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Plan-$/MCWT"]=0
+        export_object[f"{pl['dynamic_period_with_P']}-Total$"]=total_forecast_total_dollar_spend_total_frp
+        if total_actual_vol_total_frp>0:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=round(total_actual_total_dollar_spend_total_frp/total_actual_vol_total_frp,2)
+        else:
+            export_object[f"{pl['dynamic_period_with_P']}-Actual-$/MCWT"]=0
+        export_object[f"{pl['dynamic_period_with_P']}-Actual-Total$"]=total_actual_total_dollar_spend_total_frp
+        grand_total_forecast_volume_total_frp+=total_forecast_volume_total_frp
+        grand_total_forecast_total_dollar_spend_total_frp+=total_forecast_total_dollar_spend_total_frp
+        grand_total_actual_total_dollar_spend_total_frp+=total_actual_total_dollar_spend_total_frp
+        grand_total_actual_vol_total_frp+=total_actual_vol_total_frp
+    export_object["total-Plan-$/MCWT"]=round(grand_total_forecast_total_dollar_spend_total_frp/grand_total_forecast_volume_total_frp,2)
+    export_object["total-Plan-Total$"]=grand_total_forecast_total_dollar_spend_total_frp
+    export_object["total-Actual-$/MCWT"]=round(grand_total_actual_total_dollar_spend_total_frp/grand_total_actual_vol_total_frp,2)
+    export_object["total-Actual-Total$"]=grand_total_actual_total_dollar_spend_total_frp
+
+    output_export_json.append(export_object)
+
+    dt = datetime.now()
     str_date = dt.strftime("%d%m%y%H%M%S")
     df = pd.DataFrame(output_export_json)
-    file_name = f"Freight_Rates_Period_{str_date}.xlsx"
+    file_name = f"Potatorates_FreightRate_period_new{str_date}.xlsx"
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
